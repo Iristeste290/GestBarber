@@ -1,0 +1,307 @@
+@tailwind base;
+
+/* Page Transition Animations */
+.page-transition {
+  will-change: opacity, transform;
+}
+
+.page-enter {
+  animation: pageEnter 0.2s ease-out forwards;
+}
+
+.page-exit {
+  animation: pageExit 0.15s ease-in forwards;
+}
+
+.page-fade-in {
+  animation: pageFadeIn 0.2s ease-out forwards;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pageExit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition,
+  .page-enter,
+  .page-exit,
+  .page-fade-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+@tailwind components;
+@tailwind utilities;
+
+/* Design System - Performance Optimized */
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 200 80% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 200 30% 90%;
+    --secondary-foreground: 200 80% 20%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 200 70% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 200 80% 45%;
+    --radius: 0.75rem;
+
+    /* Sombras otimizadas - leves para performance */
+    --shadow-sm: 0 1px 2px hsl(var(--foreground) / 0.04);
+    --shadow-md: 0 2px 4px hsl(var(--foreground) / 0.06);
+    --shadow-lg: 0 4px 8px hsl(var(--foreground) / 0.08);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 217.2 32.6% 10%;
+    --card-foreground: 210 40% 98%;
+    --popover: 217.2 32.6% 10%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 200 80% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 200 70% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 200 80% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeSpeed;
+    /* Scroll suave nativo */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Desabilita animações para usuários que preferem */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Scrollbar minimalista */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+}
+
+/* Utilitários de Performance */
+@layer utilities {
+  /* Transição GPU-accelerated para elementos interativos */
+  .transition-gpu {
+    transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  .transition-colors-fast {
+    transition: color 0.1s ease, background-color 0.1s ease;
+  }
+
+  /* Glass simplificado - sem blur pesado */
+  .glass {
+    background: hsl(var(--background) / 0.9);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+  
+  .glass-card {
+    background: hsl(var(--card) / 0.95);
+    border: 1px solid hsl(var(--border) / 0.5);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Animações leves e rápidas */
+  .animate-fade-in {
+    animation: fadeIn 0.15s ease-out forwards;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.2s ease-out forwards;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.1s ease-out forwards;
+  }
+
+  /* Hover simples - sem sombra dinâmica */
+  .hover-lift {
+    transition: transform 0.15s ease-out;
+    transform: translateZ(0);
+  }
+  
+  .hover-lift:hover {
+    transform: translate3d(0, -1px, 0);
+  }
+
+  .hover-scale {
+    transition: transform 0.1s ease;
+    transform: translateZ(0);
+  }
+  
+  .hover-scale:hover {
+    transform: scale(1.01);
+  }
+
+  /* Skeleton otimizado */
+  .skeleton {
+    background: hsl(var(--muted));
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  /* Scroll otimizado */
+  .scroll-smooth {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Contenção para performance */
+  .contain-paint {
+    contain: paint;
+  }
+  
+  .contain-layout {
+    contain: layout;
+  }
+  
+  .contain-strict {
+    contain: strict;
+  }
+
+  .contain-content {
+    contain: content;
+  }
+
+  /* GPU layer para elementos fixos */
+  .gpu-layer {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+}
+
+/* Keyframes otimizados */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Focus visible */
+@layer utilities {
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: var(--radius);
+  }
+}
+

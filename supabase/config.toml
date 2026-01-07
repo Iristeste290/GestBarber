@@ -1,0 +1,52 @@
+project_id = "gufhndyzapnbpgikcvdb"
+
+[functions.create-checkout-session]
+verify_jwt = true
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.whatsapp-bot]
+verify_jwt = false
+
+[functions.send-whatsapp-message]
+verify_jwt = true
+
+[functions.check-inactive-clients]
+verify_jwt = false
+
+[functions.analyze-face]
+verify_jwt = true
+
+[functions.optimize-schedule]
+verify_jwt = true
+
+[functions.generate-post]
+verify_jwt = true
+
+[functions.notificar-agendamento]
+verify_jwt = false
+
+[functions.check-ip-eligibility]
+verify_jwt = false
+
+[functions.register-freemium]
+verify_jwt = false
+
+[functions.send-contact-email]
+verify_jwt = false
+
+[functions.create-support-ticket]
+verify_jwt = true
+
+[functions.check-waitlist-milestones]
+verify_jwt = false
+
+[functions.verify-admin]
+verify_jwt = true
+
+[functions.send-push-notification]
+verify_jwt = true
+
+[functions.get-vapid-key]
+verify_jwt = false

@@ -1,0 +1,38 @@
+import { lazy } from "react";
+
+// Lazy load all page components for better performance
+export const Index = lazy(() => import("./pages/Index"));
+export const Auth = lazy(() => import("./pages/Auth"));
+export const Onboarding = lazy(() => import("./pages/Onboarding"));
+export const Agenda = lazy(() => import("./pages/Agenda"));
+export const Dashboard = lazy(() => import("./pages/Dashboard"));
+export const Products = lazy(() => import("./pages/Products"));
+export const Barbeiros = lazy(() => import("./pages/Barbeiros"));
+export const Metas = lazy(() => import("./pages/Metas"));
+export const BarberAuth = lazy(() => import("./pages/BarberAuth"));
+export const BarberDashboard = lazy(() => import("./pages/BarberDashboard"));
+export const Custos = lazy(() => import("./pages/Custos"));
+export const Automacao = lazy(() => import("./pages/Automacao"));
+export const PostsProntos = lazy(() => import("./pages/PostsProntos"));
+export const Pagamentos = lazy(() => import("./pages/Pagamentos"));
+export const Caixa = lazy(() => import("./pages/Caixa"));
+export const WhatsAppConfig = lazy(() => import("./pages/WhatsAppConfig"));
+export const SharedPost = lazy(() => import("./pages/SharedPost"));
+export const Relatorios = lazy(() => import("./pages/Relatorios"));
+export const NotFound = lazy(() => import("./pages/NotFound"));
+export const Fidelidade = lazy(() => import("./pages/Fidelidade"));
+export const Servicos = lazy(() => import("./pages/Servicos"));
+export const Profile = lazy(() => import("./pages/Profile"));
+export const Planos = lazy(() => import("./pages/Planos"));
+export const AdminFraudLogs = lazy(() => import("./pages/AdminFraudLogs"));
+export const Ajuda = lazy(() => import("./pages/Ajuda"));
+export const AdminAjudaStats = lazy(() => import("./pages/AdminAjudaStats"));
+export const Suporte = lazy(() => import("./pages/Suporte"));
+export const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+export const AdminWaitlistStats = lazy(() => import("./pages/AdminWaitlistStats"));
+export const AccessDenied = lazy(() => import("./pages/AccessDenied"));
+export const AdminUserRoles = lazy(() => import("./pages/AdminUserRoles"));
+export const SubscriptionExpired = lazy(() => import("./pages/SubscriptionExpired"));
+export const TrialFeedback = lazy(() => import("./pages/TrialFeedback"));
+export const AdminTrialFeedback = lazy(() => import("./pages/AdminTrialFeedback"));
+export const AdminPWAAnalytics = lazy(() => import("./pages/AdminPWAAnalytics"));

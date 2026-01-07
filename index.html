@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <title>GestBarber - Sistema de Gestão para Barbearias</title>
+    <meta name="description" content="GestBarber é um sistema completo de gestão para barbearias. Gerencie agendamentos, barbeiros e serviços em tempo real." />
+    <meta name="author" content="GestBarber" />
+
+    <!-- Preconnect para recursos críticos -->
+    <link rel="preconnect" href="https://gufhndyzapnbpgikcvdb.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://gufhndyzapnbpgikcvdb.supabase.co" />
+    
+    <!-- Preload de fontes críticas (se houver) -->
+    <!-- <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin /> -->
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#29ABE2" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="GestBarber" />
+    
+    <!-- Favicon com versionamento para evitar cache -->
+    <link rel="icon" type="image/png" href="/favicon.png?v=10" />
+    <link rel="shortcut icon" type="image/png" href="/favicon.png?v=9" />
+    
+    <!-- Ícones PWA e Apple Touch -->
+    <link rel="apple-touch-icon" href="/icon-512.png?v=10" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icon-192.png?v=10" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icon-192.png?v=10" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/icon-192.png?v=10" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=9" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=9" />
+    
+    <!-- Cache control para forçar atualização -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content="GestBarber - Sistema de Gestão para Barbearias" />
+    <meta property="og:description" content="GestBarber é um sistema completo de gestão para barbearias. Gerencie agendamentos, barbeiros e serviços em tempo real." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@Lovable" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <!-- Otimizações de performance -->
+    <meta name="color-scheme" content="light dark" />
+    
+    <!-- CSS crítico inline para evitar FOUC -->
+    <style>
+      /* Loading state inicial */
+      #root:empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: #f8fafc;
+      }
+      
+      #root:empty::after {
+        content: "";
+        width: 40px;
+        height: 40px;
+        border: 3px solid #e2e8f0;
+        border-top-color: #4D8BFF;
+        border-radius: 50%;
+        animation: spinner 0.8s linear infinite;
+      }
+      
+      @keyframes spinner {
+        to { transform: rotate(360deg); }
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        #root:empty {
+          background: #0f172a;
+        }
+        #root:empty::after {
+          border-color: #334155;
+          border-top-color: #4D8BFF;
+        }
+      }
+      
+      /* Previne CLS */
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <!-- Script principal com type module para tree-shaking -->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

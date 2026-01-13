@@ -1,8 +1,7 @@
-// Service Worker for GestBarber PWA - v3 with Update Notifications
-const SW_VERSION = '3.0.0';
-const CACHE_NAME = 'gestbarber-v3';
-const STATIC_CACHE = 'gestbarber-static-v3';
-const DYNAMIC_CACHE = 'gestbarber-dynamic-v3';
+// Service Worker for GestBarber PWA - v4 Navigation Lock (/auth)
+const CACHE_NAME = 'gestbarber-v4';
+const STATIC_CACHE = 'gestbarber-static-v4';
+const DYNAMIC_CACHE = 'gestbarber-dynamic-v4';
 
 // Recursos estáticos para cache imediato
 const STATIC_ASSETS = [
@@ -33,22 +32,19 @@ const NO_CACHE_PATTERNS = [
 ];
 
 // Instalação - cache de recursos estáticos
-// NÃO chama skipWaiting automaticamente para permitir que o usuário controle quando atualizar
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing new version:', SW_VERSION);
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
         console.log('[SW] Caching static assets');
         return cache.addAll(STATIC_ASSETS);
       })
-      // Não chama self.skipWaiting() aqui - deixa o usuário decidir quando atualizar
+      .then(() => self.skipWaiting())
   );
 });
 
-// Ativação - limpa caches antigos e notifica clientes
+// Ativação - limpa caches antigos
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating new version:', SW_VERSION);
   event.waitUntil(
     caches.keys()
       .then((keys) => {
@@ -62,26 +58,12 @@ self.addEventListener('activate', (event) => {
         );
       })
       .then(() => self.clients.claim())
-      .then(() => {
-        // Notifica todos os clientes sobre a atualização
-        self.clients.matchAll().then(clients => {
-          clients.forEach(client => {
-            client.postMessage({
-              type: 'SW_UPDATED',
-              version: SW_VERSION
-            });
-          });
-        });
-      })
   );
 });
 
-// Escuta mensagens do cliente
+// Permite ativar imediatamente a nova versão do SW
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'GET_VERSION') {
-    event.ports[0].postMessage({ version: SW_VERSION });
-  }
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 });
@@ -101,25 +83,51 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navegação - Network First com fallback
+  // Navegação (SPA): devolve o app shell SEM "trocar" a URL para "/".
+  // Importante: retornar diretamente o Response do cache de "/" pode fazer alguns browsers
+  // adotarem o response.url como URL do documento (voltando para "/"). Para evitar isso,
+  // reconstruímos um Response "sem URL".
   if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // Cache a resposta de navegação
-          const responseClone = response.clone();
-          caches.open(DYNAMIC_CACHE).then((cache) => {
-            cache.put(request, responseClone);
-          });
-          return response;
-        })
-        .catch(() => {
-          // Fallback para cache
-          return caches.match(request).then((cached) => {
-            return cached || caches.match('/');
-          });
-        })
-    );
+    event.respondWith((async () => {
+      const cachedShell = await caches.match('/');
+
+      const toUrlAgnosticResponse = async (resp: Response) => {
+        const clone = resp.clone();
+        const body = await clone.text();
+        return new Response(body, {
+          status: clone.status,
+          statusText: clone.statusText,
+          headers: clone.headers,
+        });
+      };
+
+      if (cachedShell) {
+        // Atualiza o shell em background
+        event.waitUntil(
+          fetch('/')
+            .then(async (resp) => {
+              if (!resp || !resp.ok) return;
+              const cache = await caches.open(STATIC_CACHE);
+              await cache.put('/', resp.clone());
+            })
+            .catch(() => {})
+        );
+
+        return toUrlAgnosticResponse(cachedShell);
+      }
+
+      try {
+        const resp = await fetch('/');
+        if (resp && resp.ok) {
+          const cache = await caches.open(STATIC_CACHE);
+          await cache.put('/', resp.clone());
+        }
+        // Mesmo vindo da rede, devolvemos uma resposta "sem URL".
+        return toUrlAgnosticResponse(resp);
+      } catch {
+        return new Response('Offline', { status: 503, statusText: 'Offline' });
+      }
+    })());
     return;
   }
 
@@ -129,13 +137,15 @@ self.addEventListener('fetch', (event) => {
       caches.match(request).then((cached) => {
         if (cached) {
           // Atualiza cache em background (stale-while-revalidate)
-          fetch(request).then((response) => {
-            if (response.ok) {
-              caches.open(DYNAMIC_CACHE).then((cache) => {
-                cache.put(request, response);
-              });
-            }
-          }).catch(() => {});
+          fetch(request)
+            .then((response) => {
+              if (response.ok) {
+                caches.open(DYNAMIC_CACHE).then((cache) => {
+                  cache.put(request, response);
+                });
+              }
+            })
+            .catch(() => {});
           return cached;
         }
 
@@ -234,4 +244,4 @@ self.addEventListener('sync', (event) => {
   }
 });
 
-console.log('[SW] Service Worker loaded - v3 with Update Notifications');
+console.log('[SW] Service Worker loaded - v4 Navigation Lock');

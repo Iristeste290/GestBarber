@@ -1,45 +1,71 @@
-import { Check, X } from "lucide-react";
+import { UserX, CalendarX, Wallet, RotateCcw } from "lucide-react";
 
 const problems = [
-  "Agenda bagunçada no WhatsApp",
-  "Cliente que falta e você esquece de cobrar",
-  "Não sabe quanto lucrou no mês",
-  "Caixa misturado com dinheiro pessoal",
-  "Falta de organização no dia a dia",
+  {
+    icon: UserX,
+    title: "Clientes faltam",
+    description: "E você perde dinheiro esperando quem não vem."
+  },
+  {
+    icon: CalendarX,
+    title: "Agenda vazia",
+    description: "Horários mortos que poderiam estar gerando receita."
+  },
+  {
+    icon: Wallet,
+    title: "Caixa desorganizado",
+    description: "Você não sabe quanto entra, quanto sai, quanto sobra."
+  },
+  {
+    icon: RotateCcw,
+    title: "Ninguém volta",
+    description: "Clientes somem e você nem percebe."
+  }
 ];
 
 export const ProblemsSection = () => {
   return (
-    <section className="py-20 bg-background">
+    <section id="problema" className="py-24 bg-[#0A0A0A]">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Você se identifica com isso?
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#EDEDED] mb-6">
+            O problema que ninguém fala
           </h2>
-          <p className="text-muted-foreground text-lg">
-            A maioria dos donos de barbearia enfrenta esses problemas todos os dias:
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Você trabalha muito, mas não sabe exatamente{" "}
+            <span className="text-destructive font-medium">por quê não sobra dinheiro</span>.
           </p>
         </div>
 
-        <div className="max-w-2xl mx-auto">
-          <div className="space-y-4 mb-8">
-            {problems.map((problem) => (
-              <div
-                key={problem}
-                className="flex items-center gap-3 p-4 rounded-lg bg-destructive/5 border border-destructive/20"
-              >
-                <X className="w-5 h-5 text-destructive flex-shrink-0" />
-                <span className="text-foreground">{problem}</span>
+        {/* Problem Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          {problems.map((problem, index) => (
+            <div
+              key={index}
+              className="p-6 rounded-2xl bg-[#111111] border border-destructive/20 hover:border-destructive/40 transition-all duration-300 group"
+            >
+              <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center mb-4 group-hover:bg-destructive/20 transition-colors">
+                <problem.icon className="w-6 h-6 text-destructive" />
               </div>
-            ))}
-          </div>
+              <h3 className="text-xl font-semibold text-[#EDEDED] mb-2">
+                {problem.title}
+              </h3>
+              <p className="text-muted-foreground">
+                {problem.description}
+              </p>
+            </div>
+          ))}
+        </div>
 
-          <div className="flex items-center gap-3 p-4 rounded-lg bg-green-500/10 border border-green-500/30">
-            <Check className="w-6 h-6 text-green-500 flex-shrink-0" />
-            <span className="text-lg font-semibold text-foreground">
-              O GestBarber resolve tudo isso.
-            </span>
-          </div>
+        {/* The Turn */}
+        <div className="max-w-4xl mx-auto text-center p-8 md:p-12 rounded-3xl bg-gradient-to-br from-[#111111] to-[#1A1A1A] border border-primary/20">
+          <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#EDEDED] mb-4">
+            O GestBarber <span className="text-primary">não é uma agenda</span>.
+          </h3>
+          <p className="text-xl text-muted-foreground">
+            É um <span className="text-primary font-medium">painel de controle</span> do seu negócio.
+          </p>
         </div>
       </div>
     </section>

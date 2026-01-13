@@ -1,36 +1,56 @@
+import { useEffect } from "react";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { TopServices } from "@/components/dashboard/TopServices";
 import { BarberRanking } from "@/components/dashboard/BarberRanking";
 import { RevenueForecast } from "@/components/dashboard/RevenueForecast";
 import { PublicAgendaCard } from "@/components/dashboard/PublicAgendaCard";
+import { LostRevenueAlert } from "@/components/dashboard/LostRevenueAlert";
+import { PerformanceRanking } from "@/components/dashboard/PerformanceRanking";
+import { RevenueSimulator } from "@/components/dashboard/RevenueSimulator";
 import { AppLayout } from "@/components/AppLayout";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { DashboardSkeleton } from "@/components/skeletons/PageSkeletons";
-import { WhatsNewModal } from "@/components/notifications/WhatsNewModal";
+import { PremiumFeatureAnnouncements } from "@/components/notifications/PremiumFeatureAnnouncements";
+import { useGrowthTriggers } from "@/components/upgrade/GrowthTriggerProvider";
 
 const Dashboard = () => {
   const { user, loading } = useRequireAuth();
   const { profile, loading: profileLoading } = useUserProfile(user);
+  const { checkTriggers, isStart } = useGrowthTriggers();
+
+  // Check triggers on dashboard load for Start plan users
+  useEffect(() => {
+    if (!loading && !profileLoading && isStart) {
+      // Small delay to ensure dashboard is loaded
+      const timer = setTimeout(() => {
+        checkTriggers();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, profileLoading, isStart, checkTriggers]);
 
   return (
     <AppLayout title="Painel" description="Visão geral da barbearia">
-      <WhatsNewModal />
+      <PremiumFeatureAnnouncements />
       {loading || profileLoading ? (
         <DashboardSkeleton />
       ) : (
         <div className="space-y-4 md:space-y-6">
           {profile?.barbershop_name && (
-            <div className="rounded-lg border bg-card p-4 md:p-6">
-              <h2 className="text-xl md:text-2xl font-bold text-primary">
+            <div className="rounded-xl border border-primary/20 bg-card p-4 md:p-6 shadow-gold">
+              <h2 className="text-xl md:text-2xl font-bold bg-gradient-gold bg-clip-text text-transparent">
                 Bem-vindo, {profile.barbershop_name}
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Aqui está o resumo do seu negócio
+                Controle total do seu negócio
               </p>
             </div>
           )}
+          
+          {/* Alerta de Dinheiro Perdido */}
+          <LostRevenueAlert />
           
           <PublicAgendaCard />
           
@@ -41,6 +61,11 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
             <RevenueChart />
             <TopServices />
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
+            <PerformanceRanking />
+            <RevenueSimulator />
           </div>
 
           <BarberRanking />

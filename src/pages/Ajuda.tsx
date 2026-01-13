@@ -10,6 +10,8 @@ import { helpCategories, searchArticles, HelpCategory, HelpArticle } from "@/dat
 import { HelpCircle, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { usePlanValidation } from "@/hooks/usePlanValidation";
+import { SupportGrowthGate } from "@/components/support/SupportGrowthGate";
 
 type ViewState = 
   | { type: "categories" }
@@ -20,10 +22,20 @@ export default function Ajuda() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [view, setView] = useState<ViewState>({ type: "categories" });
+  const [showSupportGate, setShowSupportGate] = useState(false);
+  const { isGrowth, loading: planLoading } = usePlanValidation();
   
   const searchResults = useMemo(() => {
     return searchArticles(searchQuery);
   }, [searchQuery]);
+
+  const handleSupportClick = () => {
+    if (!planLoading && !isGrowth) {
+      setShowSupportGate(true);
+    } else {
+      navigate("/suporte");
+    }
+  };
   
   const isSearching = searchQuery.trim().length > 0;
   
@@ -50,6 +62,17 @@ export default function Ajuda() {
       setView({ type: "categories" });
     }
   };
+  
+  if (showSupportGate) {
+    return (
+      <AppLayout
+        title="Suporte"
+        description="Suporte exclusivo do plano Growth"
+      >
+        <SupportGrowthGate />
+      </AppLayout>
+    );
+  }
   
   return (
     <AppLayout
@@ -114,7 +137,7 @@ export default function Ajuda() {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => navigate("/suporte")}
+              onClick={handleSupportClick}
             >
               Falar com o Suporte
             </Button>

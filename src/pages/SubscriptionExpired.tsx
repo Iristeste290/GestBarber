@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Clock, Zap, Check, LogOut, Loader2 } from "lucide-react";
+import { TrendingUp, Clock, Check, LogOut, Loader2, Crown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -40,19 +40,18 @@ const SubscriptionExpired = () => {
   }, []);
 
   const mensalPrice = stripePrices.find(p => p.id === 'price_1SX04CKtuTWnHVngnvYdIlzZ');
-  const anualPrice = stripePrices.find(p => p.id === 'price_1SX074KtuTWnHVngd5iTQf1k');
 
   const formatPrice = (amount: number) => {
     return (amount / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   };
 
-  const handleSubscribe = async (planType: 'mensal' | 'anual') => {
+  const handleSubscribe = async () => {
     setIsCreatingCheckout(true);
     const checkoutWindow = window.open('about:blank', '_blank');
     
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: { planType },
+        body: { planType: 'mensal' },
       });
 
       if (error) throw error;
@@ -81,73 +80,78 @@ const SubscriptionExpired = () => {
     navigate('/');
   };
 
+  const growthFeatures = [
+    'Tudo do plano Start',
+    'Growth Engine completo',
+    'Horários Vazios',
+    'Clientes Sumidos',
+    'Clientes Problemáticos',
+    'Ranking Invisível',
+    'Mapa de Clientes',
+    'IA do Site + SEO Local',
+    'Alertas de dinheiro perdido',
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full space-y-8">
+    <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center p-4">
+      <div className="max-w-lg w-full space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-500/20 mb-4">
-            <Clock className="w-10 h-10 text-amber-500" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#C9B27C]/20 mb-4">
+            <Clock className="w-10 h-10 text-[#C9B27C]" />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
-            Seu período gratuito expirou
+          <h1 className="text-3xl sm:text-4xl font-bold text-[#EDEDED]">
+            Seu plano Growth expirou
           </h1>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Os 30 dias do plano Freemium acabaram. Para continuar usando o BarberPro, 
-            escolha um dos planos abaixo e desbloqueie todo o potencial da sua barbearia.
+          <p className="text-lg text-[#EDEDED]/60 max-w-md mx-auto">
+            Para continuar usando as funcionalidades de crescimento, renove seu plano Growth.
           </p>
         </div>
 
-        {/* Plans */}
+        {/* Growth Plan Card */}
         {loadingPrices ? (
           <div className="flex justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <Loader2 className="w-8 h-8 animate-spin text-[#C9B27C]" />
           </div>
         ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Pro Plan */}
-          <Card className="relative border-primary/50 shadow-lg hover:shadow-xl transition-all">
+          <Card className="relative border-[#C9B27C] bg-[#111111] shadow-lg shadow-[#C9B27C]/10">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <Badge className="bg-gradient-to-r from-primary to-accent shadow-lg">
-                Mais Popular
+              <Badge className="bg-gradient-to-r from-[#C9B27C] to-[#E8D9A8] text-black shadow-lg">
+                <Crown className="w-3 h-3 mr-1" />
+                Recomendado
               </Badge>
             </div>
-            <CardHeader className="text-center pt-8">
-              <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Zap className="w-7 h-7 text-primary-foreground" />
+            <CardHeader className="text-center pt-10">
+              <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-gradient-to-br from-[#C9B27C] to-[#E8D9A8] flex items-center justify-center">
+                <TrendingUp className="w-8 h-8 text-black" />
               </div>
-              <CardTitle className="text-2xl">Pro</CardTitle>
+              <CardTitle className="text-2xl text-[#EDEDED]">Growth</CardTitle>
               <div className="mt-4">
-                <span className="text-4xl font-bold">
-                  {mensalPrice ? formatPrice(mensalPrice.amount) : 'R$ 97,00'}
+                <span className="text-4xl font-bold text-[#C9B27C]">
+                  {mensalPrice ? formatPrice(mensalPrice.amount) : 'R$ 32,90'}
                 </span>
-                <span className="text-muted-foreground">/mês</span>
+                <span className="text-[#EDEDED]/60">/mês</span>
               </div>
+              <CardDescription className="text-[#EDEDED]/60 mt-2">
+                Para crescer e ganhar mais dinheiro
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
-                {[
-                  'Barbeiros ilimitados',
-                  'Agendamentos ilimitados',
-                  'Serviços ilimitados',
-                  'Produtos ilimitados',
-                  'Automações completas',
-                  'IA e Posts automáticos',
-                  'Relatórios e previsões',
-                  'Sistema de pagamentos',
-                  'Suporte por e-mail (48h)',
-                ].map((feature, idx) => (
+                {growthFeatures.map((feature, idx) => (
                   <li key={idx} className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    <span className="text-sm">{feature}</span>
+                    <Check className={`w-4 h-4 flex-shrink-0 ${idx === 0 ? 'text-[#C9B27C]' : 'text-green-500'}`} />
+                    <span className={`text-sm ${idx === 0 ? 'text-[#C9B27C] font-semibold' : 'text-[#EDEDED]'}`}>
+                      {feature}
+                    </span>
                   </li>
                 ))}
               </ul>
             </CardContent>
             <CardFooter>
               <Button
-                onClick={() => handleSubscribe('mensal')}
-                className="w-full"
+                onClick={handleSubscribe}
+                className="w-full bg-[#C9B27C] hover:bg-[#C9B27C]/90 text-black font-bold"
                 size="lg"
                 disabled={isCreatingCheckout}
               >
@@ -158,98 +162,42 @@ const SubscriptionExpired = () => {
                   </span>
                 ) : (
                   <>
-                    <Zap className="w-4 h-4 mr-2" />
-                    Assinar Pro
+                    <TrendingUp className="w-4 h-4 mr-2" />
+                    Quero crescer
                   </>
                 )}
               </Button>
             </CardFooter>
           </Card>
-
-          {/* Premium Plan */}
-          <Card className="relative hover:shadow-xl transition-all">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <Badge variant="secondary" className="shadow-lg">
-                Melhor Valor
-              </Badge>
-            </div>
-            <CardHeader className="text-center pt-8">
-              <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
-                <Crown className="w-7 h-7 text-white" />
-              </div>
-              <CardTitle className="text-2xl">Premium</CardTitle>
-              <div className="mt-4">
-                {mensalPrice && (
-                  <span className="text-sm text-muted-foreground line-through">
-                    {formatPrice(mensalPrice.amount * 12)}
-                  </span>
-                )}
-                <div>
-                  <span className="text-4xl font-bold">
-                    {anualPrice ? formatPrice(anualPrice.amount) : 'R$ 970,00'}
-                  </span>
-                  <span className="text-muted-foreground">/ano</span>
-                </div>
-                <Badge variant="outline" className="mt-2 text-green-600 border-green-600">
-                  Economia de 3 meses
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {[
-                  'Tudo do plano Pro',
-                  'Economia de 3 meses',
-                  'Suporte por e-mail (12h)',
-                  'Prioridade em novos recursos',
-                  'Preço fixo garantido no ano',
-                ].map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    <span className="text-sm">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-            <CardFooter>
-              <Button
-                onClick={() => handleSubscribe('anual')}
-                className="w-full"
-                size="lg"
-                variant="outline"
-                disabled={isCreatingCheckout}
-              >
-                {isCreatingCheckout ? (
-                  <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    Abrindo...
-                  </span>
-                ) : (
-                  <>
-                    <Crown className="w-4 h-4 mr-2" />
-                    Assinar Premium
-                  </>
-                )}
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
         )}
 
         {/* Footer */}
         <div className="text-center space-y-4">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-[#EDEDED]/40">
             Pagamento seguro via Stripe • Cancele quando quiser
           </p>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleLogout}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sair da conta
-          </Button>
+          <p className="text-sm text-[#EDEDED]/60">
+            Ou continue usando o plano <span className="font-medium">Start</span> gratuitamente
+          </p>
+          <div className="flex gap-4 justify-center">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate('/dashboard')}
+              className="border-[#333333] text-[#EDEDED] hover:bg-[#1a1a1a]"
+            >
+              Continuar com Start
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleLogout}
+              className="text-[#EDEDED]/60 hover:text-[#EDEDED]"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
+            </Button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { LayoutDashboard, Calendar, Package, Users, Award, Scissors, LogOut, Target, DollarSign, Zap, ImagePlus, Wallet, Calculator, Settings, TrendingUp, UserCircle, CreditCard, HelpCircle, ChevronDown, Clock, MessageCircle, Crown, ShieldCheck, Shield, BarChart3, ListChecks, UserCog, Smartphone } from "lucide-react";
+import { LayoutDashboard, Calendar, Package, Users, Award, Scissors, LogOut, Target, DollarSign, Zap, ImagePlus, Wallet, Calculator, Settings, TrendingUp, UserCircle, CreditCard, HelpCircle, ChevronDown, Clock, MessageCircle, Crown, ShieldCheck, Shield, BarChart3, ListChecks, UserCog, Smartphone, Rocket } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +35,7 @@ const coreMenuItems = [
   { title: "Custos", url: "/custos", icon: DollarSign },
   { title: "Relatórios", url: "/relatorios", icon: TrendingUp },
   { title: "Caixa", url: "/caixa", icon: Calculator },
+  { title: "Growth Engine", url: "/growth-engine", icon: Rocket },
 ];
 
 // Advanced items - hidden in "Mais" submenu (coming soon)
@@ -135,20 +136,24 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
+    <Sidebar collapsible="icon" className="border-r border-border bg-sidebar">
       <SidebarContent>
         <SidebarGroup>
-          <div className="flex items-center justify-between px-3 py-2">
-            <SidebarGroupLabel className={collapsed ? "px-0" : ""}>
-              {collapsed ? "GB" : "GestBarber"}
+          <div className="flex items-center justify-between px-3 py-3">
+            <SidebarGroupLabel className={`${collapsed ? "px-0" : ""} text-primary font-bold text-lg`}>
+              {collapsed ? (
+                <span className="text-primary">GB</span>
+              ) : (
+                <span className="bg-gradient-gold bg-clip-text text-transparent">GestBarber</span>
+              )}
             </SidebarGroupLabel>
             {!collapsed && user && <NotificationBell userId={user.id} />}
           </div>
           {profile?.barbershop_name && !collapsed && (
-            <div className="px-3 py-2 flex items-center gap-2">
+            <div className="px-3 py-2 flex items-center gap-2 border-b border-border/50 mb-2">
               <span className="text-sm text-muted-foreground">{profile.barbershop_name}</span>
               {isAdmin && (
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary">
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-primary/20 text-primary border-primary/30">
                   <ShieldCheck className="h-3 w-3 mr-0.5" />
                   Admin
                 </Badge>
@@ -156,8 +161,8 @@ export function AppSidebar() {
             </div>
           )}
           {!profile?.barbershop_name && !collapsed && isAdmin && (
-            <div className="px-3 py-2">
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary">
+            <div className="px-3 py-2 border-b border-border/50 mb-2">
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-primary/20 text-primary border-primary/30">
                 <ShieldCheck className="h-3 w-3 mr-0.5" />
                 Admin
               </Badge>
@@ -176,10 +181,14 @@ export function AppSidebar() {
                     <NavLink 
                       to={item.url} 
                       end 
-                      className="flex items-center gap-3"
-                      activeClassName="bg-accent text-accent-foreground font-medium"
+                      className={`flex items-center gap-3 transition-all duration-200 rounded-lg ${
+                        currentPath === item.url 
+                          ? "bg-sidebar-accent text-primary border-l-2 border-primary pl-2.5" 
+                          : "hover:bg-sidebar-accent/50"
+                      }`}
+                      activeClassName="bg-sidebar-accent text-primary font-medium border-l-2 border-primary"
                     >
-                      <item.icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                      <item.icon className={`h-4 w-4 flex-shrink-0 ${currentPath === item.url ? "text-primary" : ""}`} aria-hidden="true" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>

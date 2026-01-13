@@ -144,15 +144,15 @@ export const StatsCards = memo(() => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-      <Card className="contain-content">
+      <Card className="contain-content border-primary/20 hover:border-primary/40 transition-colors hover:shadow-gold">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Faturamento Hoje</CardTitle>
-          <div className="p-2 bg-green-500/10 rounded-full">
-            <DollarSign className="h-4 w-4 text-green-600 dark:text-green-500" />
+          <CardTitle className="text-sm font-medium text-muted-foreground">Faturamento Hoje</CardTitle>
+          <div className="p-2 bg-primary/10 rounded-full">
+            <DollarSign className="h-4 w-4 text-primary" />
           </div>
         </CardHeader>
         <CardContent className="p-4 md:p-6 pt-0">
-          <div className="text-xl md:text-2xl font-bold text-green-600 dark:text-green-500">
+          <div className="text-xl md:text-2xl font-bold text-primary">
             R$ {stats?.todayRevenue.toFixed(2) || "0.00"}
           </div>
           <div className="flex items-center justify-between mt-1">
@@ -166,15 +166,15 @@ export const StatsCards = memo(() => {
         </CardContent>
       </Card>
 
-      <Card className="contain-content">
+      <Card className="contain-content hover:border-primary/30 transition-colors">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
-          <CardTitle className="text-sm font-medium">Agendamentos Hoje</CardTitle>
-          <div className="p-2 bg-blue-500/10 rounded-full">
-            <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-500" />
+          <CardTitle className="text-sm font-medium text-muted-foreground">Agendamentos Hoje</CardTitle>
+          <div className="p-2 bg-success/10 rounded-full">
+            <Calendar className="h-4 w-4 text-success" />
           </div>
         </CardHeader>
         <CardContent className="p-4 md:p-6 pt-0">
-          <div className="text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-500">
+          <div className="text-xl md:text-2xl font-bold text-foreground">
             {stats?.todayAppointments || 0}
           </div>
           <div className="flex items-center justify-between mt-1">
@@ -188,15 +188,15 @@ export const StatsCards = memo(() => {
         </CardContent>
       </Card>
 
-      <Card className="contain-content">
+      <Card className="contain-content hover:border-primary/30 transition-colors">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
-          <CardTitle className="text-sm font-medium">Ticket Médio</CardTitle>
-          <div className="p-2 bg-purple-500/10 rounded-full">
-            <TrendingUp className="h-4 w-4 text-purple-600 dark:text-purple-500" />
+          <CardTitle className="text-sm font-medium text-muted-foreground">Ticket Médio</CardTitle>
+          <div className="p-2 bg-accent/10 rounded-full">
+            <TrendingUp className="h-4 w-4 text-accent" />
           </div>
         </CardHeader>
         <CardContent className="p-4 md:p-6 pt-0">
-          <div className="text-xl md:text-2xl font-bold text-purple-600 dark:text-purple-500">
+          <div className="text-xl md:text-2xl font-bold text-foreground">
             R$ {stats?.averageTicket.toFixed(2) || "0.00"}
           </div>
           <div className="flex items-center justify-between mt-1">

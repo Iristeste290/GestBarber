@@ -17,7 +17,7 @@ serve(async (req) => {
     });
 
     const priceIds = [
-      'price_1SX04CKtuTWnHVngnvYdIlzZ', // Mensal
+      'price_1SopUFKtuTWnHVngHNaXabSC', // Mensal R$ 59,90
       'price_1SX074KtuTWnHVngd5iTQf1k', // Anual
     ];
 

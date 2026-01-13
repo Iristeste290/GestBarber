@@ -62,74 +62,110 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Design System - Performance Optimized */
+/* 
+ * GestBarber Premium Design System
+ * Inspired by: Financial apps, Black cards, Investment platforms
+ * Psychology: Control, Power, Money, Performance
+ */
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 200 80% 45%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 200 30% 90%;
-    --secondary-foreground: 200 80% 20%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 200 70% 50%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 200 80% 45%;
+    /* Premium Dark Theme - Default */
+    --background: 0 0% 4%; /* #0A0A0A */
+    --foreground: 0 0% 93%; /* #EDEDED */
+    
+    --card: 0 0% 7%; /* #111111 */
+    --card-foreground: 0 0% 93%; /* #EDEDED */
+    
+    --popover: 0 0% 7%; /* #111111 */
+    --popover-foreground: 0 0% 93%; /* #EDEDED */
+    
+    /* Gold Premium - Main Brand Color */
+    --primary: 43 33% 63%; /* #C9B27C */
+    --primary-foreground: 0 0% 4%; /* #0A0A0A */
+    
+    --secondary: 0 0% 10%; /* #1A1A1A */
+    --secondary-foreground: 0 0% 93%; /* #EDEDED */
+    
+    --muted: 0 0% 10%; /* #1A1A1A */
+    --muted-foreground: 0 0% 71%; /* #B5B5B5 */
+    
+    /* Gold Light for accents */
+    --accent: 43 50% 77%; /* #E6D3A3 */
+    --accent-foreground: 0 0% 4%; /* #0A0A0A */
+    
+    /* Status Colors */
+    --destructive: 6 78% 57%; /* #E74C3C */
+    --destructive-foreground: 0 0% 93%;
+    
+    --success: 145 63% 49%; /* #2ECC71 */
+    --success-foreground: 0 0% 4%;
+    
+    --warning: 48 89% 50%; /* #F1C40F */
+    --warning-foreground: 0 0% 4%;
+    
+    --border: 0 0% 14%; /* Subtle border */
+    --input: 0 0% 10%; /* #1A1A1A */
+    --ring: 43 33% 63%; /* Gold ring */
     --radius: 0.75rem;
 
-    /* Sombras otimizadas - leves para performance */
-    --shadow-sm: 0 1px 2px hsl(var(--foreground) / 0.04);
-    --shadow-md: 0 2px 4px hsl(var(--foreground) / 0.06);
-    --shadow-lg: 0 4px 8px hsl(var(--foreground) / 0.08);
+    /* Premium Shadows */
+    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.3);
+    --shadow-md: 0 4px 12px hsl(0 0% 0% / 0.4);
+    --shadow-lg: 0 8px 24px hsl(0 0% 0% / 0.5);
+    --shadow-gold: 0 4px 20px hsl(43 33% 63% / 0.15);
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Premium Sidebar */
+    --sidebar-background: 0 0% 4%; /* #0A0A0A */
+    --sidebar-foreground: 0 0% 71%; /* #B5B5B5 */
+    --sidebar-primary: 43 33% 63%; /* Gold */
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 0 0% 10%; /* #1A1A1A */
+    --sidebar-accent-foreground: 43 33% 63%; /* Gold text */
+    --sidebar-border: 0 0% 14%;
+    --sidebar-ring: 43 33% 63%;
+    
+    /* Gold variants for programmatic use */
+    --gold-main: 43 33% 63%; /* #C9B27C */
+    --gold-light: 43 50% 77%; /* #E6D3A3 */
+    --gold-dark: 43 28% 48%; /* #9E8755 */
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 217.2 32.6% 10%;
-    --card-foreground: 210 40% 98%;
-    --popover: 217.2 32.6% 10%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 200 80% 55%;
+  /* Light mode override - still premium but lighter */
+  .light {
+    --background: 0 0% 98%;
+    --foreground: 0 0% 7%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 7%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 7%;
+    
+    --primary: 43 33% 53%; /* Darker gold for light mode */
     --primary-foreground: 0 0% 100%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 200 70% 60%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 200 80% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 7%;
+    
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 45%;
+    
+    --accent: 43 40% 60%;
+    --accent-foreground: 0 0% 4%;
+    
+    --border: 0 0% 90%;
+    --input: 0 0% 95%;
+    --ring: 43 33% 53%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 45%;
+    --sidebar-primary: 43 33% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 0 0% 95%;
+    --sidebar-accent-foreground: 43 33% 53%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 43 33% 53%;
   }
 }
 
@@ -143,12 +179,11 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeSpeed;
-    /* Scroll suave nativo */
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Desabilita animações para usuários que preferem */
+  /* Disable animations for users who prefer reduced motion */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
@@ -158,7 +193,7 @@
   }
 }
 
-/* Scrollbar minimalista */
+/* Premium Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -174,7 +209,7 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
+  background: hsl(var(--primary) / 0.5);
 }
 
 * {
@@ -182,9 +217,9 @@
   scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
 }
 
-/* Utilitários de Performance */
+/* Premium Utilities */
 @layer utilities {
-  /* Transição GPU-accelerated para elementos interativos */
+  /* GPU-accelerated transitions */
   .transition-gpu {
     transition: transform 0.15s ease-out, opacity 0.15s ease-out;
     transform: translateZ(0);
@@ -195,7 +230,7 @@
     transition: color 0.1s ease, background-color 0.1s ease;
   }
 
-  /* Glass simplificado - sem blur pesado */
+  /* Premium Glass Effect */
   .glass {
     background: hsl(var(--background) / 0.9);
     border: 1px solid hsl(var(--border) / 0.5);
@@ -207,7 +242,89 @@
     box-shadow: var(--shadow-sm);
   }
 
-  /* Animações leves e rápidas */
+  /* Premium Gold Gradient */
+  .gradient-gold {
+    background: linear-gradient(135deg, hsl(var(--gold-main)), hsl(var(--gold-light)));
+  }
+  
+  .gradient-gold-subtle {
+    background: linear-gradient(135deg, hsl(var(--gold-main) / 0.1), hsl(var(--gold-light) / 0.05));
+  }
+
+  .text-gold {
+    color: hsl(var(--gold-main));
+  }
+  
+  .text-gold-light {
+    color: hsl(var(--gold-light));
+  }
+
+  .border-gold {
+    border-color: hsl(var(--gold-main) / 0.3);
+  }
+  
+  .border-gold-strong {
+    border-color: hsl(var(--gold-main));
+  }
+
+  /* Premium Button Gradient */
+  .btn-premium {
+    background: linear-gradient(135deg, hsl(43 33% 63%), hsl(43 50% 77%));
+    color: hsl(0 0% 4%);
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px hsl(43 33% 63% / 0.2);
+  }
+  
+  .btn-premium:hover {
+    box-shadow: 0 6px 20px hsl(43 33% 63% / 0.3);
+    transform: translateY(-1px);
+  }
+
+  /* Gold Glow Effect */
+  .glow-gold {
+    box-shadow: 0 0 20px hsl(43 33% 63% / 0.15);
+  }
+  
+  .glow-gold-strong {
+    box-shadow: 0 0 30px hsl(43 33% 63% / 0.25);
+  }
+
+  /* Premium Card Variants */
+  .card-premium {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
+  }
+  
+  .card-premium:hover {
+    border-color: hsl(var(--gold-main) / 0.3);
+    box-shadow: var(--shadow-gold);
+  }
+
+  .card-opportunity {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--gold-main) / 0.3);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-gold);
+  }
+
+  /* Status indicators */
+  .status-success {
+    color: hsl(var(--success));
+  }
+  
+  .status-danger {
+    color: hsl(var(--destructive));
+  }
+  
+  .status-warning {
+    color: hsl(var(--warning));
+  }
+
+  /* Animations */
   .animate-fade-in {
     animation: fadeIn 0.15s ease-out forwards;
   }
@@ -219,15 +336,19 @@
   .animate-scale-in {
     animation: scaleIn 0.1s ease-out forwards;
   }
+  
+  .animate-gold-pulse {
+    animation: goldPulse 2s ease-in-out infinite;
+  }
 
-  /* Hover simples - sem sombra dinâmica */
+  /* Hover effects */
   .hover-lift {
     transition: transform 0.15s ease-out;
     transform: translateZ(0);
   }
   
   .hover-lift:hover {
-    transform: translate3d(0, -1px, 0);
+    transform: translate3d(0, -2px, 0);
   }
 
   .hover-scale {
@@ -236,22 +357,31 @@
   }
   
   .hover-scale:hover {
-    transform: scale(1.01);
+    transform: scale(1.02);
+  }
+  
+  .hover-gold {
+    transition: all 0.2s ease;
+  }
+  
+  .hover-gold:hover {
+    border-color: hsl(var(--gold-main) / 0.5);
+    box-shadow: var(--shadow-gold);
   }
 
-  /* Skeleton otimizado */
+  /* Skeleton */
   .skeleton {
     background: hsl(var(--muted));
     animation: pulse 1.5s ease-in-out infinite;
   }
 
-  /* Scroll otimizado */
+  /* Scroll */
   .scroll-smooth {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
   }
   
-  /* Contenção para performance */
+  /* Containment for performance */
   .contain-paint {
     contain: paint;
   }
@@ -268,14 +398,24 @@
     contain: content;
   }
 
-  /* GPU layer para elementos fixos */
+  /* GPU layer for fixed elements */
   .gpu-layer {
     transform: translateZ(0);
     will-change: transform;
   }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-/* Keyframes otimizados */
+/* Keyframes */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -296,6 +436,15 @@
   50% { opacity: 0.5; }
 }
 
+@keyframes goldPulse {
+  0%, 100% { 
+    box-shadow: 0 0 10px hsl(43 33% 63% / 0.1);
+  }
+  50% { 
+    box-shadow: 0 0 20px hsl(43 33% 63% / 0.25);
+  }
+}
+
 /* Focus visible */
 @layer utilities {
   *:focus-visible {
@@ -305,3 +454,31 @@
   }
 }
 
+/* Premium Input Styles */
+input:focus, textarea:focus, select:focus {
+  border-color: hsl(var(--gold-main)) !important;
+  box-shadow: 0 0 0 2px hsl(var(--gold-main) / 0.1);
+}
+
+/* Chart Colors */
+.recharts-layer .recharts-line-curve {
+  stroke: hsl(var(--gold-main));
+}
+
+.recharts-layer .recharts-area-area {
+  fill: hsl(var(--gold-main) / 0.2);
+}
+
+/* Leaflet Map Overrides */
+.leaflet-container {
+  background: hsl(var(--card)) !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.leaflet-popup-tip {
+  background: hsl(var(--card)) !important;
+}

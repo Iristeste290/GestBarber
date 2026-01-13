@@ -57,11 +57,40 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Premium Gold Colors
+        gold: {
+          DEFAULT: "hsl(var(--gold-main))",
+          main: "hsl(var(--gold-main))",
+          light: "hsl(var(--gold-light))",
+          dark: "hsl(var(--gold-dark))",
+        },
+        // Status Colors
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "calc(var(--radius) + 4px)",
+        "2xl": "calc(var(--radius) + 8px)",
+      },
+      boxShadow: {
+        'gold': '0 4px 20px hsl(43 33% 63% / 0.15)',
+        'gold-lg': '0 8px 30px hsl(43 33% 63% / 0.2)',
+        'premium': '0 4px 12px hsl(0 0% 0% / 0.4)',
+        'premium-lg': '0 8px 24px hsl(0 0% 0% / 0.5)',
+      },
+      backgroundImage: {
+        'gradient-gold': 'linear-gradient(135deg, hsl(43 33% 63%), hsl(43 50% 77%))',
+        'gradient-gold-subtle': 'linear-gradient(135deg, hsl(43 33% 63% / 0.1), hsl(43 50% 77% / 0.05))',
+        'gradient-dark': 'linear-gradient(180deg, hsl(0 0% 4%), hsl(0 0% 7%))',
       },
       keyframes: {
         "accordion-down": {
@@ -80,10 +109,28 @@ export default {
             height: "0",
           },
         },
+        "gold-pulse": {
+          "0%, 100%": {
+            boxShadow: "0 0 10px hsl(43 33% 63% / 0.1)",
+          },
+          "50%": {
+            boxShadow: "0 0 20px hsl(43 33% 63% / 0.25)",
+          },
+        },
+        "shimmer": {
+          "0%": {
+            backgroundPosition: "-200% 0",
+          },
+          "100%": {
+            backgroundPosition: "200% 0",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "gold-pulse": "gold-pulse 2s ease-in-out infinite",
+        "shimmer": "shimmer 2s linear infinite",
       },
     },
   },

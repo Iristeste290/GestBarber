@@ -29,11 +29,10 @@ serve(async (req) => {
       price,
     } = await req.json();
 
-    console.log("Sending appointment confirmation for:", {
+    console.log("Sending appointment notification to barber:", {
       barberId,
       appointmentId,
       customerName,
-      phone,
       serviceName,
       date,
       time,
@@ -53,7 +52,6 @@ serve(async (req) => {
     const results = {
       pushNotification: false,
       inAppNotification: false,
-      whatsappToClient: false,
     };
 
     // Send push notification to barber (owner)
@@ -77,7 +75,7 @@ serve(async (req) => {
 
         if (!pushError) {
           results.pushNotification = true;
-          console.log("Push notification sent successfully");
+          console.log("Push notification sent successfully to barber");
         } else {
           console.error("Push notification error:", pushError);
         }
@@ -92,83 +90,14 @@ serve(async (req) => {
         await supabase.from("notifications").insert({
           user_id: barber.user_id,
           title: "Novo Agendamento",
-          message: `${customerName} agendou ${serviceName} para ${date} às ${time}. Valor: R$ ${price}`,
+          message: `${customerName} agendou ${serviceName} para ${date} às ${time}. Valor: R$ ${price}. Tel: ${phone}`,
           type: "appointment",
           link: "/agenda",
         });
         results.inAppNotification = true;
-        console.log("In-app notification created");
+        console.log("In-app notification created for barber");
       } catch (notifErr) {
         console.error("Error creating in-app notification:", notifErr);
-      }
-    }
-
-    // Send WhatsApp confirmation to the CLIENT (if barber has WhatsApp configured)
-    if (barber?.user_id && phone) {
-      try {
-        // Check if barber has WhatsApp configured
-        const { data: whatsappSettings, error: settingsError } = await supabase
-          .from("whatsapp_settings")
-          .select("*")
-          .eq("user_id", barber.user_id)
-          .eq("is_active", true)
-          .maybeSingle();
-
-        if (settingsError) {
-          console.error("Error fetching WhatsApp settings:", settingsError);
-        }
-
-        if (whatsappSettings?.api_url && whatsappSettings?.api_token && whatsappSettings?.whatsapp_number) {
-          console.log("WhatsApp configured, sending confirmation to client...");
-
-          // Build confirmation message for the client
-          let clientMessage = "";
-          
-          if (whatsappSettings.appointment_message_template) {
-            clientMessage = whatsappSettings.appointment_message_template
-              .replace("{nome}", customerName || "")
-              .replace("{barbeiro}", barberName || barber.name || "")
-              .replace("{servico}", serviceName || "")
-              .replace("{data}", date || "")
-              .replace("{horario}", time || "")
-              .replace("{preco}", price || "");
-          } else {
-            // Default confirmation message
-            clientMessage = `✅ *Agendamento Confirmado!*\n\nOlá *${customerName}*!\n\nSeu agendamento foi realizado com sucesso:\n\n👤 Barbeiro: ${barberName || barber.name}\n✂️ Serviço: ${serviceName}\n📅 Data: ${date}\n⏰ Horário: ${time}\n💰 Valor: R$ ${price}\n\nAguardamos você! 😊`;
-          }
-
-          // Format phone number
-          const cleanPhone = phone.replace(/\D/g, "");
-          const formattedPhone = cleanPhone.startsWith("55") ? cleanPhone : `55${cleanPhone}`;
-
-          console.log(`Sending WhatsApp to client: ${formattedPhone}`);
-
-          // Send WhatsApp message via the configured API
-          const whatsappResponse = await fetch(whatsappSettings.api_url, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              token: whatsappSettings.api_token,
-              to: formattedPhone,
-              body: clientMessage,
-            }),
-          });
-
-          const whatsappData = await whatsappResponse.json();
-
-          if (whatsappResponse.ok) {
-            results.whatsappToClient = true;
-            console.log("WhatsApp sent to client successfully:", whatsappData);
-          } else {
-            console.error("Error sending WhatsApp to client:", whatsappData);
-          }
-        } else {
-          console.log("WhatsApp not configured for this barber, skipping client notification");
-        }
-      } catch (whatsappErr) {
-        console.error("Error sending WhatsApp to client:", whatsappErr);
       }
     }
 
@@ -176,7 +105,7 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         results,
-        message: "Confirmation notifications sent",
+        message: "Barber notifications sent successfully",
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

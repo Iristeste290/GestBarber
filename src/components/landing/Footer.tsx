@@ -5,31 +5,28 @@ export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="py-12 bg-muted/50 border-t border-border/40">
+    <footer className="py-12 bg-[#0A0A0A] border-t border-primary/10">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
-              <Scissors className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+              <Scissors className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-foreground">GestBarber</span>
+            <span className="text-lg font-bold text-primary">GestBarber</span>
           </Link>
 
           {/* Links */}
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-            <Link to="/auth" className="hover:text-foreground transition-colors">
+          <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <Link to="/auth" className="hover:text-primary transition-colors">
               Entrar
             </Link>
-            <a href="#sobre" className="hover:text-foreground transition-colors">
-              Sobre
-            </a>
-            <a href="#beneficios" className="hover:text-foreground transition-colors">
-              Benefícios
-            </a>
-            <a href="#planos" className="hover:text-foreground transition-colors">
-              Planos
-            </a>
+            <Link to="/auth" className="hover:text-primary transition-colors">
+              Criar conta
+            </Link>
+            <Link to="/ajuda" className="hover:text-primary transition-colors">
+              Suporte
+            </Link>
           </div>
 
           {/* Copyright */}

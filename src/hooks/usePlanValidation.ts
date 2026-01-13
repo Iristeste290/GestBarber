@@ -1,23 +1,32 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useRequireAuth } from "./useRequireAuth";
 
-export type PlanType = "freemium" | "mensal" | "anual";
+// Modelo: Start (gratuito para sempre) vs Growth (pago)
+export type PlanType = "start" | "growth";
 
 export interface PlanLimits {
+  // Recursos básicos (ambos planos)
   maxBarbers: number;
   maxAppointmentsPerMonth: number;
   maxServices: number;
   maxProducts: number;
-  hasAutomation: boolean;
-  hasAI: boolean;
-  hasAdvancedReports: boolean;
-  hasWeeklyGoals: boolean;
-  hasAdvancedStock: boolean;
-  hasForecast: boolean;
+  hasBasicReports: boolean;
+  
+  // Recursos Growth exclusivos
+  hasGrowthEngine: boolean;
+  hasEmptySlots: boolean;
+  hasInactiveClients: boolean;
+  hasProblematicClients: boolean;
   hasRanking: boolean;
-  hasSmartScheduler: boolean;
+  hasClientMap: boolean;
+  hasAIWebsite: boolean;
+  hasSEOLocal: boolean;
+  hasMoneyLostAlerts: boolean;
+  hasAutomation: boolean;
   hasAIPosts: boolean;
+  hasAdvancedReports: boolean;
+  hasForecast: boolean;
+  hasSmartScheduler: boolean;
   hasPayments: boolean;
   supportLevel: "none" | "email" | "email_priority";
 }
@@ -30,72 +39,118 @@ export interface UserPlan {
   isExpired: boolean;
 }
 
+// Configuração dos planos
 const PLAN_CONFIGS: Record<PlanType, PlanLimits> = {
-  freemium: {
-    maxBarbers: 2,
-    maxAppointmentsPerMonth: 50,
-    maxServices: 10,
-    maxProducts: 5,
-    hasAutomation: false,
-    hasAI: false,
-    hasAdvancedReports: false,
-    hasWeeklyGoals: false,
-    hasAdvancedStock: false,
-    hasForecast: false,
+  start: {
+    // Start: Recursos básicos gratuitos para sempre
+    maxBarbers: Infinity,
+    maxAppointmentsPerMonth: Infinity,
+    maxServices: Infinity,
+    maxProducts: Infinity,
+    hasBasicReports: true,
+    
+    // Recursos Growth bloqueados no Start
+    hasGrowthEngine: false,
+    hasEmptySlots: false,
+    hasInactiveClients: false,
+    hasProblematicClients: false,
     hasRanking: false,
-    hasSmartScheduler: false,
+    hasClientMap: false,
+    hasAIWebsite: false,
+    hasSEOLocal: false,
+    hasMoneyLostAlerts: false,
+    hasAutomation: false,
     hasAIPosts: false,
+    hasAdvancedReports: false,
+    hasForecast: false,
+    hasSmartScheduler: false,
     hasPayments: false,
     supportLevel: "none",
   },
-  mensal: {
+  growth: {
+    // Recursos básicos inclusos
     maxBarbers: Infinity,
     maxAppointmentsPerMonth: Infinity,
     maxServices: Infinity,
     maxProducts: Infinity,
-    hasAutomation: true,
-    hasAI: true,
-    hasAdvancedReports: true,
-    hasWeeklyGoals: true,
-    hasAdvancedStock: true,
-    hasForecast: true,
+    hasBasicReports: true,
+    
+    // Todos os recursos Growth desbloqueados
+    hasGrowthEngine: true,
+    hasEmptySlots: true,
+    hasInactiveClients: true,
+    hasProblematicClients: true,
     hasRanking: true,
-    hasSmartScheduler: true,
-    hasAIPosts: true,
-    hasPayments: true,
-    supportLevel: "email",
-  },
-  anual: {
-    maxBarbers: Infinity,
-    maxAppointmentsPerMonth: Infinity,
-    maxServices: Infinity,
-    maxProducts: Infinity,
+    hasClientMap: true,
+    hasAIWebsite: true,
+    hasSEOLocal: true,
+    hasMoneyLostAlerts: true,
     hasAutomation: true,
-    hasAI: true,
-    hasAdvancedReports: true,
-    hasWeeklyGoals: true,
-    hasAdvancedStock: true,
-    hasForecast: true,
-    hasRanking: true,
-    hasSmartScheduler: true,
     hasAIPosts: true,
+    hasAdvancedReports: true,
+    hasForecast: true,
+    hasSmartScheduler: true,
     hasPayments: true,
     supportLevel: "email_priority",
   },
 };
 
+// Mapeamento de planos antigos para novos
+const LEGACY_PLAN_MAP: Record<string, PlanType> = {
+  freemium: "start",
+  mensal: "growth",
+  anual: "growth",
+};
+
 export const usePlanValidation = () => {
-  const { user } = useRequireAuth();
+  const [user, setUser] = useState<{ id: string } | null>(null);
   const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Obter usuário SEM redirecionar (evita loop em páginas públicas como /auth)
   useEffect(() => {
-    if (!user) {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (user === null) {
+      // Usuário não logado - definir plano default sem redirecionar
+      setUserPlan({
+        plan: "start",
+        status: "none",
+        limits: PLAN_CONFIGS["start"],
+        currentPeriodEnd: null,
+        isExpired: false,
+      });
       setLoading(false);
       return;
     }
 
+    if (!user) {
+      return; // Ainda carregando
+    }
+
     const fetchPlan = async () => {
+      // Buscar dados do profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("plan, subscription_status")
+        .eq("id", user.id)
+        .single();
+
+      const subscriptionStatus = profile?.subscription_status || "none";
+
+      // Buscar subscription do Stripe (se existir)
       const { data, error } = await supabase
         .from("subscriptions")
         .select("*")
@@ -106,39 +161,26 @@ export const usePlanValidation = () => {
 
       if (error) {
         console.error("Erro ao buscar plano:", error);
-        // Fallback seguro: se não der pra ler o plano, assume Freemium
-        const planType: PlanType = "freemium";
-        setUserPlan({
-          plan: planType,
-          status: "active",
-          limits: PLAN_CONFIGS[planType],
-          currentPeriodEnd: null,
-          isExpired: false,
-        });
-        setLoading(false);
-        return;
       }
 
-      const planType = (data?.plan_type || "freemium") as PlanType;
-      const endDate = data?.end_date || data?.current_period_end;
-      const status = data?.status || "active";
+      // Mapear plano antigo para novo modelo
+      const legacyPlan = data?.plan_type || profile?.plan || "start";
+      const planType: PlanType = LEGACY_PLAN_MAP[legacyPlan] || (legacyPlan === "growth" ? "growth" : "start");
       
-      // Verificar se o plano expirou (freemium ou pago)
+      const endDate = data?.end_date || data?.current_period_end;
+      const status = data?.status || subscriptionStatus;
+      
+      // Verificar se o plano Growth expirou
       let isExpired = false;
-      if (endDate) {
+      if (endDate && planType === "growth") {
         const expirationDate = new Date(endDate);
         const now = new Date();
-        isExpired = expirationDate < now;
-      }
-      
-      // Também considerar expirado se o status não for "active"
-      if (status !== "active" && status !== "trialing") {
-        isExpired = true;
+        isExpired = expirationDate < now && status !== "active";
       }
 
       setUserPlan({
         plan: planType,
-        status: data?.status || "active",
+        status: status,
         limits: PLAN_CONFIGS[planType],
         currentPeriodEnd: data?.current_period_end || null,
         isExpired,
@@ -182,58 +224,11 @@ export const usePlanValidation = () => {
       return { allowed: false, current: 0, max: 0 };
     }
 
-    let tableName = resource;
-    let max = 0;
-    
-    switch (resource) {
-      case "barbers":
-        max = userPlan.limits.maxBarbers;
-        break;
-      case "services":
-        max = userPlan.limits.maxServices;
-        break;
-      case "products":
-        max = userPlan.limits.maxProducts;
-        break;
-      case "appointments":
-        tableName = resource;
-        max = userPlan.limits.maxAppointmentsPerMonth;
-        break;
-    }
-
-    let count = 0;
-
-    if (resource === "barbers" || resource === "services" || resource === "products") {
-      const query: any = supabase.from(tableName).select("id", { count: "exact", head: true });
-      const filtered: any = query.eq("user_id", user.id);
-      const result: any = await filtered;
-      count = result.count || 0;
-    } else if (resource === "appointments") {
-      // Count appointments this month
-      const startOfMonth = new Date();
-      startOfMonth.setDate(1);
-      startOfMonth.setHours(0, 0, 0, 0);
-      
-      const barbersQuery: any = supabase.from("barbers").select("id");
-      const barbersFiltered: any = barbersQuery.eq("user_id", user.id);
-      const barbersResult: any = await barbersFiltered;
-      
-      if (barbersResult.data && barbersResult.data.length > 0) {
-        const barberIds = barbersResult.data.map((b: any) => b.id);
-        const appointmentsQuery: any = supabase.from(tableName).select("id", { count: "exact", head: true });
-        const filtered1: any = appointmentsQuery.in("barber_id", barberIds);
-        const filtered2: any = filtered1.gte("appointment_date", startOfMonth.toISOString().split('T')[0]);
-        const result: any = await filtered2;
-        count = result.count || 0;
-      }
-    }
-
-    const current = count;
-
+    // No modelo, Start tem recursos básicos ilimitados
     return {
-      allowed: current < max,
-      current,
-      max,
+      allowed: true,
+      current: 0,
+      max: Infinity,
     };
   };
 
@@ -242,8 +237,11 @@ export const usePlanValidation = () => {
     loading,
     canUseFeature,
     checkLimit,
-    isPremium: userPlan?.plan !== "freemium",
-    isFreemium: userPlan?.plan === "freemium",
-    isAnnualPremium: userPlan?.plan === "anual",
+    isGrowth: userPlan?.plan === "growth",
+    isStart: userPlan?.plan === "start",
+    // Aliases para compatibilidade
+    isPremium: userPlan?.plan === "growth",
+    isFreemium: userPlan?.plan === "start",
+    isAnnualPremium: false,
   };
 };

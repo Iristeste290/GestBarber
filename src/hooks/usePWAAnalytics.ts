@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getDeviceId } from "@/lib/device-id";
 
-type PWAEventType = 'prompt_shown' | 'install_clicked' | 'install_success' | 'dismissed' | 'remind_later';
+type PWAEventType = 'prompt_shown' | 'install_clicked' | 'install_success' | 'dismissed';
 
 export const usePWAAnalytics = () => {
   const trackEvent = async (eventType: PWAEventType) => {

@@ -6,12 +6,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Knowledge base from help center
+// Knowledge base from help center - ATUALIZADO JAN 2026
 const helpKnowledge = `
 # Base de Conhecimento do Assistente Virtual - GestBarber
 
 ## Sobre o App
-GestBarber é um sistema completo de gestão para barbearias. Com ele, você pode gerenciar sua agenda, cadastrar serviços, controlar clientes, acompanhar faturamento e muito mais.
+GestBarber é um sistema completo de gestão para barbearias. Com ele, você pode gerenciar sua agenda, cadastrar serviços, controlar clientes, acompanhar faturamento, criar seu site profissional, usar inteligência artificial para crescer e muito mais.
 
 ## Primeiros Passos
 
@@ -21,8 +21,8 @@ GestBarber é um sistema completo de gestão para barbearias. Com ele, você pod
 3. Crie uma senha segura (mínimo 6 caracteres)
 4. Clique em 'Cadastrar'
 
-### Plano Free (30 dias)
-O plano Free dá acesso a todas as funcionalidades por 30 dias, sem custo. Após os 30 dias, você pode fazer upgrade para continuar usando.
+### Período de Teste
+Ao criar sua conta, você pode testar o app antes de escolher um plano. Depois, escolha entre os 2 planos disponíveis: Start ou Growth.
 
 ### O que fazer nos primeiros minutos
 1. Complete seu perfil com o nome da barbearia
@@ -55,25 +55,52 @@ O plano Free dá acesso a todas as funcionalidades por 30 dias, sem custo. Após
 ### Problemas de acesso
 Verifique se o e-mail está correto, se a senha está certa (atenção às letras maiúsculas) e se sua conexão com a internet está funcionando.
 
-### Por que não consigo criar mais de uma conta gratuita
-Para garantir acesso justo ao período de teste, permitimos apenas uma conta gratuita por pessoa/dispositivo.
+## Planos e Pagamentos - ATUALIZADO JAN 2026
 
-## Planos e Pagamentos
+### IMPORTANTE: Existem apenas 2 planos disponíveis
 
-### Diferença entre plano Free e Pago
-O plano Free oferece todas as funcionalidades por 30 dias gratuitamente. Os planos pagos oferecem uso ilimitado, suporte prioritário e recursos avançados.
+O GestBarber oferece **apenas 2 planos**:
 
-### Quando o Free acaba
-Você receberá um aviso para fazer upgrade. Seus dados ficam salvos, mas você precisará assinar um plano para continuar usando.
+#### 1. Plano Start - GRÁTIS PARA SEMPRE
+- Agendamentos ilimitados
+- Relatórios básicos
+- Cadastro de barbeiros e serviços
+- Controle de agenda
+- Site profissional
+- Perfeito para começar sem custos
 
-### Fazer upgrade
+#### 2. Plano Growth - R$ 59,90/mês (RECOMENDADO)
+- TUDO do plano Start
+- Motor de Crescimento com IA
+- Análise de clientes inativos
+- Previsão de faturamento
+- Rankings de performance
+- Suporte com IA especializada
+- Ferramentas avançadas de retenção
+- WhatsApp automático
+- Controle de caixa avançado
+- Fidelidade e cashback
+- Relatórios avançados
+- Melhor custo-benefício para quem quer crescer
+
+### Quantos planos existem?
+Existem **2 planos** disponíveis: **Start** (grátis) e **Growth** (R$ 59,90/mês).
+
+### Qual a diferença entre os planos?
+- **Start (Grátis)**: Funcionalidades essenciais para gerenciar sua barbearia sem custo
+- **Growth (R$ 59,90/mês)**: Tudo do Start + ferramentas de IA para crescimento e recursos avançados
+
+### Como fazer upgrade para o Growth
 1. Acesse o menu 'Planos'
-2. Escolha o plano ideal
-3. Clique em 'Assinar'
-4. Complete o pagamento
+2. Clique em 'Quero crescer' no plano Growth
+3. Complete o pagamento com cartão de crédito
+4. Seu plano é ativado imediatamente!
 
 ### Formas de pagamento
-Aceitamos cartões de crédito das principais bandeiras (Visa, Mastercard, Elo, American Express).
+Aceitamos cartões de crédito das principais bandeiras (Visa, Mastercard, Elo, American Express). Pagamento seguro via Stripe.
+
+### Cancelamento
+Para cancelar sua assinatura, acesse Planos e clique em cancelar. Você continua usando até o final do período pago.
 
 ## Agenda e Agendamentos
 
@@ -86,10 +113,17 @@ Aceitamos cartões de crédito das principais bandeiras (Visa, Mastercard, Elo, 
 
 ### Agendar um cliente
 1. Acesse a 'Agenda'
-2. Clique no horário desejado
-3. Selecione o serviço
-4. Preencha os dados do cliente
+2. Clique no horário desejado ou no botão '+ Novo Agendamento'
+3. Selecione o serviço e o barbeiro
+4. Preencha os dados do cliente (nome e telefone)
 5. Confirme o agendamento
+
+### Agenda Pública (Link para clientes)
+Você pode compartilhar um link para que seus clientes agendem diretamente:
+1. Acesse 'Barbeiros'
+2. Copie o link do barbeiro
+3. Compartilhe no WhatsApp ou redes sociais
+4. Clientes agendam sozinhos pelo celular!
 
 ### Editar ou cancelar agendamento
 1. Acesse a 'Agenda'
@@ -97,14 +131,40 @@ Aceitamos cartões de crédito das principais bandeiras (Visa, Mastercard, Elo, 
 3. Para editar: altere e salve
 4. Para cancelar: clique em 'Cancelar Agendamento'
 
+### Status dos agendamentos
+- **Pendente**: Aguardando atendimento
+- **Confirmado**: Cliente confirmou presença
+- **Concluído**: Atendimento realizado
+- **Cancelado**: Agendamento cancelado
+
+## Barbeiros
+
+### Cadastrar barbeiros
+1. Acesse 'Barbeiros' no menu
+2. Clique em 'Novo Barbeiro'
+3. Preencha nome e especialidade
+4. Configure comissão (% do serviço)
+5. Defina horários de trabalho
+6. Salve
+
+### Comissões
+Configure a porcentagem de comissão para cada barbeiro. O sistema calcula automaticamente quanto cada um ganha.
+
+### Horários de trabalho
+Configure os dias e horários que cada barbeiro trabalha. Você pode definir pausas (almoço) e dias de folga.
+
+### Exceções de horário
+Para dias especiais (feriados, folgas), acesse o barbeiro e adicione uma exceção para que o horário não apareça na agenda.
+
 ## Serviços e Preços
 
 ### Cadastrar serviços
 1. Acesse 'Serviços' no menu
 2. Clique em 'Novo Serviço'
 3. Preencha nome, descrição e preço
-4. Defina a duração
-5. Salve
+4. Defina a duração em minutos
+5. Adicione uma imagem (opcional)
+6. Salve
 
 ### Editar preços
 1. Acesse 'Serviços'
@@ -112,21 +172,94 @@ Aceitamos cartões de crédito das principais bandeiras (Visa, Mastercard, Elo, 
 3. Altere o preço
 4. Clique em 'Salvar'
 
-## Faturamento e Relatórios
+### Duração dos serviços
+A duração define quanto tempo o serviço ocupa na agenda. Serviços mais longos ocupam mais espaço.
 
-### Registrar atendimento pago
-1. Acesse a 'Agenda'
-2. Clique no agendamento concluído
-3. Marque como 'Concluído' ou 'Pago'
-4. O valor será contabilizado automaticamente
+## Caixa e Pagamentos
 
-### Ver faturamento
-Acesse o 'Painel' para ver o resumo do faturamento do dia atual.
+### Abrir o caixa
+1. Acesse 'Caixa' no menu
+2. Informe o valor inicial (troco)
+3. Clique em 'Abrir Caixa'
 
-### Relatórios
-Em 'Relatórios', você encontra análises detalhadas do seu faturamento por período.
+### Registrar pagamento
+1. Quando um atendimento for concluído
+2. Acesse 'Pagamentos' ou registre direto no caixa
+3. Informe o valor e forma de pagamento
+4. Confirme
 
-## Integração WhatsApp - MUITO IMPORTANTE
+### Formas de pagamento aceitas
+- Dinheiro
+- Cartão de débito
+- Cartão de crédito
+- PIX
+
+### Fechar o caixa
+1. Acesse 'Caixa'
+2. Clique em 'Fechar Caixa'
+3. Informe o valor final
+4. O sistema mostra o resumo do dia
+
+### Histórico de caixa
+Veja todo o histórico de aberturas e fechamentos de caixa, com valores e datas.
+
+## Relatórios e Análises
+
+### Dashboard Principal
+O painel mostra resumo do dia:
+- Faturamento do dia/semana/mês
+- Quantidade de agendamentos
+- Clientes atendidos
+- Comparativo com período anterior
+
+### Relatórios Avançados (Plano Pro/Growth)
+- Faturamento por período
+- Serviços mais vendidos
+- Ranking de barbeiros
+- Horários de pico
+- Previsão de faturamento
+- Clientes mais frequentes
+
+### Exportar relatórios
+Em 'Relatórios', você pode exportar dados em formato Excel ou PDF.
+
+## Controle de Custos
+
+### Cadastrar despesas
+1. Acesse 'Custos' no menu
+2. Clique em 'Nova Despesa'
+3. Informe descrição, valor e categoria
+4. Salve
+
+### Categorias de despesas
+- Aluguel
+- Produtos
+- Salários
+- Água/Luz
+- Manutenção
+- Outros
+
+### Ver lucro real
+O sistema calcula: Faturamento - Custos = Lucro real
+
+## Fidelidade e Cashback
+
+### Como funciona
+Clientes acumulam pontos a cada atendimento. Quando atingem X pontos, ganham desconto ou serviço grátis.
+
+### Configurar programa
+1. Acesse 'Fidelidade' no menu
+2. Defina quantos pontos por real gasto
+3. Configure as recompensas
+4. Ative o programa
+
+### Recompensas
+Crie recompensas como:
+- Corte grátis com 100 pontos
+- 10% de desconto com 50 pontos
+- Barba grátis com 30 pontos
+
+## Integração WhatsApp
 
 ### Como configurar o WhatsApp para enviar mensagens automáticas
 Recomendamos fortemente usar o **UltraMsg** por ser o serviço mais fácil e rápido de configurar!
@@ -134,7 +267,7 @@ Recomendamos fortemente usar o **UltraMsg** por ser o serviço mais fácil e rá
 #### Passo a passo para configurar com UltraMsg:
 1. **Crie sua conta no UltraMsg**
    - Acesse ultramsg.com e crie uma conta gratuita
-   - Você terá 3 dias de teste grátis para testar
+   - Você terá 3 dias de teste grátis
 
 2. **Conecte seu WhatsApp**
    - No painel do UltraMsg, você verá um QR Code
@@ -147,27 +280,105 @@ Recomendamos fortemente usar o **UltraMsg** por ser o serviço mais fácil e rá
    - Substitua XXXXX pelo seu Instance ID
 
 4. **Configure no app**
-   - Vá em Configurações > WhatsApp no menu do app
+   - Vá em 'WhatsApp' no menu lateral
    - Cole a URL da API, o Token e seu número de WhatsApp
    - Clique em "Salvar" e depois "Testar Envio"
 
-#### Preços do UltraMsg:
-- 3 dias grátis para testar
-- Planos a partir de $39/mês
-- Mensagens ilimitadas incluídas
+### Mensagens automáticas
+O sistema envia automaticamente:
+- Confirmação de agendamento
+- Lembrete 1 hora antes
+- Mensagem de pós-atendimento
 
-#### Por que usar UltraMsg?
-- Configuração em menos de 5 minutos
-- Não precisa de WhatsApp Business API oficial
-- Suporte técnico disponível
-- Funciona com qualquer número de WhatsApp
+### Bot de WhatsApp (Automação)
+Configure respostas automáticas para quando clientes mandarem mensagem:
+- Mensagem de boas-vindas
+- Horário de funcionamento
+- Link para agendamento
 
-#### Outras opções compatíveis:
-- **Evolution API**: gratuito mas precisa de servidor próprio
-- **Z-API**: alternativa brasileira similar ao UltraMsg
+## Site Profissional
 
-### Onde configurar o WhatsApp no app?
-Acesse o menu lateral > Configurações > WhatsApp. Lá você encontra um guia completo passo a passo.
+### Criar seu site
+1. Acesse 'Perfil' no menu
+2. Role até 'Seu Site'
+3. Escolha um tema (Moderna, Clássica, etc.)
+4. Personalize cores e textos
+5. Publique!
+
+### Personalizar site
+- Adicione logo da barbearia
+- Escolha cores do tema
+- Escreva sobre sua barbearia
+- Adicione fotos dos trabalhos
+- Configure horário de funcionamento
+
+### Compartilhar site
+Após publicar, você recebe um link tipo: seusite.gestbarber.app
+Compartilhe nas redes sociais e cartão de visitas!
+
+## Motor de Crescimento (Plano Growth)
+
+### O que é
+Ferramentas de IA para ajudar sua barbearia a crescer:
+- Identifica clientes inativos
+- Sugere ações de reativação
+- Analisa padrões de comportamento
+- Prevê faturamento futuro
+
+### Clientes Inativos
+O sistema identifica clientes que não voltam há mais de 30 dias e sugere enviar mensagem de reativação.
+
+### Previsão de Faturamento
+Com base no histórico, o sistema prevê quanto você vai faturar no mês.
+
+### Score de Clientes
+Cada cliente recebe uma pontuação baseada em:
+- Frequência de visitas
+- Valor gasto
+- Pontualidade
+- Cancelamentos
+
+## Posts Prontos
+
+### Gerar posts para redes sociais
+1. Acesse 'Posts Prontos' no menu
+2. Escolha o tipo (promoção, dica, novidade)
+3. O sistema gera imagem e texto prontos
+4. Baixe ou compartilhe direto
+
+### Tipos de posts
+- Promoções especiais
+- Dicas de cuidados
+- Novidades da barbearia
+- Frases motivacionais
+- Antes e depois
+
+## Produtos (Venda de Produtos)
+
+### Cadastrar produtos
+1. Acesse 'Produtos' no menu
+2. Clique em 'Novo Produto'
+3. Preencha nome, preço e estoque
+4. Salve
+
+### Registrar venda
+1. Acesse 'Produtos'
+2. Clique em 'Nova Venda'
+3. Selecione produto e quantidade
+4. Confirme a venda
+
+### Controle de estoque
+O sistema atualiza automaticamente o estoque quando você registra uma venda.
+
+## Metas
+
+### Definir metas
+1. Acesse 'Metas' no menu
+2. Defina meta de faturamento mensal
+3. Acompanhe o progresso no painel
+
+### Metas por barbeiro
+Configure metas individuais para cada barbeiro da equipe.
 
 ## Problemas Comuns
 
@@ -189,6 +400,14 @@ Verifique a data selecionada e os filtros ativos. Tente atualizar a página.
 3. Teste o envio pelo botão "Testar Envio"
 4. Verifique se a integração está ativa
 
+### Preciso fazer login toda vez
+Isso pode acontecer se você limpa o cache frequentemente ou usa navegação anônima. Tente marcar "Lembrar-me" ao fazer login.
+
+### Erro ao criar agendamento
+1. Verifique se o barbeiro tem horários configurados
+2. Confira se o horário está disponível
+3. Verifique se você tem um plano ativo
+
 ## Contato com Suporte
 
 Se a IA não conseguir resolver a dúvida do usuário, SEMPRE sugira acessar a página de suporte:
@@ -196,6 +415,29 @@ Se a IA não conseguir resolver a dúvida do usuário, SEMPRE sugira acessar a p
 
 E-mail: suportegestbarber@gmail.com
 Respondemos em até 24 horas úteis.
+
+## Funcionalidades Exclusivas por Plano
+
+### IMPORTANTE: Temos apenas 2 planos
+
+### Plano Start (GRÁTIS PARA SEMPRE)
+- Agendamentos ilimitados
+- Cadastro de barbeiros e serviços
+- Controle de agenda
+- Relatórios básicos
+- Site profissional
+
+### Plano Growth (R$ 59,90/mês) - RECOMENDADO
+- TUDO do Start
+- Motor de Crescimento com IA
+- WhatsApp automático
+- Controle de caixa avançado
+- Fidelidade e cashback
+- Relatórios avançados
+- Previsão de faturamento
+- Análise de clientes
+- Score de clientes
+- Suporte IA especializada
 `;
 
 serve(async (req) => {

@@ -36,3 +36,6 @@ export const SubscriptionExpired = lazy(() => import("./pages/SubscriptionExpire
 export const TrialFeedback = lazy(() => import("./pages/TrialFeedback"));
 export const AdminTrialFeedback = lazy(() => import("./pages/AdminTrialFeedback"));
 export const AdminPWAAnalytics = lazy(() => import("./pages/AdminPWAAnalytics"));
+export const GrowthEngine = lazy(() => import("./pages/GrowthEngine"));
+export const AdminSupportQueue = lazy(() => import("./pages/AdminSupportQueue"));
+export const Upgrade = lazy(() => import("./pages/Upgrade"));

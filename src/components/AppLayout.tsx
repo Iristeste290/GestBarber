@@ -54,7 +54,7 @@ export const AppLayout = memo(function AppLayout({ children, title, description 
   const location = useLocation();
   const [user, setUser] = useState<User | null>(null);
   const { profile } = useUserProfile(user);
-  const { userPlan, loading: planLoading, isFreemium } = usePlanValidation();
+  const { userPlan, loading: planLoading } = usePlanValidation();
 
   // Hook para notificações de agendamentos próximos
   useUpcomingAppointmentsNotifier(user?.id);

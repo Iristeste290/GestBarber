@@ -1,7 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "https://esm.sh/resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,6 +11,58 @@ interface ContactEmailRequest {
   email: string;
   subject: string;
   message: string;
+}
+
+async function sendEmailViaSMTP(
+  to: string | string[],
+  subject: string,
+  html: string,
+  replyTo?: string
+): Promise<{ success: boolean; error?: string }> {
+  const smtpHost = Deno.env.get("SMTP_HOST");
+  const smtpPort = Deno.env.get("SMTP_PORT");
+  const smtpUser = Deno.env.get("SMTP_USER");
+  const smtpPassword = Deno.env.get("SMTP_PASSWORD");
+
+  if (!smtpHost || !smtpPort || !smtpUser || !smtpPassword) {
+    console.error("SMTP configuration is incomplete");
+    return { success: false, error: "Configuração SMTP incompleta" };
+  }
+
+  const client = new SMTPClient({
+    connection: {
+      hostname: smtpHost,
+      port: parseInt(smtpPort, 10),
+      tls: true,
+      auth: {
+        username: smtpUser,
+        password: smtpPassword,
+      },
+    },
+  });
+
+  try {
+    const recipients = Array.isArray(to) ? to : [to];
+    
+    await client.send({
+      from: `GestBarber <${smtpUser}>`,
+      to: recipients,
+      replyTo: replyTo,
+      subject: subject,
+      content: "auto",
+      html: html,
+    });
+
+    await client.close();
+    return { success: true };
+  } catch (error) {
+    console.error("Error sending email:", error);
+    await client.close();
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Erro desconhecido" 
+    };
+  }
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -45,15 +95,15 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Sending contact email from:", name, email);
 
+    const smtpUser = Deno.env.get("SMTP_USER") || "suporte@gestbarber.com.br";
+
     // Send email to support
-    const supportEmailResponse = await resend.emails.send({
-      from: "BarberPro <onboarding@resend.dev>",
-      to: ["suporte@barberpro.com.br"], // Change to your support email
-      reply_to: email,
-      subject: `[Contato] ${subject}`,
-      html: `
+    const supportEmailResult = await sendEmailViaSMTP(
+      smtpUser,
+      `[Contato] ${subject}`,
+      `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #333; border-bottom: 2px solid #8B5CF6; padding-bottom: 10px;">
+          <h2 style="color: #333; border-bottom: 2px solid #22c55e; padding-bottom: 10px;">
             Nova mensagem de contato
           </h2>
           
@@ -69,22 +119,30 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <p style="color: #9ca3af; font-size: 12px; margin-top: 20px;">
-            Esta mensagem foi enviada através do formulário de contato do BarberPro.
+            Esta mensagem foi enviada através do formulário de contato do GestBarber.
           </p>
         </div>
       `,
-    });
+      email
+    );
 
-    console.log("Support email sent:", supportEmailResponse);
+    if (!supportEmailResult.success) {
+      console.error("Failed to send support email:", supportEmailResult.error);
+      return new Response(
+        JSON.stringify({ error: supportEmailResult.error || "Erro ao enviar e-mail" }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    console.log("Support email sent successfully");
 
     // Send confirmation email to user
-    const confirmationResponse = await resend.emails.send({
-      from: "BarberPro <onboarding@resend.dev>",
-      to: [email],
-      subject: "Recebemos sua mensagem - BarberPro",
-      html: `
+    const confirmationResult = await sendEmailViaSMTP(
+      email,
+      "Recebemos sua mensagem - GestBarber",
+      `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #8B5CF6;">Olá ${name}! 👋</h2>
+          <h2 style="color: #22c55e;">Olá ${name}! 👋</h2>
           
           <p>Recebemos sua mensagem e nossa equipe entrará em contato em breve.</p>
           
@@ -94,17 +152,22 @@ const handler = async (req: Request): Promise<Response> => {
             <p style="white-space: pre-wrap; color: #4b5563;">${message}</p>
           </div>
           
-          <p>Enquanto isso, você pode explorar nossa <a href="https://barberpro.com.br/ajuda" style="color: #8B5CF6;">Central de Ajuda</a> para encontrar respostas para as dúvidas mais comuns.</p>
+          <p>Enquanto isso, você pode explorar nossa <a href="https://gestbarber.com.br/ajuda" style="color: #22c55e;">Central de Ajuda</a> para encontrar respostas para as dúvidas mais comuns.</p>
           
           <p style="margin-top: 30px;">
             Atenciosamente,<br>
-            <strong>Equipe BarberPro</strong>
+            <strong>Equipe GestBarber</strong>
           </p>
         </div>
-      `,
-    });
+      `
+    );
 
-    console.log("Confirmation email sent:", confirmationResponse);
+    if (!confirmationResult.success) {
+      console.log("Confirmation email failed but support email was sent:", confirmationResult.error);
+      // Don't fail the request if confirmation email fails
+    } else {
+      console.log("Confirmation email sent to:", email);
+    }
 
     return new Response(
       JSON.stringify({ success: true, message: "E-mail enviado com sucesso!" }),

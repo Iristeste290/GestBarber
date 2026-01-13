@@ -35,7 +35,7 @@ export const BarberLinkCard = ({ barberId, barberName, barberSlug }: BarberLinkC
     }
   }, [barberSlug, barberName, barberId]);
 
-  const agendaUrl = `${window.location.origin}/b/${slug}`;
+  const agendaUrl = `${window.location.origin}/agenda/${slug}`;
 
   const saveSlug = async (newSlug: string) => {
     setIsSaving(true);

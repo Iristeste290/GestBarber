@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   Accordion,
   AccordionContent,
@@ -5,79 +6,136 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-const faqs = [
+const generalFaqs = [
   {
-    question: "Como funciona o período de teste grátis?",
+    question: "O Start é realmente grátis para sempre?",
     answer:
-      "Você tem 30 dias para testar todas as funcionalidades do GestBarber sem pagar nada. Não pedimos cartão de crédito para começar. Se gostar, escolhe um plano. Se não, cancela sem burocracia.",
+      "Sim, 100% grátis para sempre. Você pode usar agenda, clientes, caixa, barbeiros e serviços sem pagar nada. O plano Start foi feito para organizar sua barbearia. Só existe cobrança se você quiser crescer com o plano Growth.",
   },
   {
-    question: "Posso cancelar a qualquer momento?",
+    question: "Quando eu preciso pagar?",
     answer:
-      "Sim! Não existe fidelidade ou multa. Você pode cancelar quando quiser direto pelo sistema, sem precisar falar com ninguém.",
+      "Você só paga quando decide que quer crescer. O plano Growth ativa recursos avançados como o Growth Engine, mapa de clientes, insights de faturamento e IA. Enquanto o Start resolver, você não precisa pagar.",
   },
   {
-    question: "Vocês oferecem suporte técnico?",
+    question: "O GestBarber é só para agendar?",
     answer:
-      "Sim! Nossa equipe está disponível 24/7 via chat e WhatsApp. Também temos tutoriais em vídeo e uma base de conhecimento completa.",
+      "Não! O GestBarber é um sistema completo de gestão e crescimento. Ele organiza sua agenda, mas também analisa seu negócio, identifica oportunidades de faturamento, mostra clientes em risco e te ajuda a tomar decisões baseadas em dados.",
   },
   {
-    question: "Como funciona o controle financeiro?",
+    question: "Funciona para barbearias pequenas?",
     answer:
-      "Você registra todas as entradas e saídas, e o sistema calcula automaticamente seu lucro. Também mostra relatórios por período, serviço e profissional.",
+      "Funciona para qualquer tamanho. Se você trabalha sozinho, o Start resolve. Se tem equipe e quer crescer, o Growth potencializa. O sistema cresce junto com você.",
   },
   {
-    question: "Meus dados estão seguros?",
+    question: "Preciso entender de marketing?",
     answer:
-      "100% seguros. Usamos criptografia SSL de ponta e nossos servidores seguem os mais altos padrões de segurança. Seus dados nunca são compartilhados.",
+      "Não precisa saber nada de marketing. O Growth Engine faz a análise por você e mostra exatamente o que fazer: qual horário está vazio, qual cliente sumiu, onde você está perdendo dinheiro. É só seguir as recomendações.",
   },
   {
-    question: "Posso gerenciar múltiplas barbearias?",
+    question: "Posso cancelar o Growth quando quiser?",
     answer:
-      "Sim! Com o plano adequado, você gerencia quantas unidades precisar, tudo em um único painel centralizado.",
+      "Sim, cancela quando quiser sem multa e sem burocracia. Se você voltar para o Start, continua usando o sistema normalmente. O GestBarber cresce junto com o barbeiro — não força nada.",
+  },
+];
+
+const supportFaqs = [
+  {
+    question: "O que é o Suporte Growth?",
+    answer:
+      "O Suporte Growth é um assistente inteligente exclusivo do plano Growth. Ele combina IA que entende seu negócio com acesso a especialistas humanos quando necessário. O foco é ajudar você a crescer, não apenas resolver problemas.",
   },
   {
-    question: "Preciso instalar algo no computador?",
+    question: "Vou falar com uma pessoa de verdade?",
     answer:
-      "Não! O GestBarber funciona 100% online. Basta acessar pelo navegador no computador, tablet ou celular.",
+      "Sim! Quando necessário, você será atendido por especialistas em crescimento de barbearias. A IA resolve questões simples instantaneamente, e casos mais complexos ou estratégicos são encaminhados para atendimento humano.",
   },
   {
-    question: "Como funciona a gestão de clientes?",
+    question: "Em quanto tempo respondem?",
     answer:
-      "Você tem o histórico completo de cada cliente: serviços realizados, valores pagos, preferências e data da última visita. Isso ajuda a personalizar o atendimento.",
+      "A IA responde instantaneamente. Quando o atendimento humano é necessário, priorizamos por faturamento e urgência. Usuários Growth com maior movimento recebem atenção prioritária.",
+  },
+  {
+    question: "O que o plano Start não tem?",
+    answer:
+      "O plano Start não inclui suporte direto. Ele foi feito para você usar o sistema livremente. O Suporte Growth é um benefício exclusivo para barbearias que querem crescer com acompanhamento real.",
+  },
+  {
+    question: "O suporte ajuda com marketing e crescimento?",
+    answer:
+      "Sim! O foco principal do Suporte Growth é ajudar você a ganhar mais clientes, encher sua agenda e faturar mais. Não é suporte técnico comum — é consultoria de crescimento.",
+  },
+  {
+    question: "Posso pedir ajuda para configurar minha barbearia?",
+    answer:
+      "Sim. Usuários Growth podem pedir ajuda para configurar agenda, serviços, preços, estratégias de retenção e tudo que impacta seu faturamento.",
   },
 ];
 
 export const FAQSection = () => {
   return (
-    <section className="py-20 bg-background">
+    <section id="faq" className="py-20 bg-[#0A0A0A]">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#EDEDED]">
             Perguntas Frequentes
           </h2>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-[#EDEDED]/60 text-lg">
             Tire suas dúvidas sobre o GestBarber
           </p>
         </div>
 
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto space-y-8">
+          {/* General FAQs */}
           <Accordion type="single" collapsible className="space-y-4">
-            {faqs.map((faq, index) => (
+            {generalFaqs.map((faq, index) => (
               <AccordionItem
                 key={index}
-                value={`item-${index}`}
-                className="border border-border/50 rounded-lg px-6 bg-muted/20"
+                value={`general-${index}`}
+                className="border border-[#222222] rounded-lg px-6 bg-[#111111]"
               >
-                <AccordionTrigger className="text-left font-semibold hover:no-underline">
+                <AccordionTrigger className="text-left font-semibold hover:no-underline text-[#EDEDED] hover:text-[#C9B27C]">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
+                <AccordionContent className="text-[#EDEDED]/70 leading-relaxed">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
+
+          {/* Support FAQs */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold text-[#C9B27C] flex items-center gap-2">
+              <span className="w-8 h-[2px] bg-[#C9B27C]"></span>
+              Suporte e Atendimento
+            </h3>
+            <Accordion type="single" collapsible className="space-y-4">
+              {supportFaqs.map((faq, index) => (
+                <AccordionItem
+                  key={index}
+                  value={`support-${index}`}
+                  className="border border-[#222222] rounded-lg px-6 bg-[#111111]"
+                >
+                  <AccordionTrigger className="text-left font-semibold hover:no-underline text-[#EDEDED] hover:text-[#C9B27C]">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-[#EDEDED]/70 leading-relaxed">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </div>
+
+        <div className="text-center mt-12">
+          <p className="text-[#EDEDED]/50 text-sm">
+            Ainda tem dúvidas?{" "}
+            <Link to="/suporte" className="text-[#C9B27C] hover:underline">
+              Fale com nosso suporte
+            </Link>
+          </p>
         </div>
       </div>
     </section>

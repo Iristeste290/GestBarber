@@ -1,8 +1,7 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { FullPageLoader } from "@/components/ui/full-page-loader";
-import { SplashScreen } from "@/components/pwa/SplashScreen";
 import LandingPage from "./LandingPage";
 
 const VISIT_COUNT_KEY = "gestbarber_visit_count";
@@ -23,39 +22,29 @@ const Index = () => {
   const navigate = useNavigate();
   const [isChecking, setIsChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showSplash, setShowSplash] = useState(false);
-  const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
-
-  // Check if running as standalone PWA
-  const isStandalone = 
-    window.matchMedia("(display-mode: standalone)").matches ||
-    (window.navigator as any).standalone === true;
-
-  const handleSplashComplete = useCallback(() => {
-    setShowSplash(false);
-    if (pendingRedirect) {
-      navigate(pendingRedirect);
-    }
-  }, [navigate, pendingRedirect]);
 
   useEffect(() => {
     const checkAuthAndActivation = async () => {
       try {
-        // Track and check visit count
+        // Check if running as standalone PWA (installed app)
+        const isStandalone = 
+          window.matchMedia("(display-mode: standalone)").matches ||
+          (window.navigator as any).standalone === true;
+
+        // Track visit count (redirect disabled - users should see landing and click CTA)
         const currentVisits = parseInt(localStorage.getItem(VISIT_COUNT_KEY) || "0", 10);
         const newVisitCount = currentVisits + 1;
         localStorage.setItem(VISIT_COUNT_KEY, newVisitCount.toString());
-        const isFrequentVisitor = newVisitCount >= VISITS_THRESHOLD;
+        // Disabled: let users always see landing page and click CTA buttons manually
+        const isFrequentVisitor = false;
 
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-          // If PWA installed, show splash then go to auth
+          // If PWA installed, go directly to auth page
           if (isStandalone) {
             trackRedirect('pwa_installed');
-            setPendingRedirect("/auth");
-            setShowSplash(true);
-            setIsChecking(false);
+            navigate("/auth");
             return;
           }
           // If frequent visitor, go directly to auth page
@@ -80,15 +69,10 @@ const Index = () => {
           .eq("id", session.user.id)
           .single();
 
-        const targetRoute = !profile?.activation_completed ? "/onboarding" : "/painel";
-
-        // If PWA, show splash before redirecting
-        if (isStandalone) {
-          setPendingRedirect(targetRoute);
-          setShowSplash(true);
-          setIsChecking(false);
+        if (!profile?.activation_completed) {
+          navigate("/onboarding");
         } else {
-          navigate(targetRoute);
+          navigate("/painel");
         }
       } catch (error) {
         console.error("Error checking auth:", error);
@@ -98,12 +82,7 @@ const Index = () => {
     };
 
     checkAuthAndActivation();
-  }, [navigate, isStandalone]);
-
-  // Show splash screen for PWA users
-  if (showSplash) {
-    return <SplashScreen onComplete={handleSplashComplete} />;
-  }
+  }, [navigate]);
 
   if (isChecking) {
     return <FullPageLoader text="Carregando..." />;

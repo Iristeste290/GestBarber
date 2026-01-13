@@ -1,53 +1,41 @@
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { AuthLinkButton } from "@/components/landing/AuthLinkButton";
+import { ArrowRight, Scissors } from "lucide-react";
 
 export const CTASection = () => {
   return (
-    <section className="py-20 bg-gradient-to-br from-primary/10 via-background to-accent/10 relative overflow-hidden">
+    <section className="py-24 bg-gradient-to-br from-primary/10 via-primary/5 to-[#0A0A0A] relative overflow-hidden">
       {/* Background elements */}
-      <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
-
-      <div className="container relative mx-auto px-4 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          Pare de perder dinheiro.{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-            Organize sua barbearia hoje.
-          </span>
-        </h2>
-
-        <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-          Mais de 2.500 donos de barbearia já transformaram seus negócios. Você é o próximo.
-        </p>
-
-        <Link to="/auth">
-          <Button
-            size="lg"
-            className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-lg px-10 py-6 shadow-lg"
-          >
-            Testar grátis por 30 dias
-          </Button>
-        </Link>
-
-        <div className="flex flex-wrap items-center justify-center gap-4 mt-6 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Check className="w-4 h-4 text-green-500" />
-            <span>Sem cartão de crédito</span>
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      
+      <div className="container mx-auto px-4 relative">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Logo */}
+          <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-8 shadow-gold">
+            <Scissors className="w-10 h-10 text-primary-foreground" />
           </div>
-          <div className="flex items-center gap-1">
-            <Check className="w-4 h-4 text-green-500" />
-            <span>Acesso completo</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Check className="w-4 h-4 text-green-500" />
-            <span>Cancele quando quiser</span>
-          </div>
+          
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#EDEDED] mb-6 leading-tight">
+            Sua barbearia pode ser{" "}
+            <span className="text-muted-foreground">apenas mais uma</span>
+            <br />
+            — ou pode ser uma{" "}
+            <span className="text-primary">empresa</span>.
+          </h2>
+          
+          <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+            Comece agora gratuitamente e veja em 30 dias como o GestBarber transforma seu negócio.
+          </p>
+          
+          <AuthLinkButton variant="premium" size="lg" className="text-lg px-12 py-8 shadow-gold">
+            Criar minha conta no GestBarber
+            <ArrowRight className="ml-2 w-6 h-6" />
+          </AuthLinkButton>
+          
+          <p className="mt-6 text-sm text-muted-foreground">
+            Sem cartão de crédito • Acesso completo • Cancele quando quiser
+          </p>
         </div>
-
-        <p className="text-sm text-muted-foreground mt-6">
-          247 pessoas se cadastraram hoje
-        </p>
       </div>
     </section>
   );

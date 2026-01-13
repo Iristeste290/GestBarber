@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star } from "lucide-react";
+import { Star, MapPin } from "lucide-react";
 
 import carlosSilvaImg from "@/assets/testimonials/carlos-silva.jpg";
 import robertoSantosImg from "@/assets/testimonials/roberto-santos.jpg";
@@ -8,29 +8,26 @@ import marcosOliveiraImg from "@/assets/testimonials/marcos-oliveira.jpg";
 
 const testimonials = [
   {
-    metric: "70% menos faltas",
+    metric: "+45% de faturamento",
     quote:
-      "Antes eu perdia 3 horas por dia só respondendo WhatsApp. Agora meus clientes agendam sozinhos e eu foco no que importa: cortar cabelo.",
-    name: "Carlos Silva",
-    role: "Proprietário - Barbearia Premium",
+      "Depois que comecei a usar o GestBarber, parei de ter horários vazios e aumentei meu faturamento. O Growth Engine me mostrou exatamente onde eu estava perdendo dinheiro.",
+    barbershopName: "Barbearia Alpha",
     location: "São Paulo, SP",
     image: carlosSilvaImg,
   },
   {
-    metric: "+40% de lucro",
+    metric: "Zero faltas por mês",
     quote:
-      "Descobri que estava cobrando errado em 3 serviços. Corrigi e meu lucro subiu de R$4.000 para R$5.600 no mesmo mês!",
-    name: "Roberto Santos",
-    role: "Barbeiro Autônomo",
+      "Antes eu perdia 5 clientes por semana com faltas. Agora o sistema me avisa quem tem histórico ruim e eu consigo agir antes. Simplesmente mudou meu negócio.",
+    barbershopName: "Corte & Estilo",
     location: "Rio de Janeiro, RJ",
     image: robertoSantosImg,
   },
   {
-    metric: "+180 clientes/mês",
+    metric: "+80 clientes novos",
     quote:
-      "Gerencio 3 unidades e 12 profissionais sem stress. Os relatórios me mostram exatamente onde preciso agir.",
-    name: "Marcos Oliveira",
-    role: "Dono de 3 Barbearias",
+      "O mapa de clientes me mostrou que eu não tinha nenhum cliente de um bairro vizinho. Fiz uma ação focada e ganhei 80 clientes em 2 meses.",
+    barbershopName: "Barbearia do Marcos",
     location: "Belo Horizonte, MG",
     image: marcosOliveiraImg,
   },
@@ -38,13 +35,13 @@ const testimonials = [
 
 export const TestimonialsSection = () => {
   return (
-    <section className="py-20 bg-muted/30">
+    <section id="resultados" className="py-20 bg-[#0F0F0F]">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Resultados reais de quem já usa
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#EDEDED]">
+            Resultados reais de quem já usa o <span className="text-[#C9B27C]">GestBarber</span>
           </h2>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-[#EDEDED]/60 text-lg">
             Não é promessa. São números de barbeiros que transformaram seus negócios.
           </p>
         </div>
@@ -52,11 +49,11 @@ export const TestimonialsSection = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {testimonials.map((testimonial) => (
             <Card
-              key={testimonial.name}
-              className="hover:shadow-lg transition-shadow"
+              key={testimonial.barbershopName}
+              className="bg-[#111111] border-[#222222] hover:border-[#C9B27C]/30 transition-all duration-300"
             >
               <CardContent className="p-6">
-                <Badge className="mb-4 bg-gradient-to-r from-primary to-accent">
+                <Badge className="mb-4 bg-gradient-to-r from-[#C9B27C] to-[#E8D9A8] text-black font-semibold">
                   {testimonial.metric}
                 </Badge>
 
@@ -64,25 +61,27 @@ export const TestimonialsSection = () => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                      className="w-4 h-4 fill-[#C9B27C] text-[#C9B27C]"
                     />
                   ))}
                 </div>
 
-                <p className="text-muted-foreground mb-6 italic">
+                <p className="text-[#EDEDED]/80 mb-6 italic leading-relaxed">
                   "{testimonial.quote}"
                 </p>
 
                 <div className="flex items-center gap-3">
                   <img 
                     src={testimonial.image} 
-                    alt={testimonial.name}
-                    className="w-12 h-12 rounded-full object-cover"
+                    alt={testimonial.barbershopName}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-[#C9B27C]/30"
                   />
                   <div>
-                    <p className="font-semibold text-foreground">{testimonial.name}</p>
-                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                    <p className="text-xs text-muted-foreground">{testimonial.location}</p>
+                    <p className="font-semibold text-[#EDEDED]">{testimonial.barbershopName}</p>
+                    <p className="text-sm text-[#EDEDED]/50 flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {testimonial.location}
+                    </p>
                   </div>
                 </div>
               </CardContent>

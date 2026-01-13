@@ -321,6 +321,110 @@ export type Database = {
           },
         ]
       }
+      barber_score: {
+        Row: {
+          barber_id: string
+          cancel_rate: number
+          canceled_appointments: number
+          completed_appointments: number
+          created_at: string
+          id: string
+          last_update: string
+          no_show_clients: number
+          revenue: number
+          score: number
+          total_appointments: number
+          user_id: string
+        }
+        Insert: {
+          barber_id: string
+          cancel_rate?: number
+          canceled_appointments?: number
+          completed_appointments?: number
+          created_at?: string
+          id?: string
+          last_update?: string
+          no_show_clients?: number
+          revenue?: number
+          score?: number
+          total_appointments?: number
+          user_id: string
+        }
+        Update: {
+          barber_id?: string
+          cancel_rate?: number
+          canceled_appointments?: number
+          completed_appointments?: number
+          created_at?: string
+          id?: string
+          last_update?: string
+          no_show_clients?: number
+          revenue?: number
+          score?: number
+          total_appointments?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "barber_score_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: true
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      barber_sites: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          description: string | null
+          id: string
+          phone: string | null
+          published: boolean | null
+          seo_data: Json | null
+          site_content: Json | null
+          slug: string
+          theme: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          phone?: string | null
+          published?: boolean | null
+          seo_data?: Json | null
+          site_content?: Json | null
+          slug: string
+          theme?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          phone?: string | null
+          published?: boolean | null
+          seo_data?: Json | null
+          site_content?: Json | null
+          slug?: string
+          theme?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       barber_work_hours: {
         Row: {
           barber_id: string
@@ -389,6 +493,194 @@ export type Database = {
           slug?: string | null
           specialty?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      barbershop_leads: {
+        Row: {
+          converted_at: string | null
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          phone: string
+          site_id: string | null
+          source: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          phone: string
+          site_id?: string | null
+          source?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string
+          site_id?: string | null
+          source?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "barbershop_leads_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "barber_sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      barbershop_performance: {
+        Row: {
+          appointments_count: number | null
+          avg_ticket: number | null
+          calculated_at: string
+          clients_count: number | null
+          created_at: string
+          id: string
+          no_show_rate: number | null
+          occupancy_rate: number | null
+          performance_percentile: number | null
+          performance_score: number | null
+          retention_rate: number | null
+          total_revenue: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          appointments_count?: number | null
+          avg_ticket?: number | null
+          calculated_at?: string
+          clients_count?: number | null
+          created_at?: string
+          id?: string
+          no_show_rate?: number | null
+          occupancy_rate?: number | null
+          performance_percentile?: number | null
+          performance_score?: number | null
+          retention_rate?: number | null
+          total_revenue?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          appointments_count?: number | null
+          avg_ticket?: number | null
+          calculated_at?: string
+          clients_count?: number | null
+          created_at?: string
+          id?: string
+          no_show_rate?: number | null
+          occupancy_rate?: number | null
+          performance_percentile?: number | null
+          performance_score?: number | null
+          retention_rate?: number | null
+          total_revenue?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      barbershop_website: {
+        Row: {
+          address: string | null
+          created_at: string
+          id: string
+          is_published: boolean | null
+          photos: string[] | null
+          published_at: string | null
+          services_highlight: string[] | null
+          site_content: Json | null
+          site_description: string | null
+          site_name: string | null
+          site_style: string | null
+          site_url: string | null
+          updated_at: string
+          user_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          photos?: string[] | null
+          published_at?: string | null
+          services_highlight?: string[] | null
+          site_content?: Json | null
+          site_description?: string | null
+          site_name?: string | null
+          site_style?: string | null
+          site_url?: string | null
+          updated_at?: string
+          user_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          photos?: string[] | null
+          published_at?: string | null
+          services_highlight?: string[] | null
+          site_content?: Json | null
+          site_description?: string | null
+          site_name?: string | null
+          site_style?: string | null
+          site_url?: string | null
+          updated_at?: string
+          user_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      booking_rules: {
+        Row: {
+          auto_block_risk: boolean | null
+          created_at: string
+          deposit_amount: number | null
+          id: string
+          min_score_no_confirmation: number | null
+          require_confirmation: boolean | null
+          require_deposit: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_block_risk?: boolean | null
+          created_at?: string
+          deposit_amount?: number | null
+          id?: string
+          min_score_no_confirmation?: number | null
+          require_confirmation?: boolean | null
+          require_deposit?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_block_risk?: boolean | null
+          created_at?: string
+          deposit_amount?: number | null
+          id?: string
+          min_score_no_confirmation?: number | null
+          require_confirmation?: boolean | null
+          require_deposit?: boolean | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -499,6 +791,128 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      client_behavior: {
+        Row: {
+          attended_count: number | null
+          cancel_rate: number
+          canceled: number
+          city: string | null
+          classification: string
+          client_id: string
+          client_name: string | null
+          client_phone: string | null
+          completed: number
+          created_at: string
+          customer_score: number | null
+          customer_status: string | null
+          id: string
+          last_appointment_date: string | null
+          last_update: string
+          latitude: number | null
+          longitude: number | null
+          months_as_client: number | null
+          neighborhood: string | null
+          no_show: number
+          postal_code: string | null
+          rescheduled_count: number | null
+          total_appointments: number
+          user_id: string
+        }
+        Insert: {
+          attended_count?: number | null
+          cancel_rate?: number
+          canceled?: number
+          city?: string | null
+          classification?: string
+          client_id: string
+          client_name?: string | null
+          client_phone?: string | null
+          completed?: number
+          created_at?: string
+          customer_score?: number | null
+          customer_status?: string | null
+          id?: string
+          last_appointment_date?: string | null
+          last_update?: string
+          latitude?: number | null
+          longitude?: number | null
+          months_as_client?: number | null
+          neighborhood?: string | null
+          no_show?: number
+          postal_code?: string | null
+          rescheduled_count?: number | null
+          total_appointments?: number
+          user_id: string
+        }
+        Update: {
+          attended_count?: number | null
+          cancel_rate?: number
+          canceled?: number
+          city?: string | null
+          classification?: string
+          client_id?: string
+          client_name?: string | null
+          client_phone?: string | null
+          completed?: number
+          created_at?: string
+          customer_score?: number | null
+          customer_status?: string | null
+          id?: string
+          last_appointment_date?: string | null
+          last_update?: string
+          latitude?: number | null
+          longitude?: number | null
+          months_as_client?: number | null
+          neighborhood?: string | null
+          no_show?: number
+          postal_code?: string | null
+          rescheduled_count?: number | null
+          total_appointments?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      empty_slots: {
+        Row: {
+          barber_id: string
+          created_at: string
+          id: string
+          slot_date: string
+          slot_time: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          barber_id: string
+          created_at?: string
+          id?: string
+          slot_date: string
+          slot_time: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          barber_id?: string
+          created_at?: string
+          id?: string
+          slot_date?: string
+          slot_time?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empty_slots_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       expenses: {
         Row: {
@@ -658,6 +1072,96 @@ export type Database = {
         }
         Relationships: []
       }
+      google_business_connection: {
+        Row: {
+          access_token: string | null
+          account_name: string | null
+          business_id: string | null
+          created_at: string
+          id: string
+          is_connected: boolean | null
+          last_sync_at: string | null
+          location_name: string | null
+          refresh_token: string | null
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          account_name?: string | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          is_connected?: boolean | null
+          last_sync_at?: string | null
+          location_name?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          account_name?: string | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          is_connected?: boolean | null
+          last_sync_at?: string | null
+          location_name?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      google_business_metrics: {
+        Row: {
+          average_rating: number | null
+          created_at: string
+          direction_requests: number | null
+          id: string
+          metric_date: string
+          phone_calls: number | null
+          reviews_count: number | null
+          searches_count: number | null
+          unanswered_reviews: number | null
+          user_id: string
+          views_count: number | null
+          website_clicks: number | null
+        }
+        Insert: {
+          average_rating?: number | null
+          created_at?: string
+          direction_requests?: number | null
+          id?: string
+          metric_date?: string
+          phone_calls?: number | null
+          reviews_count?: number | null
+          searches_count?: number | null
+          unanswered_reviews?: number | null
+          user_id: string
+          views_count?: number | null
+          website_clicks?: number | null
+        }
+        Update: {
+          average_rating?: number | null
+          created_at?: string
+          direction_requests?: number | null
+          id?: string
+          metric_date?: string
+          phone_calls?: number | null
+          reviews_count?: number | null
+          searches_count?: number | null
+          unanswered_reviews?: number | null
+          user_id?: string
+          views_count?: number | null
+          website_clicks?: number | null
+        }
+        Relationships: []
+      }
       help_article_feedback: {
         Row: {
           article_id: string
@@ -750,6 +1254,62 @@ export type Database = {
           success?: boolean
         }
         Relationships: []
+      }
+      lost_revenue: {
+        Row: {
+          appointment_id: string | null
+          barber_id: string | null
+          created_at: string
+          customer_id: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          id: string
+          lost_date: string
+          reason: string
+          service_name: string | null
+          slot_time: string | null
+          user_id: string
+          value_lost: number
+        }
+        Insert: {
+          appointment_id?: string | null
+          barber_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          lost_date?: string
+          reason: string
+          service_name?: string | null
+          slot_time?: string | null
+          user_id: string
+          value_lost?: number
+        }
+        Update: {
+          appointment_id?: string | null
+          barber_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          lost_date?: string
+          reason?: string
+          service_name?: string | null
+          slot_time?: string | null
+          user_id?: string
+          value_lost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lost_revenue_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       loyalty_points: {
         Row: {
@@ -848,6 +1408,84 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      money_lost_alerts: {
+        Row: {
+          alert_date: string
+          cancel_rate: number
+          cancellations_count: number
+          created_at: string
+          empty_slots_count: number
+          estimated_loss: number
+          id: string
+          is_critical: boolean
+          is_dismissed: boolean
+          no_shows_count: number
+          user_id: string
+        }
+        Insert: {
+          alert_date?: string
+          cancel_rate?: number
+          cancellations_count?: number
+          created_at?: string
+          empty_slots_count?: number
+          estimated_loss?: number
+          id?: string
+          is_critical?: boolean
+          is_dismissed?: boolean
+          no_shows_count?: number
+          user_id: string
+        }
+        Update: {
+          alert_date?: string
+          cancel_rate?: number
+          cancellations_count?: number
+          created_at?: string
+          empty_slots_count?: number
+          estimated_loss?: number
+          id?: string
+          is_critical?: boolean
+          is_dismissed?: boolean
+          no_shows_count?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      neighborhood_stats: {
+        Row: {
+          avg_latitude: number | null
+          avg_longitude: number | null
+          city: string | null
+          clients_count: number | null
+          id: string
+          last_updated: string | null
+          neighborhood: string
+          total_revenue: number | null
+          user_id: string
+        }
+        Insert: {
+          avg_latitude?: number | null
+          avg_longitude?: number | null
+          city?: string | null
+          clients_count?: number | null
+          id?: string
+          last_updated?: string | null
+          neighborhood: string
+          total_revenue?: number | null
+          user_id: string
+        }
+        Update: {
+          avg_latitude?: number | null
+          avg_longitude?: number | null
+          city?: string | null
+          clients_count?: number | null
+          id?: string
+          last_updated?: string | null
+          neighborhood?: string
+          total_revenue?: number | null
+          user_id?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -1051,7 +1689,11 @@ export type Database = {
           full_name: string
           id: string
           phone: string | null
+          plan: string | null
           reminder_template: string | null
+          subscription_status: string | null
+          trial_ends_at: string | null
+          trial_started_at: string | null
         }
         Insert: {
           activated_at?: string | null
@@ -1063,7 +1705,11 @@ export type Database = {
           full_name: string
           id: string
           phone?: string | null
+          plan?: string | null
           reminder_template?: string | null
+          subscription_status?: string | null
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
         }
         Update: {
           activated_at?: string | null
@@ -1075,7 +1721,11 @@ export type Database = {
           full_name?: string
           id?: string
           phone?: string | null
+          plan?: string | null
           reminder_template?: string | null
+          subscription_status?: string | null
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
         }
         Relationships: []
       }
@@ -1130,6 +1780,45 @@ export type Database = {
           platform?: string | null
           user_agent?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      reactivation_queue: {
+        Row: {
+          client_id: string
+          client_name: string | null
+          client_phone: string | null
+          created_at: string
+          days_inactive: number
+          id: string
+          last_appointment_date: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          client_name?: string | null
+          client_phone?: string | null
+          created_at?: string
+          days_inactive?: number
+          id?: string
+          last_appointment_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          client_name?: string | null
+          client_phone?: string | null
+          created_at?: string
+          days_inactive?: number
+          id?: string
+          last_appointment_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1241,45 +1930,126 @@ export type Database = {
         }
         Relationships: []
       }
+      support_chat_messages: {
+        Row: {
+          classification: string | null
+          content: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          classification?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          role: string
+          user_id: string
+        }
+        Update: {
+          classification?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      support_interaction_logs: {
+        Row: {
+          created_at: string
+          id: string
+          interaction_type: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interaction_type: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interaction_type?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       support_tickets: {
         Row: {
+          agendamentos_30d: number | null
+          ai_summary: string | null
           app_version: string | null
+          assigned_to: string | null
+          classification: string | null
           created_at: string
           device_id: string | null
           email: string
+          faturamento_30d: number | null
           id: string
           mensagem: string
           nome: string
           plano: string
+          priority_score: number | null
+          resolution_notes: string | null
+          resolved_at: string | null
           status: string
+          taxa_retorno: number | null
           tipo: string
           user_id: string
           whatsapp: string
         }
         Insert: {
+          agendamentos_30d?: number | null
+          ai_summary?: string | null
           app_version?: string | null
+          assigned_to?: string | null
+          classification?: string | null
           created_at?: string
           device_id?: string | null
           email: string
+          faturamento_30d?: number | null
           id?: string
           mensagem: string
           nome: string
           plano?: string
+          priority_score?: number | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
           status?: string
+          taxa_retorno?: number | null
           tipo: string
           user_id: string
           whatsapp: string
         }
         Update: {
+          agendamentos_30d?: number | null
+          ai_summary?: string | null
           app_version?: string | null
+          assigned_to?: string | null
+          classification?: string | null
           created_at?: string
           device_id?: string | null
           email?: string
+          faturamento_30d?: number | null
           id?: string
           mensagem?: string
           nome?: string
           plano?: string
+          priority_score?: number | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
           status?: string
+          taxa_retorno?: number | null
           tipo?: string
           user_id?: string
           whatsapp?: string
@@ -1336,6 +2106,475 @@ export type Database = {
           created_at?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      whatsapp_bot_config: {
+        Row: {
+          ai_personality: string | null
+          auto_booking_enabled: boolean
+          away_message: string | null
+          business_days: number[] | null
+          business_hours_end: string | null
+          business_hours_start: string | null
+          created_at: string
+          custom_instructions: string | null
+          greeting_message: string | null
+          id: string
+          is_enabled: boolean
+          keywords_config: Json | null
+          max_messages_before_transfer: number | null
+          operating_hours_end: string | null
+          operating_hours_start: string | null
+          outside_hours_message: string | null
+          response_delay_seconds: number | null
+          transfer_keywords: string[] | null
+          updated_at: string
+          user_id: string
+          welcome_message: string | null
+        }
+        Insert: {
+          ai_personality?: string | null
+          auto_booking_enabled?: boolean
+          away_message?: string | null
+          business_days?: number[] | null
+          business_hours_end?: string | null
+          business_hours_start?: string | null
+          created_at?: string
+          custom_instructions?: string | null
+          greeting_message?: string | null
+          id?: string
+          is_enabled?: boolean
+          keywords_config?: Json | null
+          max_messages_before_transfer?: number | null
+          operating_hours_end?: string | null
+          operating_hours_start?: string | null
+          outside_hours_message?: string | null
+          response_delay_seconds?: number | null
+          transfer_keywords?: string[] | null
+          updated_at?: string
+          user_id: string
+          welcome_message?: string | null
+        }
+        Update: {
+          ai_personality?: string | null
+          auto_booking_enabled?: boolean
+          away_message?: string | null
+          business_days?: number[] | null
+          business_hours_end?: string | null
+          business_hours_start?: string | null
+          created_at?: string
+          custom_instructions?: string | null
+          greeting_message?: string | null
+          id?: string
+          is_enabled?: boolean
+          keywords_config?: Json | null
+          max_messages_before_transfer?: number | null
+          operating_hours_end?: string | null
+          operating_hours_start?: string | null
+          outside_hours_message?: string | null
+          response_delay_seconds?: number | null
+          transfer_keywords?: string[] | null
+          updated_at?: string
+          user_id?: string
+          welcome_message?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_bot_settings: {
+        Row: {
+          appointment_booking_enabled: boolean | null
+          auto_reply_enabled: boolean | null
+          away_message: string | null
+          business_hours_enabled: boolean | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          keywords_config: Json | null
+          keywords_enabled: boolean | null
+          updated_at: string
+          user_id: string
+          welcome_message: string | null
+        }
+        Insert: {
+          appointment_booking_enabled?: boolean | null
+          auto_reply_enabled?: boolean | null
+          away_message?: string | null
+          business_hours_enabled?: boolean | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          keywords_config?: Json | null
+          keywords_enabled?: boolean | null
+          updated_at?: string
+          user_id: string
+          welcome_message?: string | null
+        }
+        Update: {
+          appointment_booking_enabled?: boolean | null
+          auto_reply_enabled?: boolean | null
+          away_message?: string | null
+          business_hours_enabled?: boolean | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          keywords_config?: Json | null
+          keywords_enabled?: boolean | null
+          updated_at?: string
+          user_id?: string
+          welcome_message?: string | null
+        }
+        Relationships: []
+      }
+      whatsapp_chat_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          direction: string
+          id: string
+          is_from_bot: boolean
+          media_mime_type: string | null
+          media_url: string | null
+          message_id: string | null
+          message_type: string
+          metadata: Json | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          direction: string
+          id?: string
+          is_from_bot?: boolean
+          media_mime_type?: string | null
+          media_url?: string | null
+          message_id?: string | null
+          message_type?: string
+          metadata?: Json | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          is_from_bot?: boolean
+          media_mime_type?: string | null
+          media_url?: string | null
+          message_id?: string | null
+          message_type?: string
+          metadata?: Json | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_contacts: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          id: string
+          is_blocked: boolean | null
+          last_message_at: string | null
+          name: string | null
+          notes: string | null
+          phone: string
+          profile_picture_url: string | null
+          tags: string[] | null
+          unread_count: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          is_blocked?: boolean | null
+          last_message_at?: string | null
+          name?: string | null
+          notes?: string | null
+          phone: string
+          profile_picture_url?: string | null
+          tags?: string[] | null
+          unread_count?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          is_blocked?: boolean | null
+          last_message_at?: string | null
+          name?: string | null
+          notes?: string | null
+          phone?: string
+          profile_picture_url?: string | null
+          tags?: string[] | null
+          unread_count?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_contacts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_conversations: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          id: string
+          last_message: string | null
+          last_message_at: string | null
+          lead_id: string | null
+          phone: string
+          status: string
+          unread_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_at?: string | null
+          lead_id?: string | null
+          phone: string
+          status?: string
+          unread_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_at?: string | null
+          lead_id?: string | null
+          phone?: string
+          status?: string
+          unread_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_conversations_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_leads: {
+        Row: {
+          created_at: string
+          id: string
+          last_contact_at: string | null
+          linked_profile_id: string | null
+          name: string | null
+          notes: string | null
+          phone: string
+          profile_picture_url: string | null
+          status: string
+          tags: string[] | null
+          total_appointments: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_contact_at?: string | null
+          linked_profile_id?: string | null
+          name?: string | null
+          notes?: string | null
+          phone: string
+          profile_picture_url?: string | null
+          status?: string
+          tags?: string[] | null
+          total_appointments?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_contact_at?: string | null
+          linked_profile_id?: string | null
+          name?: string | null
+          notes?: string | null
+          phone?: string
+          profile_picture_url?: string | null
+          status?: string
+          tags?: string[] | null
+          total_appointments?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_leads_linked_profile_id_fkey"
+            columns: ["linked_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_messages: {
+        Row: {
+          appointment_id: string | null
+          contact_name: string | null
+          created_at: string
+          direction: string
+          id: string
+          message: string
+          message_type: string | null
+          metadata: Json | null
+          phone: string
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          contact_name?: string | null
+          created_at?: string
+          direction: string
+          id?: string
+          message: string
+          message_type?: string | null
+          metadata?: Json | null
+          phone: string
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          appointment_id?: string | null
+          contact_name?: string | null
+          created_at?: string
+          direction?: string
+          id?: string
+          message?: string
+          message_type?: string | null
+          metadata?: Json | null
+          phone?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_messages_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_metrics: {
+        Row: {
+          appointments_via_whatsapp: number
+          avg_response_time_seconds: number | null
+          conversations_resolved: number
+          created_at: string
+          date: string
+          id: string
+          new_leads: number
+          total_conversations: number
+          total_messages_received: number
+          total_messages_sent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          appointments_via_whatsapp?: number
+          avg_response_time_seconds?: number | null
+          conversations_resolved?: number
+          created_at?: string
+          date: string
+          id?: string
+          new_leads?: number
+          total_conversations?: number
+          total_messages_received?: number
+          total_messages_sent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          appointments_via_whatsapp?: number
+          avg_response_time_seconds?: number | null
+          conversations_resolved?: number
+          created_at?: string
+          date?: string
+          id?: string
+          new_leads?: number
+          total_conversations?: number
+          total_messages_received?: number
+          total_messages_sent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      whatsapp_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          last_connected_at: string | null
+          phone_number: string | null
+          qr_code: string | null
+          session_data: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_connected_at?: string | null
+          phone_number?: string | null
+          qr_code?: string | null
+          session_data?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_connected_at?: string | null
+          phone_number?: string | null
+          qr_code?: string | null
+          session_data?: Json | null
+          status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -1405,6 +2644,17 @@ export type Database = {
     }
     Functions: {
       auto_complete_appointments: { Args: never; Returns: undefined }
+      calculate_customer_score: {
+        Args: {
+          p_attended: number
+          p_cancelled: number
+          p_days_inactive: number
+          p_months_as_client: number
+          p_no_show: number
+          p_rescheduled: number
+        }
+        Returns: number
+      }
       check_free_eligibility: {
         Args: { p_device_id?: string; p_ip_address: string }
         Returns: {
@@ -1433,18 +2683,31 @@ export type Database = {
         }
         Returns: boolean
       }
-      create_appointment_safe: {
-        Args: {
-          p_appointment_date: string
-          p_appointment_time: string
-          p_barber_id: string
-          p_customer_name: string
-          p_customer_phone: string
-          p_duration_minutes: number
-          p_service_id: string
-        }
-        Returns: string
-      }
+      create_appointment_safe:
+        | {
+            Args: {
+              p_appointment_date: string
+              p_appointment_time: string
+              p_barber_id: string
+              p_customer_name: string
+              p_customer_phone: string
+              p_notes?: string
+              p_service_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_appointment_date: string
+              p_appointment_time: string
+              p_barber_id: string
+              p_customer_name: string
+              p_customer_phone: string
+              p_duration_minutes: number
+              p_service_id: string
+            }
+            Returns: string
+          }
       create_profile:
         | { Args: never; Returns: undefined }
         | {
@@ -1452,6 +2715,16 @@ export type Database = {
             Returns: undefined
           }
       generate_barber_slug: { Args: { barber_name: string }; Returns: string }
+      generate_site_slug: { Args: { site_title: string }; Returns: string }
+      get_customer_status: { Args: { p_score: number }; Returns: string }
+      get_or_create_whatsapp_conversation: {
+        Args: { p_lead_id: string; p_phone: string; p_user_id: string }
+        Returns: string
+      }
+      get_or_create_whatsapp_lead: {
+        Args: { p_name?: string; p_phone: string; p_user_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

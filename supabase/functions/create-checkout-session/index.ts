@@ -59,7 +59,7 @@ serve(async (req) => {
 
     // Price IDs do Stripe (hardcoded)
     const priceId = planType === 'mensal' 
-      ? 'price_1SX04CKtuTWnHVngnvYdIlzZ'  // Plano Mensal
+      ? 'price_1SopUFKtuTWnHVngHNaXabSC'  // Plano Growth Mensal R$ 59,90
       : 'price_1SX074KtuTWnHVngd5iTQf1k';  // Plano Anual
 
     // Criar sessão de checkout

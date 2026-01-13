@@ -16,6 +16,7 @@ import { DEFAULT_REMINDER_TEMPLATE } from "@/lib/whatsapp";
 import { isNotificationSoundEnabled, setNotificationSoundEnabled, playNotificationSound } from "@/lib/notification-sound";
 import { PushNotificationSettings } from "@/components/notifications/PushNotificationSettings";
 import { BarbershopLogoUpload } from "@/components/profile/BarbershopLogoUpload";
+import SiteGenerator from "@/components/profile/SiteGenerator";
 
 const profileSchema = z.object({
   full_name: z.string().trim().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
@@ -242,6 +243,9 @@ const Profile = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Site Generator */}
+        <SiteGenerator />
 
         <Card>
           <CardHeader>

@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { usePWAAnalytics } from "@/hooks/usePWAAnalytics";
-import { toast } from "@/hooks/use-toast";
+
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
@@ -20,10 +20,7 @@ type Platform = "android" | "ios" | "desktop" | "unknown";
 const STORAGE_KEYS = {
   INSTALLED: "gestbarber_pwa_installed",
   DISMISSED: "gestbarber_pwa_dismissed",
-  REMIND_LATER: "gestbarber_pwa_remind_later",
 };
-
-const REMIND_DAYS = 3;
 
 // Global variable to store the deferred prompt
 declare global {
@@ -85,22 +82,6 @@ export const PWAInstallPrompt = () => {
     // Check if already installed or dismissed
     const isInstalled = localStorage.getItem(STORAGE_KEYS.INSTALLED) === "true";
     const isDismissed = localStorage.getItem(STORAGE_KEYS.DISMISSED) === "true";
-    const remindLaterTimestamp = localStorage.getItem(STORAGE_KEYS.REMIND_LATER);
-
-    // Check if remind later period has passed
-    if (remindLaterTimestamp) {
-      const remindDate = new Date(parseInt(remindLaterTimestamp, 10));
-      const now = new Date();
-      const daysPassed = (now.getTime() - remindDate.getTime()) / (1000 * 60 * 60 * 24);
-      
-      if (daysPassed < REMIND_DAYS) {
-        setShowToast(false);
-        return;
-      } else {
-        // Clear remind later if time has passed
-        localStorage.removeItem(STORAGE_KEYS.REMIND_LATER);
-      }
-    }
 
     if (isInstalled || isDismissed) {
       setShowToast(false);
@@ -191,13 +172,6 @@ export const PWAInstallPrompt = () => {
       setIsVisible(false);
       window.deferredPWAInstallPrompt = null;
       setPromptAvailable(false);
-      
-      // Show toast about update instructions
-      toast({
-        title: "🎉 App instalado com sucesso!",
-        description: "Para receber atualizações, desinstale e reinstale o app. Ou acesse pelo navegador para ter as novidades imediatamente.",
-        duration: 12000,
-      });
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -257,15 +231,6 @@ export const PWAInstallPrompt = () => {
     setIsVisible(false);
     setTimeout(() => {
       localStorage.setItem(STORAGE_KEYS.DISMISSED, "true");
-      setShowToast(false);
-    }, 300);
-  };
-
-  const handleRemindLater = () => {
-    trackEvent('remind_later');
-    setIsVisible(false);
-    setTimeout(() => {
-      localStorage.setItem(STORAGE_KEYS.REMIND_LATER, Date.now().toString());
       setShowToast(false);
     }, 300);
   };
@@ -340,35 +305,24 @@ export const PWAInstallPrompt = () => {
                     Adicione à tela inicial para acesso rápido
                   </p>
                   
-                  <div className="flex gap-2 mt-3">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleRemindLater}
-                      className="flex-1 h-11 sm:h-10 px-3 text-xs sm:text-sm touch-manipulation"
-                      style={{ minHeight: '44px' }}
-                    >
-                      Depois
-                    </Button>
-                    <Button
-                      onClick={handleInstallClick}
-                      size="sm"
-                      className="flex-1 h-11 sm:h-10 px-3 text-xs sm:text-sm gap-2 touch-manipulation font-medium"
-                      style={{ minHeight: '44px' }}
-                    >
-                      {platform === "ios" ? (
-                        <>
-                          <Share className="w-4 h-4" />
-                          Instruções
-                        </>
-                      ) : (
-                        <>
-                          <Download className="w-4 h-4" />
-                          Instalar
-                        </>
-                      )}
-                    </Button>
-                  </div>
+                  <Button
+                    onClick={handleInstallClick}
+                    size="sm"
+                    className="mt-3 h-11 sm:h-10 px-4 text-sm gap-2 w-full touch-manipulation font-medium"
+                    style={{ minHeight: '44px' }}
+                  >
+                    {platform === "ios" ? (
+                      <>
+                        <Share className="w-4 h-4" />
+                        Ver instruções
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4" />
+                        Instalar agora
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
             ) : (
@@ -405,10 +359,10 @@ export const PWAInstallPrompt = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleRemindLater}
+                    onClick={handleDismiss}
                     className="flex-1 h-10 text-sm"
                   >
-                    Lembrar depois
+                    Agora não
                   </Button>
                   <Button
                     onClick={handleInstallClick}

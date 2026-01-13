@@ -2733,7 +2733,7 @@ export type Database = {
         Returns: boolean
       }
       record_login_attempt: {
-        Args: { p_email: string; p_ip?: string; p_success: boolean }
+        Args: { p_email: string; p_ip_address?: string; p_success: boolean }
         Returns: undefined
       }
       update_barber_goals_progress: { Args: never; Returns: undefined }

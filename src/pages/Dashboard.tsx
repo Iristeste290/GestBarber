@@ -8,6 +8,7 @@ import { PublicAgendaCard } from "@/components/dashboard/PublicAgendaCard";
 import { LostRevenueAlert } from "@/components/dashboard/LostRevenueAlert";
 import { PerformanceRanking } from "@/components/dashboard/PerformanceRanking";
 import { RevenueSimulator } from "@/components/dashboard/RevenueSimulator";
+import { GoogleBusinessCards } from "@/components/dashboard/GoogleBusinessCards";
 import { AppLayout } from "@/components/AppLayout";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
@@ -51,6 +52,9 @@ const Dashboard = () => {
           
           {/* Alerta de Dinheiro Perdido */}
           <LostRevenueAlert />
+          
+          {/* Google Business Cards - Visibilidade Local */}
+          <GoogleBusinessCards />
           
           <PublicAgendaCard />
           

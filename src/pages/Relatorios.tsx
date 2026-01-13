@@ -6,6 +6,7 @@ import { PeakHoursChart } from "@/components/analytics/PeakHoursChart";
 import { ForecastCard } from "@/components/analytics/ForecastCard";
 import { ExportButtons } from "@/components/analytics/ExportButtons";
 import { CombinedMonthlyReport } from "@/components/analytics/CombinedMonthlyReport";
+import { CustomerMap } from "@/components/analytics/CustomerMap";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportsPageSkeleton } from "@/components/skeletons/PageSkeletons";
 
@@ -41,10 +42,11 @@ const Relatorios = () => {
           </div>
 
           <Tabs defaultValue="combined" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="combined">Relatório Mensal</TabsTrigger>
               <TabsTrigger value="monthly">Comparação Mensal</TabsTrigger>
               <TabsTrigger value="weekly">Comparação Semanal</TabsTrigger>
+              <TabsTrigger value="map">Mapa de Clientes</TabsTrigger>
             </TabsList>
 
             <TabsContent value="combined" className="space-y-6">
@@ -71,6 +73,10 @@ const Relatorios = () => {
                   growth={weeklyComparison.growth}
                 />
               )}
+            </TabsContent>
+
+            <TabsContent value="map" className="space-y-6">
+              <CustomerMap />
             </TabsContent>
           </Tabs>
 

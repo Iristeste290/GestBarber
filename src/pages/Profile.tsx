@@ -17,6 +17,7 @@ import { isNotificationSoundEnabled, setNotificationSoundEnabled, playNotificati
 import { PushNotificationSettings } from "@/components/notifications/PushNotificationSettings";
 import { BarbershopLogoUpload } from "@/components/profile/BarbershopLogoUpload";
 import SiteGenerator from "@/components/profile/SiteGenerator";
+import { GoogleBusinessSetup } from "@/components/google-business/GoogleBusinessSetup";
 
 const profileSchema = z.object({
   full_name: z.string().trim().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
@@ -246,6 +247,9 @@ const Profile = () => {
 
         {/* Site Generator */}
         <SiteGenerator />
+
+        {/* Google Business Integration */}
+        <GoogleBusinessSetup />
 
         <Card>
           <CardHeader>

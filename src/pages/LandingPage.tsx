@@ -3,6 +3,7 @@ import { HeroSection } from "@/components/landing/HeroSection";
 import { ProblemsSection } from "@/components/landing/ProblemsSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { GrowthEngineSection } from "@/components/landing/GrowthEngineSection";
+import { MapSection } from "@/components/landing/MapSection";
 import { AIWebsiteSection } from "@/components/landing/AIWebsiteSection";
 import { PlansSection } from "@/components/landing/PlansSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
@@ -18,6 +19,7 @@ const LandingPage = () => {
       <ProblemsSection />
       <HowItWorksSection />
       <GrowthEngineSection />
+      <MapSection />
       <AIWebsiteSection />
       <PlansSection />
       <TestimonialsSection />

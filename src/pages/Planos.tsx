@@ -2,7 +2,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, TrendingUp, Briefcase, Sparkles, Crown, Clock } from "lucide-react";
+import { Check, X, TrendingUp, Briefcase, Sparkles, Crown } from "lucide-react";
 import { usePlanValidation } from "@/hooks/usePlanValidation";
 import { FullPageLoader } from "@/components/ui/full-page-loader";
 import { toast } from "sonner";
@@ -107,13 +107,6 @@ const Planos = () => {
     return (amount / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   };
 
-  const comingSoonFeatures = [
-    "Produtos",
-    "Metas",
-    "Automação WhatsApp",
-    "Posts Prontos",
-  ];
-
   const startFeatures = [
     { text: 'Agenda completa', included: true },
     { text: 'Gestão de clientes', included: true },
@@ -123,9 +116,16 @@ const Planos = () => {
     { text: 'Controle de custos', included: true },
     { text: 'Relatórios básicos', included: true },
     { text: 'Growth Engine', included: false },
+    { text: 'Mapa de Clientes', included: false },
     { text: 'Ranking', included: false },
     { text: 'IA do Site', included: false },
     { text: 'Alertas Inteligentes', included: false },
+    { text: 'Produtos', included: false, comingSoon: true },
+    { text: 'Metas', included: false, comingSoon: true },
+    { text: 'Automação', included: false, comingSoon: true },
+    { text: 'Posts Prontos', included: false, comingSoon: true },
+    { text: 'Pagamentos', included: false, comingSoon: true },
+    { text: 'Config WhatsApp', included: false, comingSoon: true },
   ];
 
   const growthFeatures = [
@@ -135,9 +135,17 @@ const Planos = () => {
     { text: 'Clientes Sumidos', included: true },
     { text: 'Clientes Problemáticos', included: true },
     { text: 'Ranking Invisível', included: true },
+    { text: 'Mapa de Clientes', included: true },
     { text: 'IA do Site', included: true },
+    { text: 'SEO Local (Google Maps)', included: true },
     { text: 'Alertas de dinheiro perdido', included: true },
     { text: 'Suporte humano prioritário', included: true },
+    { text: 'Produtos', included: true, comingSoon: true },
+    { text: 'Metas', included: true, comingSoon: true },
+    { text: 'Automação', included: true, comingSoon: true },
+    { text: 'Posts Prontos', included: true, comingSoon: true },
+    { text: 'Pagamentos', included: true, comingSoon: true },
+    { text: 'Config WhatsApp', included: true, comingSoon: true },
   ];
 
   return (
@@ -192,24 +200,14 @@ const Planos = () => {
                     <span className={`text-sm ${feature.included ? 'text-foreground' : 'text-muted-foreground line-through'}`}>
                       {feature.text}
                     </span>
+                    {feature.comingSoon && (
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                        Em breve
+                      </Badge>
+                    )}
                   </li>
                 ))}
               </ul>
-              
-              {/* Coming Soon Section */}
-              <div className="pt-3 border-t">
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock className="w-3 h-3 text-blue-500" />
-                  <span className="text-xs text-blue-500 font-medium">Em breve</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {comingSoonFeatures.map((item, idx) => (
-                    <span key={idx} className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
             </CardContent>
             <CardFooter>
               <Button
@@ -261,24 +259,14 @@ const Planos = () => {
                     <span className={`text-sm ${feature.highlight ? 'font-semibold text-[#C9B27C]' : 'text-foreground'}`}>
                       {feature.text}
                     </span>
+                    {feature.comingSoon && (
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                        Em breve
+                      </Badge>
+                    )}
                   </li>
                 ))}
               </ul>
-              
-              {/* Coming Soon Section */}
-              <div className="pt-3 border-t border-[#C9B27C]/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock className="w-3 h-3 text-blue-500" />
-                  <span className="text-xs text-blue-500 font-medium">Em breve</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {comingSoonFeatures.map((item, idx) => (
-                    <span key={idx} className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
             </CardContent>
             <CardFooter>
               {isGrowth ? (

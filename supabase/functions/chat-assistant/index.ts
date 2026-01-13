@@ -446,28 +446,72 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, userContext } = await req.json();
+    // Validate authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Não autorizado" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Sessão inválida" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { messages } = await req.json();
+    
+    // Validate input
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Mensagens inválidas" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Limit message count to prevent abuse
+    const limitedMessages = messages.slice(-10);
+
+    // Fetch actual user context from database instead of trusting client
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('barbershop_name, activation_completed, trial_ends_at, plan')
+      .eq('id', user.id)
+      .single();
+
+    let contextInfo = "";
+    if (profile) {
+      if (profile.activation_completed === false) {
+        contextInfo += "\n\nCONTEXTO: Este usuário ainda não completou a ativação inicial. Sugira ajudá-lo a cadastrar o primeiro serviço.";
+      }
+      if (profile.trial_ends_at) {
+        const daysRemaining = Math.ceil((new Date(profile.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        if (daysRemaining <= 5 && daysRemaining > 0) {
+          contextInfo += `\n\nCONTEXTO: O plano gratuito deste usuário termina em ${daysRemaining} dias. Mencione os planos pagos se apropriado.`;
+        } else if (daysRemaining <= 0) {
+          contextInfo += "\n\nCONTEXTO: O plano gratuito deste usuário já expirou. Oriente sobre como fazer upgrade.";
+        }
+      }
+      if (profile.barbershop_name) {
+        contextInfo += `\n\nCONTEXTO: O nome da barbearia é "${profile.barbershop_name}".`;
+      }
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
-    }
-
-    // Build context-aware system prompt
-    let contextInfo = "";
-    if (userContext) {
-      if (userContext.activationCompleted === false) {
-        contextInfo += "\n\nCONTEXTO: Este usuário ainda não completou a ativação inicial. Sugira ajudá-lo a cadastrar o primeiro serviço.";
-      }
-      if (userContext.daysRemaining !== undefined && userContext.daysRemaining <= 5 && userContext.daysRemaining > 0) {
-        contextInfo += `\n\nCONTEXTO: O plano gratuito deste usuário termina em ${userContext.daysRemaining} dias. Mencione os planos pagos se apropriado.`;
-      }
-      if (userContext.daysRemaining !== undefined && userContext.daysRemaining <= 0) {
-        contextInfo += "\n\nCONTEXTO: O plano gratuito deste usuário já expirou. Oriente sobre como fazer upgrade.";
-      }
-      if (userContext.barbershopName) {
-        contextInfo += `\n\nCONTEXTO: O nome da barbearia é "${userContext.barbershopName}".`;
-      }
     }
 
     const systemPrompt = `Você é o assistente virtual do GestBarber, um sistema completo de gestão para barbearias. Seu nome é "Assistente GestBarber".
@@ -504,7 +548,7 @@ Ao responder:
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          ...messages,
+          ...limitedMessages,
         ],
         stream: true,
       }),

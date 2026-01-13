@@ -21,16 +21,17 @@ const plans = [
       { text: "Serviços ilimitados", included: true },
       { text: "Controle financeiro", included: true },
       { text: "Growth Engine", included: false },
+      { text: "Mapa de Clientes", included: false },
       { text: "IA do Site", included: false },
+      { text: "Produtos", included: false, comingSoon: true },
+      { text: "Metas", included: false, comingSoon: true },
+      { text: "Automação", included: false, comingSoon: true },
+      { text: "Posts Prontos", included: false, comingSoon: true },
+      { text: "Pagamentos", included: false, comingSoon: true },
+      { text: "Config WhatsApp", included: false, comingSoon: true },
     ],
     cta: "Começar grátis",
     variant: "outline" as const,
-    comingSoon: [
-      "Produtos",
-      "Metas",
-      "Automação WhatsApp",
-      "Posts Prontos",
-    ],
   },
   {
     name: "Growth",
@@ -44,20 +45,21 @@ const plans = [
     features: [
       { text: "Tudo do Start", included: true, highlight: true },
       { text: "Growth Engine (IA)", included: true },
+      { text: "Mapa de clientes", included: true },
       { text: "Insights de faturamento", included: true },
       { text: "Previsões e alertas", included: true },
+      { text: "SEO local automático", included: true },
       { text: "IA que cria site", included: true },
-      { text: "Automação de lembretes", included: true },
       { text: "Suporte humano prioritário", included: true },
+      { text: "Produtos", included: true, comingSoon: true },
+      { text: "Metas", included: true, comingSoon: true },
+      { text: "Automação", included: true, comingSoon: true },
+      { text: "Posts Prontos", included: true, comingSoon: true },
+      { text: "Pagamentos", included: true, comingSoon: true },
+      { text: "Config WhatsApp", included: true, comingSoon: true },
     ],
     cta: "Quero crescer",
     variant: "default" as const,
-    comingSoon: [
-      "Produtos",
-      "Metas",
-      "Automação WhatsApp",
-      "Posts Prontos",
-    ],
   },
 ];
 
@@ -131,26 +133,15 @@ export const PlansSection = () => {
                         }`}>
                           {feature.text}
                         </span>
+                        {feature.comingSoon && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-blue-500/20 text-blue-400 border-blue-500/30">
+                            <Clock className="w-2.5 h-2.5 mr-0.5" />
+                            Em breve
+                          </Badge>
+                        )}
                       </li>
                     ))}
                   </ul>
-
-                  {/* Coming Soon Section */}
-                  {plan.comingSoon && plan.comingSoon.length > 0 && (
-                    <div className="pt-3 border-t border-[#222222]">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Clock className="w-3 h-3 text-blue-400" />
-                        <span className="text-xs text-blue-400 font-medium">Em breve</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {plan.comingSoon.map((item, idx) => (
-                          <span key={idx} className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-300/70">
-                            {item}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
                   <div className="pt-4">
                     <AuthLinkButton

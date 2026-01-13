@@ -101,8 +101,73 @@ serve(async (req) => {
   }
 
   try {
-    const { message, classification, barberContext, needsHuman, chatHistory } = 
-      await req.json() as RequestBody;
+    // Validate authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Não autorizado" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Sessão inválida" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { message, classification, needsHuman, chatHistory } = 
+      await req.json() as Omit<RequestBody, 'barberContext'> & { barberContext?: BarberContext };
+
+    // Validate input
+    if (!message || typeof message !== 'string' || message.length > 5000) {
+      return new Response(
+        JSON.stringify({ error: "Mensagem inválida" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Fetch actual barber context from database instead of trusting client
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('barbershop_name, plan')
+      .eq('id', user.id)
+      .single();
+
+    const { data: appointments } = await supabaseClient
+      .from('appointments')
+      .select('id, status')
+      .eq('client_id', user.id)
+      .gte('appointment_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+
+    const { data: services } = await supabaseClient
+      .from('services')
+      .select('name')
+      .eq('user_id', user.id)
+      .eq('is_active', true);
+
+    const barberContext: BarberContext = {
+      barbearia_id: user.id,
+      barbershop_name: profile?.barbershop_name || 'Barbearia',
+      plano: profile?.plan || 'start',
+      faturamento_30d: 0,
+      agendamentos_30d: appointments?.length || 0,
+      taxa_retorno: 0,
+      dias_desde_ultimo_agendamento: 0,
+      horarios_vazios_proximos_7_dias: 0,
+      servicos_ativos: services?.map(s => s.name) || [],
+      clientes_risco: 0,
+      total_clientes: 0,
+    };
 
     console.log("Growth Support Chat - Classification:", classification);
     console.log("Barber Context:", JSON.stringify(barberContext, null, 2));

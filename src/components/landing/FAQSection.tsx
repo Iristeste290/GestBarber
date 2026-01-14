@@ -5,6 +5,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { ScrollAnimation } from "./ScrollAnimation";
+import { HelpCircle, Headphones } from "lucide-react";
 
 const generalFaqs = [
   {
@@ -74,69 +76,98 @@ const supportFaqs = [
 
 export const FAQSection = () => {
   return (
-    <section id="faq" className="py-20 bg-[#0A0A0A]">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#EDEDED]">
-            Perguntas Frequentes
+    <section id="faq" className="py-24 md:py-32 relative overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0A] via-[#0F0F0F] to-[#0A0A0A]" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl" />
+      
+      <div className="container mx-auto px-4 relative z-10">
+        <ScrollAnimation animation="fade-up" className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+            <HelpCircle className="w-4 h-4 text-primary" />
+            <span className="text-sm text-primary font-medium">Perguntas Frequentes</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Tire suas <span className="text-primary">dúvidas</span>
           </h2>
-          <p className="text-[#EDEDED]/60 text-lg">
-            Tire suas dúvidas sobre o GestBarber
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Respondemos as perguntas mais comuns sobre o GestBarber
           </p>
-        </div>
+        </ScrollAnimation>
 
-        <div className="max-w-3xl mx-auto space-y-8">
+        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {/* General FAQs */}
-          <Accordion type="single" collapsible className="space-y-4">
-            {generalFaqs.map((faq, index) => (
-              <AccordionItem
-                key={index}
-                value={`general-${index}`}
-                className="border border-[#222222] rounded-lg px-6 bg-[#111111]"
-              >
-                <AccordionTrigger className="text-left font-semibold hover:no-underline text-[#EDEDED] hover:text-[#C9B27C]">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-[#EDEDED]/70 leading-relaxed">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          <ScrollAnimation animation="fade-right" delay={0.1}>
+            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl border border-white/10 p-6 md:p-8 h-full">
+              <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                  <HelpCircle className="w-5 h-5 text-primary" />
+                </div>
+                Sobre o GestBarber
+              </h3>
+              <Accordion type="single" collapsible className="space-y-3">
+                {generalFaqs.map((faq, index) => (
+                  <AccordionItem
+                    key={index}
+                    value={`general-${index}`}
+                    className="border border-white/10 rounded-xl px-4 bg-white/[0.02] data-[state=open]:bg-white/5 transition-colors"
+                  >
+                    <AccordionTrigger className="text-left text-white hover:text-primary hover:no-underline py-4 text-sm md:text-base">
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground pb-4 text-sm leading-relaxed">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+          </ScrollAnimation>
 
           {/* Support FAQs */}
-          <div className="space-y-4">
-            <h3 className="text-xl font-bold text-[#C9B27C] flex items-center gap-2">
-              <span className="w-8 h-[2px] bg-[#C9B27C]"></span>
-              Suporte e Atendimento
-            </h3>
-            <Accordion type="single" collapsible className="space-y-4">
-              {supportFaqs.map((faq, index) => (
-                <AccordionItem
-                  key={index}
-                  value={`support-${index}`}
-                  className="border border-[#222222] rounded-lg px-6 bg-[#111111]"
-                >
-                  <AccordionTrigger className="text-left font-semibold hover:no-underline text-[#EDEDED] hover:text-[#C9B27C]">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-[#EDEDED]/70 leading-relaxed">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
+          <ScrollAnimation animation="fade-left" delay={0.2}>
+            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl border border-white/10 p-6 md:p-8 h-full">
+              <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                  <Headphones className="w-5 h-5 text-primary" />
+                </div>
+                Suporte e Atendimento
+              </h3>
+              <Accordion type="single" collapsible className="space-y-3">
+                {supportFaqs.map((faq, index) => (
+                  <AccordionItem
+                    key={index}
+                    value={`support-${index}`}
+                    className="border border-white/10 rounded-xl px-4 bg-white/[0.02] data-[state=open]:bg-white/5 transition-colors"
+                  >
+                    <AccordionTrigger className="text-left text-white hover:text-primary hover:no-underline py-4 text-sm md:text-base">
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground pb-4 text-sm leading-relaxed">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+          </ScrollAnimation>
         </div>
 
-        <div className="text-center mt-12">
-          <p className="text-[#EDEDED]/50 text-sm">
-            Ainda tem dúvidas?{" "}
-            <Link to="/suporte" className="text-[#C9B27C] hover:underline">
+        {/* CTA to support */}
+        <ScrollAnimation animation="fade-up" delay={0.3}>
+          <div className="mt-12 text-center">
+            <p className="text-muted-foreground mb-4">
+              Não encontrou sua resposta?
+            </p>
+            <Link
+              to="/suporte"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-primary/30 transition-all duration-300"
+            >
+              <Headphones className="w-4 h-4" />
               Fale com nosso suporte
             </Link>
-          </p>
-        </div>
+          </div>
+        </ScrollAnimation>
       </div>
     </section>
   );

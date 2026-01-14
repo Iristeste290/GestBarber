@@ -46,7 +46,7 @@ export const GoogleBusinessCards = () => {
               </p>
             </div>
             <Button 
-              onClick={() => navigate('/perfil')}
+              onClick={() => navigate('/perfil#google-business')}
               className="shrink-0"
             >
               <Settings className="mr-2 h-4 w-4" />

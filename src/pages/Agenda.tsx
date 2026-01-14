@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, MessageSquare, Sparkles, AlertTriangle, Crown, Calendar, Send } from "lucide-react";
+import { Plus, MessageSquare, Sparkles, AlertTriangle, Crown, Calendar, Send, Clock, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -17,6 +17,7 @@ import { openWhatsAppChat, formatReminderMessage } from "@/lib/whatsapp";
 import { AgendaSkeleton } from "@/components/skeletons/PageSkeletons";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useGrowthTriggers } from "@/components/upgrade/GrowthTriggerProvider";
 
 // New components
 import { AgendaHeader } from "@/components/agenda/AgendaHeader";
@@ -34,6 +35,7 @@ import { WhatsAppIntegration } from "@/components/whatsapp/WhatsAppIntegration";
 const Agenda = () => {
   const { loading: authLoading, user } = useRequireAuth();
   const { userPlan, isFreemium } = usePlanValidation();
+  const { metrics, isStart, checkTriggers } = useGrowthTriggers();
   const navigate = useNavigate();
   
   // State
@@ -229,12 +231,40 @@ const Agenda = () => {
   // Calculate total appointments
   const totalAppointments = appointments.length;
 
+  // Calculate empty slots for banner
+  const emptySlots = metrics ? metrics.dailySlotsTotal - metrics.dailySlotsFilled : 0;
+  const lostMoney = metrics ? Math.round(emptySlots * metrics.avgTicket) : 0;
+
   return (
     <AppLayout title="Agenda" description="Gerencie seus agendamentos">
       {authLoading ? (
         <AgendaSkeleton />
       ) : (
         <div className="space-y-4 md:space-y-6 pb-24 sm:pb-6">
+          {/* Banner Growth Engine - Horários vazios (apenas para plano Start) */}
+          {isStart && emptySlots > 3 && lostMoney > 50 && (
+            <Alert className="border-amber-500/50 bg-gradient-to-r from-amber-500/10 to-orange-500/10">
+              <Clock className="h-4 w-4 text-amber-500" />
+              <AlertTitle className="flex items-center gap-2 text-amber-600">
+                <span>Você tem {emptySlots} horários vazios hoje</span>
+              </AlertTitle>
+              <AlertDescription className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Isso representa aproximadamente <strong className="text-amber-600">R$ {lostMoney}</strong> que você deixa de ganhar. 
+                  O Growth Engine preenche automaticamente esses horários.
+                </p>
+                <Button 
+                  size="sm" 
+                  onClick={() => navigate('/planos')}
+                  className="bg-gradient-to-r from-[#C9B27C] to-[#E5D4A1] hover:from-[#D4BD87] hover:to-[#F0DFA9] text-black"
+                >
+                  <TrendingUp className="h-4 w-4 mr-1" />
+                  Ativar Growth Engine
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {/* Alerta de limite de agendamentos para Freemium */}
           {isFreemium && appointmentsUsedThisMonth !== null && userPlan && (
             (() => {

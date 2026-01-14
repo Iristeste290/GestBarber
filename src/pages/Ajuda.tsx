@@ -6,6 +6,7 @@ import { HelpCategories } from "@/components/ajuda/HelpCategories";
 import { HelpArticlesList } from "@/components/ajuda/HelpArticlesList";
 import { HelpArticleView } from "@/components/ajuda/HelpArticleView";
 import { HelpSearchResults } from "@/components/ajuda/HelpSearchResults";
+import { HelpGrowthGate } from "@/components/ajuda/HelpGrowthGate";
 import { helpCategories, searchArticles, HelpCategory, HelpArticle } from "@/data/helpArticles";
 import { HelpCircle, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,8 @@ import { SupportGrowthGate } from "@/components/support/SupportGrowthGate";
 type ViewState = 
   | { type: "categories" }
   | { type: "articles"; category: HelpCategory }
-  | { type: "article"; category: HelpCategory; article: HelpArticle };
+  | { type: "article"; category: HelpCategory; article: HelpArticle }
+  | { type: "growth-gate" };
 
 export default function Ajuda() {
   const navigate = useNavigate();
@@ -35,6 +37,10 @@ export default function Ajuda() {
     } else {
       navigate("/suporte");
     }
+  };
+
+  const handleRestrictedClick = () => {
+    setView({ type: "growth-gate" });
   };
   
   const isSearching = searchQuery.trim().length > 0;
@@ -58,6 +64,8 @@ export default function Ajuda() {
   const handleBack = () => {
     if (view.type === "article") {
       setView({ type: "articles", category: view.category });
+    } else if (view.type === "growth-gate") {
+      setView({ type: "categories" });
     } else {
       setView({ type: "categories" });
     }
@@ -97,7 +105,9 @@ export default function Ajuda() {
         <HelpSearch value={searchQuery} onChange={setSearchQuery} />
         
         {/* Content */}
-        {isSearching ? (
+        {view.type === "growth-gate" ? (
+          <HelpGrowthGate onBack={handleBack} />
+        ) : isSearching ? (
           <HelpSearchResults
             results={searchResults}
             query={searchQuery}
@@ -107,6 +117,7 @@ export default function Ajuda() {
           <HelpCategories
             categories={helpCategories}
             onSelectCategory={handleSelectCategory}
+            onRestrictedClick={handleRestrictedClick}
           />
         ) : view.type === "articles" ? (
           <HelpArticlesList

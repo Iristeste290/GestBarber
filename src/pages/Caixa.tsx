@@ -7,15 +7,21 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CashHistory } from "@/components/caixa/CashHistory";
 import { SessionHeader } from "@/components/caixa/SessionHeader";
 import { TransactionForm } from "@/components/caixa/TransactionForm";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { useCashSession } from "@/hooks/useCashSession";
 import { CashRegisterSkeleton } from "@/components/skeletons/PageSkeletons";
+import { useGrowthTriggers } from "@/components/upgrade/GrowthTriggerProvider";
+import { useNavigate } from "react-router-dom";
+import { Users, TrendingUp } from "lucide-react";
 
 const Caixa = () => {
   const { user, loading: authLoading } = useRequireAuth();
+  const { metrics, isStart } = useGrowthTriggers();
+  const navigate = useNavigate();
   const [openingAmount, setOpeningAmount] = useState("");
   const [closingAmount, setClosingAmount] = useState("");
   const [closingNotes, setClosingNotes] = useState("");
@@ -59,6 +65,9 @@ const Caixa = () => {
     }
   };
 
+  // Calculate lost clients revenue
+  const lostClientsRevenue = metrics ? Math.round(metrics.lostClients30d * metrics.avgTicket * 2) : 0;
+
   return (
     <AppLayout title="Controle de Caixa" description="Gerencie suas entradas e saídas">
       {authLoading || sessionLoading ? (
@@ -67,6 +76,30 @@ const Caixa = () => {
         </div>
       ) : (
         <div className="space-y-4 md:space-y-6 px-3 md:px-0">
+          {/* Banner Growth Engine - Clientes perdidos (apenas para plano Start) */}
+          {isStart && metrics && metrics.lostClients30d >= 5 && (
+            <Alert className="border-orange-500/50 bg-gradient-to-r from-orange-500/10 to-red-500/10">
+              <Users className="h-4 w-4 text-orange-500" />
+              <AlertTitle className="flex items-center gap-2 text-orange-600">
+                <span>{metrics.lostClients30d} clientes não voltaram nos últimos 30 dias</span>
+              </AlertTitle>
+              <AlertDescription className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Isso representa aproximadamente <strong className="text-orange-600">R$ {lostClientsRevenue}</strong> em receita perdida.
+                  O Growth Engine envia mensagens automáticas para reativar esses clientes.
+                </p>
+                <Button 
+                  size="sm" 
+                  onClick={() => navigate('/planos')}
+                  className="bg-gradient-to-r from-[#C9B27C] to-[#E5D4A1] hover:from-[#D4BD87] hover:to-[#F0DFA9] text-black"
+                >
+                  <TrendingUp className="h-4 w-4 mr-1" />
+                  Recuperar Clientes com Growth
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          
         {!session ? (
           <Card>
             <CardHeader>

@@ -2,12 +2,16 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calculator, Target, Users, DollarSign, Calendar } from "lucide-react";
+import { Calculator, Target, Users, DollarSign, Calendar, Lock, TrendingUp } from "lucide-react";
 import { useSimulatorData, calculateSimulation, SimulationResult } from "@/hooks/useRevenueSimulator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePlanValidation } from "@/hooks/usePlanValidation";
+import { useNavigate } from "react-router-dom";
 
 export const RevenueSimulator = () => {
+  const navigate = useNavigate();
   const { data: simulatorData, isLoading } = useSimulatorData();
+  const { isGrowth, loading: planLoading } = usePlanValidation();
   const [targetValue, setTargetValue] = useState<string>("");
   const [result, setResult] = useState<SimulationResult | null>(null);
 
@@ -28,7 +32,7 @@ export const RevenueSimulator = () => {
     }).format(value);
   };
 
-  if (isLoading) {
+  if (isLoading || planLoading) {
     return (
       <Card>
         <CardHeader>
@@ -36,6 +40,32 @@ export const RevenueSimulator = () => {
         </CardHeader>
         <CardContent>
           <Skeleton className="h-32 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Plan restriction - Growth only
+  if (!isGrowth) {
+    return (
+      <Card className="border-dashed">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-muted-foreground">
+            <Lock className="h-5 w-5" />
+            Simulador de Faturamento
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Simule diferentes cenários para alcançar suas metas de faturamento. Descubra quantos clientes a mais precisa ou quanto deve aumentar o ticket médio.
+          </p>
+          <Button 
+            onClick={() => navigate('/planos')}
+            className="w-full bg-gradient-to-r from-[#C9B27C] to-[#E5D4A1] hover:from-[#D4BD87] hover:to-[#F0DFA9] text-black font-medium"
+          >
+            <TrendingUp className="h-4 w-4 mr-2" />
+            Disponível no plano Growth
+          </Button>
         </CardContent>
       </Card>
     );

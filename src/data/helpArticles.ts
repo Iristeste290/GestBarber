@@ -9,6 +9,10 @@ import {
   Shield, 
   AlertTriangle, 
   MessageCircle,
+  Crown,
+  Globe,
+  Sparkles,
+  TrendingUp,
   LucideIcon
 } from "lucide-react";
 
@@ -389,12 +393,85 @@ export const helpCategories: HelpCategory[] = [
       {
         id: "canal-contato",
         title: "Canal de contato",
-        content: "Você pode entrar em contato conosco através do e-mail suporte@barberapp.com ou pelo WhatsApp (11) 99999-9999. Respondemos em até 24 horas úteis."
+        content: "Você pode entrar em contato conosco através do e-mail suporte@gestbarber.com.br. Respondemos em até 24 horas úteis."
       },
       {
         id: "mensagem-padrao",
         title: "Como enviar uma boa mensagem para o suporte",
         content: "Para agilizar o atendimento, inclua na sua mensagem: seu e-mail cadastrado, descrição clara do problema, o que você já tentou fazer, e prints de tela se possível."
+      }
+    ]
+  },
+  {
+    id: "recursos-growth",
+    title: "Recursos Avançados (Growth)",
+    icon: Crown,
+    description: "Funcionalidades exclusivas do plano Growth",
+    articles: [
+      {
+        id: "sobre-plano-growth",
+        title: "O que é o plano Growth",
+        content: "O plano Growth é o plano mais completo do app, com recursos avançados para fazer sua barbearia crescer. Inclui Site com IA, Google Business Profile, Growth Engine, suporte prioritário e muito mais."
+      },
+      {
+        id: "conectar-google-business",
+        title: "Como conectar ao Google Business Profile",
+        content: "O Google Business Profile ajuda sua barbearia a aparecer no Google Maps e nas buscas locais. Conecte sua conta para gerenciar avaliações e aumentar sua visibilidade.",
+        steps: [
+          "Acesse 'Meu Perfil' no menu lateral",
+          "Role até a seção 'Google Business Profile'",
+          "Clique em 'Conectar com Google'",
+          "Faça login com sua conta Google que gerencia o perfil",
+          "Selecione a conta e o local do seu negócio",
+          "Pronto! Seus dados serão sincronizados automaticamente"
+        ]
+      },
+      {
+        id: "beneficios-google-business",
+        title: "Benefícios do Google Business Profile",
+        content: "Com o Google Business conectado, você pode: ver quantas pessoas encontraram sua barbearia no Google, acompanhar e responder avaliações, ver quantas ligações e pedidos de rota recebeu, e aumentar sua visibilidade local."
+      },
+      {
+        id: "criar-site-ia",
+        title: "Como criar seu site com IA",
+        content: "Crie um site profissional para sua barbearia em segundos usando inteligência artificial. O site inclui suas informações, serviços e link para agendamento.",
+        steps: [
+          "Acesse 'Meu Perfil' no menu lateral",
+          "Role até a seção 'Criar Site com IA'",
+          "Preencha o nome da barbearia e WhatsApp",
+          "Adicione endereço e cidade (opcional)",
+          "Escolha um tema de cores",
+          "Clique em 'Criar Site com IA'",
+          "Aguarde a geração e copie o link do seu novo site!"
+        ]
+      },
+      {
+        id: "personalizar-site",
+        title: "Personalizando seu site",
+        content: "Após criar o site, você pode ver as informações cadastradas e o link público. Para atualizar o site, clique em 'Recriar Site' e faça as alterações desejadas. A IA irá gerar uma nova versão com as informações atualizadas."
+      },
+      {
+        id: "o-que-e-growth-engine",
+        title: "O que é o Growth Engine",
+        content: "O Growth Engine é um painel inteligente que analisa sua barbearia e mostra oportunidades de crescimento. Ele identifica clientes inativos, horários vazios, cancelamentos e muito mais."
+      },
+      {
+        id: "usar-growth-engine",
+        title: "Como usar o Growth Engine",
+        content: "Acesse o Growth Engine pelo menu lateral para ver insights sobre seu negócio.",
+        steps: [
+          "Acesse 'Growth Engine' no menu lateral",
+          "Veja os cards com alertas e oportunidades",
+          "Clique em cada card para ver detalhes",
+          "Siga as recomendações para recuperar receita",
+          "Acompanhe clientes inativos na fila de reativação",
+          "Use os lembretes sugeridos para engajar clientes"
+        ]
+      },
+      {
+        id: "metricas-growth-engine",
+        title: "Métricas do Growth Engine",
+        content: "O Growth Engine mostra: horários vazios do dia, clientes que não voltam há mais de 30 dias, valor perdido com cancelamentos e no-shows, clientes problemáticos (que cancelam muito), e sugestões de mensagens para reativar clientes."
       }
     ]
   }

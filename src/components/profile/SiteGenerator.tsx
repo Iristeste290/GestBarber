@@ -5,11 +5,15 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Globe, Copy, ExternalLink, Sparkles, Check, RefreshCw } from "lucide-react";
+import { Globe, Copy, ExternalLink, Sparkles, Check, RefreshCw, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useBarberSite, useCreateBarberSite } from "@/hooks/useBarberSite";
+import { usePlanValidation } from "@/hooks/usePlanValidation";
+import { Link } from "react-router-dom";
 
 const SiteGenerator = () => {
+  const { canUseFeature, loading: planLoading } = usePlanValidation();
+  const hasAIWebsite = canUseFeature("hasAIWebsite");
   const { data: site, isLoading } = useBarberSite();
   const createSite = useCreateBarberSite();
   
@@ -57,7 +61,7 @@ const SiteGenerator = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || planLoading) {
     return (
       <Card>
         <CardHeader>
@@ -66,6 +70,40 @@ const SiteGenerator = () => {
         </CardHeader>
         <CardContent>
           <Skeleton className="h-32 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Plan restriction - Growth only
+  if (!hasAIWebsite) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lock className="h-5 w-5 text-muted-foreground" />
+            Criar Meu Site
+          </CardTitle>
+          <CardDescription>
+            Crie um site profissional para sua barbearia em segundos com IA
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-4 bg-muted/50 rounded-lg border border-dashed text-center">
+            <Lock className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+            <p className="font-medium text-muted-foreground">
+              Recurso exclusivo do plano Growth
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Faça upgrade para criar seu site profissional com IA
+            </p>
+            <Button asChild className="mt-4">
+              <Link to="/planos">
+                <Sparkles className="mr-2 h-4 w-4" />
+                Fazer Upgrade
+              </Link>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );

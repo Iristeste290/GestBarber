@@ -15,6 +15,8 @@ import {
   Building2,
   MapPin,
   Copy,
+  Lock,
+  Sparkles,
 } from "lucide-react";
 import {
   Select,
@@ -23,6 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { usePlanValidation } from "@/hooks/usePlanValidation";
+import { Link } from "react-router-dom";
 
 interface GoogleAccount {
   name: string;
@@ -40,7 +44,21 @@ interface GoogleLocation {
 }
 
 export const GoogleBusinessSetup = () => {
+  const { canUseFeature, loading: planLoading } = usePlanValidation();
+  const hasSEOLocal = canUseFeature("hasSEOLocal");
   const queryClient = useQueryClient();
+  
+  // Scroll to this section if URL has #google-business hash
+  useEffect(() => {
+    if (window.location.hash === '#google-business') {
+      const element = document.getElementById('google-business-section');
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+  }, []);
   const [step, setStep] = useState<'idle' | 'authenticating' | 'selecting-account' | 'selecting-location' | 'saving' | 'no-account' | 'api-error'>('idle');
   const [apiError, setApiError] = useState<string | null>(null);
   const [accounts, setAccounts] = useState<GoogleAccount[]>([]);
@@ -291,15 +309,49 @@ export const GoogleBusinessSetup = () => {
     },
   });
 
-  if (connectionLoading) {
+  if (connectionLoading || planLoading) {
     return (
-      <Card>
+      <Card id="google-business-section">
         <CardHeader>
           <Skeleton className="h-6 w-48" />
           <Skeleton className="h-4 w-64" />
         </CardHeader>
         <CardContent>
           <Skeleton className="h-10 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Plan restriction - Growth only
+  if (!hasSEOLocal) {
+    return (
+      <Card id="google-business-section">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lock className="h-5 w-5 text-muted-foreground" />
+            Google Business Profile
+          </CardTitle>
+          <CardDescription>
+            Conecte sua barbearia ao Google Maps e apareça nas buscas locais
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-4 bg-muted/50 rounded-lg border border-dashed text-center">
+            <Lock className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+            <p className="font-medium text-muted-foreground">
+              Recurso exclusivo do plano Growth
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Faça upgrade para integrar com o Google Business Profile
+            </p>
+            <Button asChild className="mt-4">
+              <Link to="/planos">
+                <Sparkles className="mr-2 h-4 w-4" />
+                Fazer Upgrade
+              </Link>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );

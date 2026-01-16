@@ -100,9 +100,13 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
 
   const loadData = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       const { data: barbersData, error: barbersError } = await supabase
         .from("barbers")
         .select("*")
+        .eq("user_id", user.id)
         .eq("is_active", true)
         .order("name");
 
@@ -111,6 +115,7 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
       const { data: servicesData, error: servicesError } = await supabase
         .from("services")
         .select("*")
+        .eq("user_id", user.id)
         .eq("is_active", true)
         .order("name");
 

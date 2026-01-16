@@ -36,9 +36,12 @@ export const AgendaFiltersSheet = ({
   }, []);
 
   const loadFiltersData = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
     const [barbersRes, servicesRes] = await Promise.all([
-      supabase.from("barbers").select("*").eq("is_active", true).order("name"),
-      supabase.from("services").select("*").eq("is_active", true).order("name"),
+      supabase.from("barbers").select("*").eq("user_id", user.id).eq("is_active", true).order("name"),
+      supabase.from("services").select("*").eq("user_id", user.id).eq("is_active", true).order("name"),
     ]);
 
     if (barbersRes.data) setBarbers(barbersRes.data);

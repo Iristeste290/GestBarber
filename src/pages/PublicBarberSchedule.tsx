@@ -69,10 +69,10 @@ const PublicBarberSchedule = () => {
       if (barberError) throw barberError;
       setBarber(barberData);
 
-      // Buscar nome e logo da barbearia do perfil do dono
+      // Buscar nome e logo da barbearia usando a view pública segura
       if (barberData?.user_id) {
         const { data: profileData } = await supabase
-          .from("profiles")
+          .from("barbershop_public_info")
           .select("barbershop_name, barbershop_logo_url")
           .eq("id", barberData.user_id)
           .maybeSingle();

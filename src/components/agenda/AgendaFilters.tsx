@@ -29,15 +29,20 @@ export const AgendaFilters = ({
   }, []);
 
   const loadFiltersData = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
     const { data: barbersData } = await supabase
       .from("barbers")
       .select("*")
+      .eq("user_id", user.id)
       .eq("is_active", true)
       .order("name");
 
     const { data: servicesData } = await supabase
       .from("services")
       .select("*")
+      .eq("user_id", user.id)
       .eq("is_active", true)
       .order("name");
 

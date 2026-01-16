@@ -111,6 +111,13 @@ export type Database = {
             foreignKeyName: "appointments_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "barbershop_public_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -1624,6 +1631,13 @@ export type Database = {
             foreignKeyName: "product_sales_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "barbershop_public_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_sales_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -2334,6 +2348,13 @@ export type Database = {
             foreignKeyName: "whatsapp_contacts_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "barbershop_public_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_contacts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -2436,6 +2457,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "whatsapp_leads_linked_profile_id_fkey"
+            columns: ["linked_profile_id"]
+            isOneToOne: false
+            referencedRelation: "barbershop_public_info"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "whatsapp_leads_linked_profile_id_fkey"
             columns: ["linked_profile_id"]
@@ -2617,6 +2645,30 @@ export type Database = {
       }
     }
     Views: {
+      barbershop_public_info: {
+        Row: {
+          activation_completed: boolean | null
+          barbershop_logo_url: string | null
+          barbershop_name: string | null
+          created_at: string | null
+          id: string | null
+        }
+        Insert: {
+          activation_completed?: boolean | null
+          barbershop_logo_url?: string | null
+          barbershop_name?: string | null
+          created_at?: string | null
+          id?: string | null
+        }
+        Update: {
+          activation_completed?: boolean | null
+          barbershop_logo_url?: string | null
+          barbershop_name?: string | null
+          created_at?: string | null
+          id?: string | null
+        }
+        Relationships: []
+      }
       help_article_stats: {
         Row: {
           article_id: string | null

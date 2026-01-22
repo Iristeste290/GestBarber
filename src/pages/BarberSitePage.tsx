@@ -20,15 +20,15 @@ import { Helmet } from "react-helmet";
 import { useState } from "react";
 import { toast } from "sonner";
 
+// Public-safe interface - excludes user_id but includes business contact info
 interface BarberSite {
   id: string;
-  user_id: string;
   slug: string;
   title: string;
   description: string | null;
   theme: string | null;
-  phone: string | null;
-  address: string | null;
+  phone: string | null;      // Business phone is public for published sites
+  address: string | null;    // Business address is public for published sites
   city: string | null;
   site_content: Record<string, unknown>;
   seo_data: Record<string, unknown>;
@@ -85,14 +85,14 @@ const BarberSitePage = () => {
   const [leadPhone, setLeadPhone] = useState('');
   const [leadSubmitted, setLeadSubmitted] = useState(false);
 
-  // Fetch site data
+  // Fetch site data using secure public view
   const { data: site, isLoading, error } = useQuery({
     queryKey: ['public-barber-site', slug],
     queryFn: async (): Promise<BarberSite | null> => {
       if (!slug) return null;
 
       const { data, error } = await supabase
-        .from('barber_sites')
+        .from('barber_sites_public')
         .select('*')
         .eq('slug', slug)
         .maybeSingle();
@@ -103,39 +103,49 @@ const BarberSitePage = () => {
     enabled: !!slug,
   });
 
-  // Fetch services for this barbershop
+  // Fetch services using secure view (linked by site slug)
   const { data: services } = useQuery({
-    queryKey: ['barber-site-services', site?.user_id],
+    queryKey: ['barber-site-services', slug],
     queryFn: async (): Promise<Service[]> => {
-      if (!site?.user_id) return [];
+      if (!slug) return [];
       
       const { data } = await supabase
-        .from('services')
-        .select('id, name, price, description, duration_minutes')
-        .eq('user_id', site.user_id)
-        .eq('is_active', true)
+        .from('barber_site_services_public')
+        .select('service_id, service_name, price, service_description, duration_minutes')
+        .eq('site_slug', slug)
         .order('price', { ascending: false });
       
-      return (data || []) as Service[];
+      // Map to expected format
+      return (data || []).map(s => ({
+        id: s.service_id,
+        name: s.service_name,
+        price: s.price,
+        description: s.service_description,
+        duration_minutes: s.duration_minutes
+      })) as Service[];
     },
-    enabled: !!site?.user_id,
+    enabled: !!slug,
   });
 
-  // Fetch barbers for scheduling link
+  // Fetch barbers using secure view (linked by site slug)
   const { data: barbers } = useQuery({
-    queryKey: ['barber-site-barbers', site?.user_id],
+    queryKey: ['barber-site-barbers', slug],
     queryFn: async (): Promise<Barber[]> => {
-      if (!site?.user_id) return [];
+      if (!slug) return [];
       
       const { data } = await supabase
-        .from('barbers')
-        .select('id, name, slug')
-        .eq('user_id', site.user_id)
-        .eq('is_active', true);
+        .from('barber_site_barbers_public')
+        .select('barber_id, barber_name, barber_slug')
+        .eq('site_slug', slug);
       
-      return (data || []) as Barber[];
+      // Map to expected format
+      return (data || []).map(b => ({
+        id: b.barber_id,
+        name: b.barber_name,
+        slug: b.barber_slug
+      })) as Barber[];
     },
-    enabled: !!site?.user_id,
+    enabled: !!slug,
   });
 
   // Fetch work hours
@@ -155,37 +165,35 @@ const BarberSitePage = () => {
     enabled: !!barbers?.[0]?.id,
   });
 
-  // Fetch total appointments count (social proof)
+  // Fetch total appointments count (social proof) using secure view
   const { data: appointmentsCount } = useQuery({
-    queryKey: ['barber-site-appointments-count', site?.user_id],
+    queryKey: ['barber-site-appointments-count', slug],
     queryFn: async (): Promise<number> => {
-      if (!site?.user_id) return 0;
+      if (!slug) return 0;
       
-      const { count, error } = await supabase
-        .from('appointments')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'completed');
+      const { data, error } = await supabase
+        .from('barber_site_stats_public')
+        .select('completed_appointments')
+        .eq('site_slug', slug)
+        .maybeSingle();
       
       if (error) return 0;
-      return count || 0;
+      return data?.completed_appointments || 0;
     },
-    enabled: !!site?.user_id,
+    enabled: !!slug,
   });
 
-  // Lead submission mutation
+  // Lead submission mutation using RPC function
   const submitLead = useMutation({
     mutationFn: async ({ name, phone }: { name: string; phone: string }) => {
       if (!site) throw new Error('Site não encontrado');
       
-      const { error } = await supabase
-        .from('barbershop_leads')
-        .insert({
-          user_id: site.user_id,
-          site_id: site.id,
-          name,
-          phone,
-          source: servicePage ? `website-${servicePage}` : 'website',
-        });
+      const { error } = await supabase.rpc('submit_barbershop_lead', {
+        p_site_id: site.id,
+        p_name: name,
+        p_phone: phone,
+        p_source: servicePage ? `website-${servicePage}` : 'website',
+      });
       
       if (error) throw error;
     },

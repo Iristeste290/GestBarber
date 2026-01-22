@@ -1,10 +1,24 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema
+const MAX_PAYLOAD_SIZE = 10_000; // 10KB max for text payload
+
+const PostInputSchema = z.object({
+  postType: z.enum(["weekly", "promotion", "campaign"], {
+    errorMap: () => ({ message: "Tipo de post inválido. Use: weekly, promotion ou campaign" })
+  }),
+  context: z.string()
+    .max(1000, "Contexto muito longo (máx 1000 caracteres)")
+    .optional()
+    .transform(val => val?.trim()),
+});
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -12,7 +26,36 @@ serve(async (req) => {
   }
 
   try {
-    const { postType, context } = await req.json();
+    // Check payload size
+    const contentLength = req.headers.get("content-length");
+    if (contentLength && parseInt(contentLength) > MAX_PAYLOAD_SIZE) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Payload muito grande" }),
+        { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Parse and validate input
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ success: false, error: "JSON inválido" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const validationResult = PostInputSchema.safeParse(body);
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(e => e.message).join(", ");
+      return new Response(
+        JSON.stringify({ success: false, error: errors }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { postType, context } = validationResult.data;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -57,8 +100,6 @@ Contexto: ${context || "Promoção especial para novos clientes"}`;
 - Ter no máximo 250 palavras
 
 Contexto: ${context || "Campanha de valorização do cliente"}`;
-    } else {
-      throw new Error("Tipo de post inválido");
     }
 
     console.log("Gerando post com Lovable AI...");

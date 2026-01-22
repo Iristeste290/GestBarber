@@ -123,6 +123,7 @@ const App = () => {
                   <Route path="/admin/feedbacks" element={<Pages.AdminTrialFeedback />} />
                   <Route path="/admin/pwa" element={<Pages.AdminPWAAnalytics />} />
                   <Route path="/admin/suporte" element={<Pages.AdminSupportQueue />} />
+                  <Route path="/admin/triggers" element={<Pages.AdminTriggerAnalytics />} />
                   <Route path="/ajuda" element={<Pages.Ajuda />} />
                   <Route path="/suporte" element={<Pages.Suporte />} />
                   <Route path="/pagamento-sucesso" element={<Pages.PaymentSuccess />} />

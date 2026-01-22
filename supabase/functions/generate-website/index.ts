@@ -1,9 +1,44 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema
+const MAX_PAYLOAD_SIZE = 50_000; // 50KB max
+
+const ServiceSchema = z.object({
+  name: z.string().min(1).max(100, "Nome do serviço muito longo"),
+  price: z.union([
+    z.number().positive().max(100000),
+    z.string().transform((val) => parseFloat(val) || 0)
+  ]),
+  description: z.string().max(500).optional(),
+});
+
+const WebsiteInputSchema = z.object({
+  barbershopName: z.string()
+    .min(1, "Nome da barbearia é obrigatório")
+    .max(100, "Nome da barbearia muito longo")
+    .transform(val => val.trim()),
+  style: z.enum(["classica", "moderna", "premium"], {
+    errorMap: () => ({ message: "Estilo inválido. Use: classica, moderna ou premium" })
+  }),
+  services: z.array(ServiceSchema)
+    .max(50, "Máximo de 50 serviços permitidos")
+    .optional()
+    .default([]),
+  whatsapp: z.string()
+    .min(8, "Número de WhatsApp muito curto")
+    .max(20, "Número de WhatsApp muito longo")
+    .regex(/^[\d\s\-\+\(\)]+$/, "Número de WhatsApp inválido"),
+  address: z.string()
+    .max(500, "Endereço muito longo")
+    .optional()
+    .transform(val => val?.trim()),
+});
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -11,16 +46,45 @@ serve(async (req) => {
   }
 
   try {
-    const { barbershopName, style, services, whatsapp, address } = await req.json();
+    // Check payload size
+    const contentLength = req.headers.get("content-length");
+    if (contentLength && parseInt(contentLength) > MAX_PAYLOAD_SIZE) {
+      return new Response(
+        JSON.stringify({ error: "Payload muito grande" }),
+        { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Parse and validate input
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "JSON inválido" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const validationResult = WebsiteInputSchema.safeParse(body);
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(", ");
+      return new Response(
+        JSON.stringify({ error: errors }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { barbershopName, style, services, whatsapp, address } = validationResult.data;
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY não configurada");
     }
 
-    const servicesText = services
-      .map((s: any) => `- ${s.name}: R$ ${s.price}${s.description ? ` - ${s.description}` : ''}`)
-      .join('\n');
+    const servicesText = services.length > 0
+      ? services.map((s) => `- ${s.name}: R$ ${s.price}${s.description ? ` - ${s.description}` : ''}`).join('\n')
+      : 'Corte de cabelo, barba, e outros serviços de barbearia';
 
     const styleDescriptions = {
       classica: 'tradicional, elegante, com tons escuros e dourados, estilo vintage barbershop',
@@ -35,12 +99,12 @@ Responda APENAS em JSON válido, sem markdown.`;
 
     const userPrompt = `Crie o conteúdo para o site da barbearia "${barbershopName}".
 
-Estilo: ${styleDescriptions[style as keyof typeof styleDescriptions] || styleDescriptions.moderna}
+Estilo: ${styleDescriptions[style]}
 ${address ? `Endereço: ${address}` : ''}
 WhatsApp: ${whatsapp}
 
 Serviços:
-${servicesText || 'Corte de cabelo, barba, e outros serviços de barbearia'}
+${servicesText}
 
 Gere um JSON com esta estrutura exata:
 {

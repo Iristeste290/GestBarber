@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Clock } from "lucide-react";
 import { formatCurrency } from "@/lib/exportUtils";
+import { GrowthFeatureGate } from "@/components/growth/GrowthFeatureGate";
 
 interface PeakHoursChartProps {
   data: Array<{ hour: number; count: number; revenue: number }>;
@@ -17,7 +18,7 @@ export const PeakHoursChart = ({ data }: PeakHoursChartProps) => {
   const peakHour = data.reduce((max, item) => 
     item.count > max.count ? item : max, data[0] || { hour: 0, count: 0 });
 
-  return (
+  const chartContent = (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -48,5 +49,14 @@ export const PeakHoursChart = ({ data }: PeakHoursChartProps) => {
         </ResponsiveContainer>
       </CardContent>
     </Card>
+  );
+
+  return (
+    <GrowthFeatureGate 
+      featureName="Horários de Pico"
+      featureDescription="Visualize seus horários de maior e menor movimento para otimizar sua agenda e maximizar o faturamento."
+    >
+      {chartContent}
+    </GrowthFeatureGate>
   );
 };

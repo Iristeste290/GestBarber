@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Calendar, Users, TrendingUp, Trophy, AlertTriangle, DollarSign, Bell } from "lucide-react";
+import { RefreshCw, Calendar, Users, TrendingUp, Trophy, AlertTriangle, DollarSign, Bell, ShieldAlert, Sparkles } from "lucide-react";
 import { useGrowthEngine } from "@/hooks/useGrowthEngine";
 import { EmptySlotsCard } from "@/components/growth/EmptySlotsCard";
 import { ProblematicClientsCard } from "@/components/growth/ProblematicClientsCard";
@@ -12,8 +12,12 @@ import { BarberScoreCard } from "@/components/growth/BarberScoreCard";
 import { RemindersCard } from "@/components/growth/RemindersCard";
 import { ActionBanner } from "@/components/growth/ActionBanner";
 import { LostRevenueCard } from "@/components/growth/LostRevenueCard";
+import { NoShowPredictionCard } from "@/components/growth/NoShowPredictionCard";
+import { DynamicPricingCard } from "@/components/growth/DynamicPricingCard";
 import { GrowthEngineSkeleton } from "@/components/skeletons/PageSkeletons";
 import { GrowthFeatureGate } from "@/components/growth/GrowthFeatureGate";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const GrowthEngine = () => {
   const { loading } = useRequireAuth();
@@ -27,6 +31,68 @@ const GrowthEngine = () => {
     syncGrowthEngine,
     markReminderSent
   } = useGrowthEngine();
+
+  // Fetch reminder template
+  const { data: reminderTemplate } = useQuery({
+    queryKey: ["reminder-template"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("reminder_template")
+        .eq("id", user.id)
+        .single();
+
+      return profile?.reminder_template || null;
+    },
+  });
+
+  // Fetch upcoming appointments for no-show prediction
+  const { data: upcomingAppointments = [], isLoading: appointmentsLoading } = useQuery({
+    queryKey: ["upcoming-appointments-for-prediction"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data: barbers } = await supabase
+        .from("barbers")
+        .select("id, name")
+        .eq("user_id", user.id);
+
+      if (!barbers || barbers.length === 0) return [];
+
+      const barberMap = new Map(barbers.map(b => [b.id, b.name]));
+
+      const today = new Date().toISOString().split("T")[0];
+      const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
+      const { data: appointments } = await supabase
+        .from("appointments")
+        .select(`
+          id, customer_name, customer_phone, appointment_date, appointment_time, status, barber_id,
+          services!appointments_service_id_fkey(name)
+        `)
+        .in("barber_id", barbers.map(b => b.id))
+        .gte("appointment_date", today)
+        .lte("appointment_date", nextWeek)
+        .in("status", ["pending", "confirmed"])
+        .order("appointment_date", { ascending: true })
+        .order("appointment_time", { ascending: true });
+
+      return (appointments || []).map(apt => ({
+        id: apt.id,
+        customer_name: apt.customer_name,
+        customer_phone: apt.customer_phone,
+        appointment_date: apt.appointment_date,
+        appointment_time: apt.appointment_time,
+        status: apt.status,
+        barber_name: barberMap.get(apt.barber_id) || "Barbeiro",
+        service_name: (apt.services as any)?.name || "Serviço"
+      }));
+    },
+  });
 
   if (loading) {
     return (
@@ -140,7 +206,7 @@ const GrowthEngine = () => {
 
           {/* Tabs for each system */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 h-auto">
+            <TabsList className="grid w-full grid-cols-4 md:grid-cols-7 h-auto">
               <TabsTrigger value="reminders" className="gap-2 py-3">
                 <Bell className="h-4 w-4" />
                 <span className="hidden sm:inline">Lembretes</span>
@@ -181,6 +247,14 @@ const GrowthEngine = () => {
                 <Trophy className="h-4 w-4" />
                 <span className="hidden sm:inline">Ranking</span>
               </TabsTrigger>
+              <TabsTrigger value="no-show" className="gap-2 py-3">
+                <ShieldAlert className="h-4 w-4" />
+                <span className="hidden sm:inline">No-Show</span>
+              </TabsTrigger>
+              <TabsTrigger value="pricing" className="gap-2 py-3">
+                <Sparkles className="h-4 w-4" />
+                <span className="hidden sm:inline">Preços</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="reminders" className="mt-4">
@@ -217,6 +291,18 @@ const GrowthEngine = () => {
                 scores={barberScores.data || []} 
                 isLoading={isLoading}
               />
+            </TabsContent>
+
+            <TabsContent value="no-show" className="mt-4">
+              <NoShowPredictionCard 
+                appointments={upcomingAppointments}
+                isLoading={appointmentsLoading}
+                reminderTemplate={reminderTemplate}
+              />
+            </TabsContent>
+
+            <TabsContent value="pricing" className="mt-4">
+              <DynamicPricingCard />
             </TabsContent>
           </Tabs>
         </div>

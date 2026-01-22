@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
+import { useManualProcessTracker } from "@/hooks/useManualProcessTracker";
 
 export interface PendingReminder {
   id: string;
@@ -30,6 +31,10 @@ interface RemindersCardProps {
 
 export const RemindersCard = ({ reminders, isLoading, onMarkAsSent }: RemindersCardProps) => {
   const [sentReminders, setSentReminders] = useState<Set<string>>(new Set());
+  
+  // 📊 Rastreamento de tempo manual para lembretes
+  const { logManualProcess } = useManualProcessTracker();
+  const reminderStartTime = useRef<number | null>(null);
 
   const generateWhatsAppLink = (reminder: PendingReminder) => {
     if (!reminder.client_phone) return null;
@@ -53,7 +58,12 @@ export const RemindersCard = ({ reminders, isLoading, onMarkAsSent }: RemindersC
     return `mailto:${reminder.client_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
-  const handleSendReminder = (reminder: PendingReminder, type: "whatsapp" | "email") => {
+  const handleSendReminder = async (reminder: PendingReminder, type: "whatsapp" | "email") => {
+    // Iniciar cronômetro se ainda não iniciou
+    if (!reminderStartTime.current) {
+      reminderStartTime.current = Date.now();
+    }
+
     const link = type === "whatsapp" 
       ? generateWhatsAppLink(reminder) 
       : generateEmailLink(reminder);
@@ -63,6 +73,13 @@ export const RemindersCard = ({ reminders, isLoading, onMarkAsSent }: RemindersC
       setSentReminders(prev => new Set(prev).add(reminder.id));
       onMarkAsSent(reminder.id);
       toast.success("Lembrete marcado como enviado");
+      
+      // 📊 Registrar tempo gasto enviando lembrete manual
+      if (reminderStartTime.current) {
+        const durationSeconds = Math.round((Date.now() - reminderStartTime.current) / 1000);
+        await logManualProcess("manual_reminder", Math.max(durationSeconds, 10)); // Mínimo 10s por lembrete
+        reminderStartTime.current = Date.now(); // Reset para próximo lembrete
+      }
     }
   };
 

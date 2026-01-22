@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ArrowLeft, Check, Clock, Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
+import { useBookingAttemptTracker } from "@/hooks/useBookingAttemptTracker";
 
 interface Service {
   id: string;
@@ -41,6 +42,36 @@ export const AppointmentBookingForm = ({
   const [customerPhone, setCustomerPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  
+  // 📊 Rastreamento de tentativas de agendamento
+  const { 
+    startBookingAttempt, 
+    updateBookingStep, 
+    markAsAbandoned, 
+    completeBookingAttempt 
+  } = useBookingAttemptTracker();
+
+  // Iniciar rastreamento quando componente monta (usuário está no step de confirmação)
+  useEffect(() => {
+    startBookingAttempt();
+    updateBookingStep("confirm");
+
+    // Marcar como abandonado se sair da página
+    const handleBeforeUnload = () => {
+      markAsAbandoned();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [startBookingAttempt, updateBookingStep, markAsAbandoned]);
+
+  // Marcar como abandonado se cancelar
+  const handleCancel = () => {
+    markAsAbandoned();
+    onCancel();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,6 +139,9 @@ export const AppointmentBookingForm = ({
         // Não falhar o agendamento se a notificação falhar
       }
 
+      // ✅ Marcar tentativa como completada
+      await completeBookingAttempt();
+      
       setSuccess(true);
       toast.success("Agendamento realizado com sucesso!");
 
@@ -174,7 +208,7 @@ export const AppointmentBookingForm = ({
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="container mx-auto max-w-2xl">
-        <Button variant="ghost" onClick={onCancel} className="mb-4">
+        <Button variant="ghost" onClick={handleCancel} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar
         </Button>
@@ -245,7 +279,7 @@ export const AppointmentBookingForm = ({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={onCancel}
+                  onClick={handleCancel}
                   className="flex-1"
                   disabled={loading}
                 >

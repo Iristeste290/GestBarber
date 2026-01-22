@@ -39,3 +39,4 @@ export const AdminPWAAnalytics = lazy(() => import("./pages/AdminPWAAnalytics"))
 export const GrowthEngine = lazy(() => import("./pages/GrowthEngine"));
 export const AdminSupportQueue = lazy(() => import("./pages/AdminSupportQueue"));
 export const Upgrade = lazy(() => import("./pages/Upgrade"));
+export const AdminTriggerAnalytics = lazy(() => import("./pages/AdminTriggerAnalytics"));

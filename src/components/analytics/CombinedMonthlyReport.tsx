@@ -256,11 +256,11 @@ export const CombinedMonthlyReport = () => {
             <CardTitle className="text-base">Ticket Médio</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-4 p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30">
-              <Scissors className="h-8 w-8 text-blue-500" />
+            <div className="flex items-center gap-4 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <Scissors className="h-8 w-8 text-blue-400" />
               <div>
-                <p className="text-sm text-muted-foreground">Ticket Médio por Serviço</p>
-                <p className="text-xl font-bold">{formatCurrency(current.avgServiceTicket)}</p>
+                <p className="text-sm text-blue-300">Ticket Médio por Serviço</p>
+                <p className="text-xl font-bold text-foreground">{formatCurrency(current.avgServiceTicket)}</p>
               </div>
             </div>
           </CardContent>

@@ -168,6 +168,78 @@ export function ChatBot() {
     queryClient.invalidateQueries({ queryKey: ["chat-history", user?.id] });
   };
 
+  // Helper function to get valid access token with auto-refresh
+  const getValidAccessToken = useCallback(async (): Promise<string | null> => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return null;
+    }
+
+    // Check if token is about to expire (within 60 seconds)
+    const expiresAt = session.expires_at ? session.expires_at * 1000 : 0;
+    const now = Date.now();
+    const isExpiringSoon = expiresAt - now < 60000;
+
+    if (isExpiringSoon) {
+      console.log("Token expiring soon, attempting refresh...");
+      const { data: refreshedSession, error } = await supabase.auth.refreshSession();
+      
+      if (error || !refreshedSession.session) {
+        console.error("Failed to refresh session:", error);
+        return null;
+      }
+      
+      console.log("Token refreshed successfully");
+      return refreshedSession.session.access_token;
+    }
+
+    return session.access_token;
+  }, []);
+
+  // Helper function to make authenticated request with retry on 401
+  const fetchWithAuthRetry = useCallback(async (
+    url: string, 
+    options: RequestInit,
+    retryCount = 0
+  ): Promise<Response> => {
+    const accessToken = await getValidAccessToken();
+    
+    if (!accessToken) {
+      throw new Error("SESSION_EXPIRED");
+    }
+
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    // If 401 and haven't retried yet, try refreshing token and retry once
+    if (response.status === 401 && retryCount < 1) {
+      console.log("Received 401, attempting token refresh and retry...");
+      
+      const { data: refreshedSession, error } = await supabase.auth.refreshSession();
+      
+      if (error || !refreshedSession.session) {
+        throw new Error("SESSION_EXPIRED");
+      }
+
+      // Retry with new token
+      return fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          Authorization: `Bearer ${refreshedSession.session.access_token}`,
+        },
+      });
+    }
+
+    return response;
+  }, [getValidAccessToken]);
+
   const sendMessage = async (content: string) => {
     if (!user) {
       toast.error("Você precisa estar logado para usar o chat");
@@ -206,11 +278,10 @@ export function ChatBot() {
         daysRemaining: getDaysRemaining()
       };
 
-      const response = await fetch(CHAT_URL, {
+      const response = await fetchWithAuthRetry(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({ 
           messages: conversationHistory,
@@ -289,6 +360,25 @@ export function ChatBot() {
     } catch (error) {
       console.error("Chat error:", error);
       setIsLoading(false);
+      
+      // Handle session expiration specifically
+      if (error instanceof Error && error.message === "SESSION_EXPIRED") {
+        toast.error("Sua sessão expirou. Redirecionando para login...");
+        
+        const errorMessage: Message = {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: "Sua sessão expirou. Por favor, faça login novamente para continuar nossa conversa. 🔐"
+        };
+        setMessages(prev => [...prev, errorMessage]);
+        
+        // Redirect to auth after a short delay
+        setTimeout(() => {
+          navigate("/auth");
+        }, 2000);
+        return;
+      }
+      
       setShowSupportButton(true);
       
       const errorMessage: Message = {

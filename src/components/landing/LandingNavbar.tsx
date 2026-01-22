@@ -61,7 +61,7 @@ export const LandingNavbar = () => {
               <button
                 key={link.id}
                 onClick={() => scrollToSection(link.id)}
-                className="relative px-4 py-2 text-sm text-muted-foreground hover:text-white transition-colors duration-300 group"
+                className="relative px-4 py-2 text-sm text-white/70 hover:text-white transition-colors duration-300 group"
               >
                 {link.label}
                 <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-primary group-hover:w-1/2 transition-all duration-300" />

@@ -1,8 +1,10 @@
 import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useRequireAuth } from "./useRequireAuth";
 import { usePlanValidation } from "./usePlanValidation";
+import { toast } from "sonner";
 
 export interface BarberContext {
   barbearia_id: string;
@@ -58,7 +60,75 @@ export const useGrowthSupport = () => {
   const { user } = useRequireAuth();
   const { isGrowth } = usePlanValidation();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Helper function to get valid access token with auto-refresh
+  const getValidAccessToken = useCallback(async (): Promise<string | null> => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return null;
+    }
+
+    // Check if token is about to expire (within 60 seconds)
+    const expiresAt = session.expires_at ? session.expires_at * 1000 : 0;
+    const now = Date.now();
+    const isExpiringSoon = expiresAt - now < 60000;
+
+    if (isExpiringSoon) {
+      console.log("Token expiring soon, attempting refresh...");
+      const { data: refreshedSession, error } = await supabase.auth.refreshSession();
+      
+      if (error || !refreshedSession.session) {
+        console.error("Failed to refresh session:", error);
+        return null;
+      }
+      
+      console.log("Token refreshed successfully");
+      return refreshedSession.session.access_token;
+    }
+
+    return session.access_token;
+  }, []);
+
+  // Helper function to invoke edge function with auth retry
+  const invokeWithAuthRetry = useCallback(async <T>(
+    functionName: string,
+    body: Record<string, unknown>,
+    retryCount = 0
+  ): Promise<{ data: T | null; error: Error | null }> => {
+    const accessToken = await getValidAccessToken();
+    
+    if (!accessToken) {
+      return { data: null, error: new Error("SESSION_EXPIRED") };
+    }
+
+    const response = await supabase.functions.invoke<T>(functionName, {
+      body,
+    });
+
+    // If 401/auth error and haven't retried yet, try refreshing token and retry once
+    if (response.error?.message?.includes("401") || 
+        response.error?.message?.includes("Sessão inválida") ||
+        response.error?.message?.includes("Unauthorized")) {
+      
+      if (retryCount < 1) {
+        console.log("Received auth error, attempting token refresh and retry...");
+        
+        const { data: refreshedSession, error } = await supabase.auth.refreshSession();
+        
+        if (error || !refreshedSession.session) {
+          return { data: null, error: new Error("SESSION_EXPIRED") };
+        }
+
+        // Retry with refreshed session
+        return invokeWithAuthRetry<T>(functionName, body, retryCount + 1);
+      }
+    }
+
+    return { data: response.data, error: response.error ? new Error(response.error.message) : null };
+  }, [getValidAccessToken]);
 
   // Fetch barbershop context for AI
   const { data: barberContext, isLoading: contextLoading } = useQuery({
@@ -268,21 +338,29 @@ export const useGrowthSupport = () => {
         await createEscalationTicket(content, classification);
       }
 
-      // Call AI edge function
-      const response = await supabase.functions.invoke("growth-support-chat", {
-        body: {
+      // Call AI edge function with auth retry
+      const { data, error } = await invokeWithAuthRetry<{ response: string }>(
+        "growth-support-chat",
+        {
           message: content,
           classification,
           barberContext,
           needsHuman,
           chatHistory: chatHistory?.slice(-10) || [],
-        },
-      });
+        }
+      );
 
-      if (response.error) throw new Error(response.error.message);
+      // Handle session expiration
+      if (error?.message === "SESSION_EXPIRED") {
+        toast.error("Sua sessão expirou. Redirecionando para login...");
+        setTimeout(() => navigate("/auth"), 2000);
+        throw new Error("Sessão expirada. Faça login novamente.");
+      }
+
+      if (error) throw error;
 
       // Save assistant response
-      const aiResponse = response.data?.response || "Desculpe, não consegui processar sua mensagem.";
+      const aiResponse = data?.response || "Desculpe, não consegui processar sua mensagem.";
       
       await supabase
         .from("support_chat_messages")

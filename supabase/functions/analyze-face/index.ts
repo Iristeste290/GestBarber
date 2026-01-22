@@ -1,9 +1,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const MAX_IMAGE_SIZE = 5_000_000; // 5MB max for base64 image
+
+const ImageInputSchema = z.object({
+  imageBase64: z.string()
+    .min(100, "Imagem muito pequena")
+    .max(MAX_IMAGE_SIZE, "Imagem muito grande (máx 5MB)")
+    .refine(
+      (val) => val.startsWith("data:image/") || val.startsWith("/9j/") || val.startsWith("iVBOR"),
+      "Formato de imagem inválido. Use JPEG, PNG ou WebP."
+    ),
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,14 +25,36 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64 } = await req.json();
-
-    if (!imageBase64) {
+    // Check payload size before parsing
+    const contentLength = req.headers.get("content-length");
+    if (contentLength && parseInt(contentLength) > MAX_IMAGE_SIZE + 1000) {
       return new Response(
-        JSON.stringify({ error: "Imagem não fornecida" }),
+        JSON.stringify({ error: "Payload muito grande. Máximo: 5MB" }),
+        { status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Parse and validate input
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "JSON inválido" }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const validationResult = ImageInputSchema.safeParse(body);
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(e => e.message).join(", ");
+      return new Response(
+        JSON.stringify({ error: errors }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { imageBase64 } = validationResult.data;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {

@@ -7,9 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { PWAUpdateBanner } from "@/components/pwa/PWAUpdateBanner";
 import { useUpcomingAppointmentsNotifier } from "@/hooks/useUpcomingAppointmentsNotifier";
 import { usePlanValidation } from "@/hooks/usePlanValidation";
-
 interface AppLayoutProps {
   children: ReactNode;
   title?: string;
@@ -122,6 +122,8 @@ export const AppLayout = memo(function AppLayout({ children, title, description 
           </main>
         </div>
       </div>
+      {/* Banner de atualização PWA */}
+      <PWAUpdateBanner />
     </SidebarProvider>
   );
 });

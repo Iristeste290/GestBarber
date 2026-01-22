@@ -1,7 +1,9 @@
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { exportToCSV } from "@/lib/exportUtils";
 import { toast } from "sonner";
+import { useManualProcessTracker } from "@/hooks/useManualProcessTracker";
 
 interface ExportButtonsProps {
   monthlyData: any;
@@ -10,8 +12,13 @@ interface ExportButtonsProps {
 }
 
 export const ExportButtons = ({ monthlyData, weeklyData, peakHours }: ExportButtonsProps) => {
-  const exportMonthlyReport = () => {
+  // 📊 Rastreamento de tempo manual para relatórios
+  const { logManualProcess } = useManualProcessTracker();
+  const exportStartTime = useRef<number>(0);
+
+  const exportMonthlyReport = async () => {
     if (!monthlyData) return;
+    exportStartTime.current = Date.now();
     
     const data = [
       {
@@ -34,10 +41,15 @@ export const ExportButtons = ({ monthlyData, weeklyData, peakHours }: ExportButt
 
     exportToCSV(data, 'relatorio_mensal');
     toast.success('Relatório mensal exportado com sucesso!');
+    
+    // 📊 Registrar tempo de geração de relatório
+    const duration = Math.round((Date.now() - exportStartTime.current) / 1000);
+    await logManualProcess("manual_report", Math.max(duration, 5));
   };
 
-  const exportWeeklyReport = () => {
+  const exportWeeklyReport = async () => {
     if (!weeklyData) return;
+    exportStartTime.current = Date.now();
     
     const data = [
       {
@@ -60,10 +72,15 @@ export const ExportButtons = ({ monthlyData, weeklyData, peakHours }: ExportButt
 
     exportToCSV(data, 'relatorio_semanal');
     toast.success('Relatório semanal exportado com sucesso!');
+    
+    // 📊 Registrar tempo de geração de relatório
+    const duration = Math.round((Date.now() - exportStartTime.current) / 1000);
+    await logManualProcess("manual_report", Math.max(duration, 5));
   };
 
-  const exportPeakHours = () => {
+  const exportPeakHours = async () => {
     if (!peakHours) return;
+    exportStartTime.current = Date.now();
     
     const data = peakHours.map((item: any) => ({
       horario: `${item.hour}:00`,
@@ -73,6 +90,10 @@ export const ExportButtons = ({ monthlyData, weeklyData, peakHours }: ExportButt
 
     exportToCSV(data, 'horarios_pico');
     toast.success('Análise de horários exportada com sucesso!');
+    
+    // 📊 Registrar tempo de geração de relatório
+    const duration = Math.round((Date.now() - exportStartTime.current) / 1000);
+    await logManualProcess("manual_report", Math.max(duration, 5));
   };
 
   return (

@@ -24,10 +24,10 @@ const PublicAgenda = () => {
 
   const loadBarbers = async () => {
     try {
+      // Use secure public view that excludes user_id
       const { data, error } = await supabase
-        .from("barbers")
+        .from("barbers_public")
         .select("id, name, specialty, avatar_url")
-        .eq("is_active", true)
         .order("name");
 
       if (error) throw error;

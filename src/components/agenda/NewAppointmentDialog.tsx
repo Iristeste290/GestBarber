@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ import { Calendar as CalendarIcon, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { usePlanValidation } from "@/hooks/usePlanValidation";
+import { useManualProcessTracker } from "@/hooks/useManualProcessTracker";
 
 interface OccupiedSlot {
   time: string;
@@ -49,6 +50,18 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
   const [occupiedSlots, setOccupiedSlots] = useState<OccupiedSlot[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const { checkLimit } = usePlanValidation();
+  
+  // 📊 Rastreamento de tempo manual
+  const { startManualProcess, endManualProcess, cancelManualProcess } = useManualProcessTracker();
+
+  // Iniciar rastreamento quando dialog abre
+  useEffect(() => {
+    if (open) {
+      startManualProcess("manual_appointment");
+    } else {
+      cancelManualProcess();
+    }
+  }, [open, startManualProcess, cancelManualProcess]);
 
   // Fetch barber's appointments for selected date
   useEffect(() => {
@@ -272,6 +285,10 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
       }
 
       toast.success("Agendamento criado com sucesso!");
+      
+      // ✅ Finalizar rastreamento de tempo manual (agendamento concluído)
+      await endManualProcess();
+      
       onOpenChange(false);
       resetForm();
     } catch (error: any) {

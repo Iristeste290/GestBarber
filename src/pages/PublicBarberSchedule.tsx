@@ -14,7 +14,6 @@ interface Barber {
   name: string;
   specialty: string | null;
   avatar_url: string | null;
-  user_id: string | null;
 }
 
 interface Service {
@@ -60,41 +59,47 @@ const PublicBarberSchedule = () => {
   const loadBarberData = async () => {
     try {
       setLoading(true);
+      
+      // Use secure public view that excludes user_id
       const { data: barberData, error: barberError } = await supabase
-        .from("barbers")
-        .select("id, name, specialty, avatar_url, user_id")
+        .from("barbers_public")
+        .select("id, name, specialty, avatar_url")
         .eq("id", barberId)
         .single();
 
       if (barberError) throw barberError;
       setBarber(barberData);
 
-      // Buscar nome e logo da barbearia usando a view pública segura
-      if (barberData?.user_id) {
-        const { data: profileData } = await supabase
-          .from("barbershop_public_info")
-          .select("barbershop_name, barbershop_logo_url")
-          .eq("id", barberData.user_id)
-          .maybeSingle();
-        
-        if (profileData?.barbershop_name) {
-          setBarbershopName(profileData.barbershop_name);
-        }
-        if (profileData?.barbershop_logo_url) {
-          setBarbershopLogoUrl(profileData.barbershop_logo_url);
-        }
-
-        // Buscar serviços do dono da barbearia
-        const { data: servicesData, error: servicesError } = await supabase
-          .from("services")
-          .select("id, name, duration_minutes, price")
-          .eq("user_id", barberData.user_id)
-          .eq("is_active", true)
-          .order("name");
-
-        if (servicesError) throw servicesError;
-        setServices(servicesData || []);
+      // Fetch barbershop info using the secure barber_barbershop_public view
+      const { data: shopData } = await supabase
+        .from("barber_barbershop_public")
+        .select("barbershop_name, barbershop_logo_url")
+        .eq("barber_id", barberId)
+        .maybeSingle();
+      
+      if (shopData?.barbershop_name) {
+        setBarbershopName(shopData.barbershop_name);
       }
+      if (shopData?.barbershop_logo_url) {
+        setBarbershopLogoUrl(shopData.barbershop_logo_url);
+      }
+
+      // Fetch services using the secure barber_services_public view
+      const { data: servicesData, error: servicesError } = await supabase
+        .from("barber_services_public")
+        .select("service_id, service_name, duration_minutes, price")
+        .eq("barber_id", barberId);
+
+      if (servicesError) throw servicesError;
+      
+      // Map to expected format
+      const mappedServices = (servicesData || []).map(s => ({
+        id: s.service_id,
+        name: s.service_name,
+        duration_minutes: s.duration_minutes,
+        price: s.price
+      }));
+      setServices(mappedServices);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     } finally {

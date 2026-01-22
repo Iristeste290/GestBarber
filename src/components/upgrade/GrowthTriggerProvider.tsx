@@ -28,6 +28,7 @@ interface GrowthTriggerProviderProps {
 export const GrowthTriggerProvider = ({ children }: GrowthTriggerProviderProps) => {
   const {
     activeTrigger,
+    activeEventId,
     isModalOpen,
     dismissTrigger,
     triggerFeatureBlock,
@@ -52,6 +53,7 @@ export const GrowthTriggerProvider = ({ children }: GrowthTriggerProviderProps) 
         trigger={activeTrigger}
         isOpen={isModalOpen}
         onClose={dismissTrigger}
+        eventId={activeEventId || undefined}
       />
     </GrowthTriggerContext.Provider>
   );

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useManualProcessTracker } from "@/hooks/useManualProcessTracker";
 
 interface NewPaymentFormProps {
   onPaymentCreated: () => void;
@@ -19,6 +20,18 @@ export const NewPaymentForm = ({ onPaymentCreated }: NewPaymentFormProps) => {
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "card" | "cash">("pix");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  
+  // 📊 Rastreamento de tempo manual
+  const { startManualProcess, endManualProcess } = useManualProcessTracker();
+  const trackingStarted = useRef(false);
+
+  // Iniciar rastreamento quando usuário começa a preencher
+  useEffect(() => {
+    if ((clientName || serviceName || amount) && !trackingStarted.current) {
+      startManualProcess("manual_payment");
+      trackingStarted.current = true;
+    }
+  }, [clientName, serviceName, amount, startManualProcess]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +70,10 @@ export const NewPaymentForm = ({ onPaymentCreated }: NewPaymentFormProps) => {
       if (error) throw error;
 
       toast.success("Cobrança criada com sucesso!");
+      
+      // ✅ Finalizar rastreamento de tempo manual
+      await endManualProcess();
+      trackingStarted.current = false;
       
       // Reset form
       setClientName("");

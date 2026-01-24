@@ -31,12 +31,11 @@ const Index = () => {
           window.matchMedia("(display-mode: standalone)").matches ||
           (window.navigator as any).standalone === true;
 
-        // Track visit count (redirect disabled - users should see landing and click CTA)
+        // Track visit count - redirect frequent visitors to auth
         const currentVisits = parseInt(localStorage.getItem(VISIT_COUNT_KEY) || "0", 10);
         const newVisitCount = currentVisits + 1;
         localStorage.setItem(VISIT_COUNT_KEY, newVisitCount.toString());
-        // Disabled: let users always see landing page and click CTA buttons manually
-        const isFrequentVisitor = false;
+        const isFrequentVisitor = newVisitCount >= VISITS_THRESHOLD;
 
         const { data: { session } } = await supabase.auth.getSession();
         

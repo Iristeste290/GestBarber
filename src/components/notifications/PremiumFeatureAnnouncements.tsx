@@ -31,7 +31,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export const PremiumFeatureAnnouncements = () => {
-  const { isAnnualPremium, userPlan, loading } = usePlanValidation();
+  const { isGrowth, userPlan, loading } = usePlanValidation();
   const [announcements, setAnnouncements] = useState<FeatureAnnouncement[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -62,8 +62,8 @@ export const PremiumFeatureAnnouncements = () => {
 
       // Filtrar anúncios não vistos
       const unviewed = allAnnouncements.filter(a => {
-        // Se é premium_only, só mostrar para Premium
-        if (a.is_premium_only && !isAnnualPremium) return false;
+        // Se é premium_only, só mostrar para Growth
+        if (a.is_premium_only && !isGrowth) return false;
         // Se já foi visto, não mostrar
         if (viewedIds.has(a.id)) return false;
         return true;
@@ -76,7 +76,7 @@ export const PremiumFeatureAnnouncements = () => {
     };
 
     fetchUnviewedAnnouncements();
-  }, [loading, userPlan, isAnnualPremium]);
+  }, [loading, userPlan, isGrowth]);
 
   const markAsViewed = async (announcementId: string) => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -122,7 +122,7 @@ export const PremiumFeatureAnnouncements = () => {
           <div className="flex items-center gap-2 mb-2">
             <Badge className="bg-gradient-to-r from-amber-500 to-amber-600">
               <Crown className="w-3 h-3 mr-1" />
-              Novidade Premium
+              Novidade Growth
             </Badge>
             {announcements.length > 1 && (
               <Badge variant="outline">

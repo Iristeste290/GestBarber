@@ -14,20 +14,20 @@ interface GrowthFeatureGateProps {
   useModal?: boolean;
 }
 
-// Features que fazem parte do Growth
+// Features que fazem parte do Growth (modelo atual)
 const GROWTH_FEATURES = [
   "Growth Engine",
   "Mapa de Clientes",
-  "Ranking Invisível",
-  "IA do Site",
-  "SEO Local",
-  "Alertas Inteligentes",
+  "Ranking de Barbeiros",
+  "Site com IA",
   "Horários Vazios",
-  "Clientes Sumidos",
+  "Clientes Inativos",
   "Clientes Problemáticos",
   "Relatórios Avançados",
-  "Campanhas",
-  "Posts IA",
+  "Automações WhatsApp",
+  "Posts com IA",
+  "Previsão de Faturamento",
+  "Suporte Prioritário",
 ];
 
 // Benefícios do Growth para mostrar no card

@@ -15,6 +15,17 @@ import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { DashboardSkeleton } from "@/components/skeletons/PageSkeletons";
 import { PremiumFeatureAnnouncements } from "@/components/notifications/PremiumFeatureAnnouncements";
 import { useGrowthTriggers } from "@/components/upgrade/GrowthTriggerProvider";
+import { 
+  InactiveClientsAlert, 
+  EmptySlotsAlert, 
+  EducationalTips,
+  MilestoneUpsell,
+  MonthlyOpportunityCard,
+  WeakWeekAlert,
+  WeeklyProgressCard,
+  EngagementStatsCard,
+  DailyLossTracker
+} from "@/components/conversion";
 
 const Dashboard = () => {
   const { user, loading } = useRequireAuth();
@@ -35,6 +46,10 @@ const Dashboard = () => {
   return (
     <AppLayout title="Painel" description="Visão geral da barbearia">
       <PremiumFeatureAnnouncements />
+      
+      {/* Milestone celebration for Start users */}
+      <MilestoneUpsell />
+      
       {loading || profileLoading ? (
         <DashboardSkeleton />
       ) : (
@@ -50,8 +65,27 @@ const Dashboard = () => {
             </div>
           )}
           
-          {/* Alerta de Dinheiro Perdido */}
+          {/* Tracker de perdas diárias (Start only) */}
+          <DailyLossTracker />
+          
+          {/* Card principal de oportunidade (apenas Start) */}
+          <MonthlyOpportunityCard />
+          
+          {/* Alerta de semana fraca (Start only) */}
+          <WeakWeekAlert />
+          
+          {/* Alerta de Dinheiro Perdido - para todos, com CTA diferente */}
           <LostRevenueAlert />
+          
+          {/* Alertas de conversão para usuários Start */}
+          <InactiveClientsAlert />
+          <EmptySlotsAlert />
+          
+          {/* Stats de engajamento (Growth only) */}
+          <EngagementStatsCard />
+          
+          {/* Dica educativa */}
+          <EducationalTips context="dashboard" />
           
           {/* Google Business Cards - Visibilidade Local */}
           <GoogleBusinessCards />
@@ -69,7 +103,10 @@ const Dashboard = () => {
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
             <PerformanceRanking />
-            <RevenueSimulator />
+            <div className="space-y-4">
+              <WeeklyProgressCard />
+              <RevenueSimulator />
+            </div>
           </div>
 
           <BarberRanking />

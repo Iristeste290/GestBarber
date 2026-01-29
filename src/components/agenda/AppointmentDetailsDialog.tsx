@@ -9,6 +9,7 @@ import { ptBR } from "date-fns/locale";
 import { User, Scissors, Clock, Calendar, CheckCircle, XCircle, MessageSquare } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { openWhatsAppChat } from "@/lib/whatsapp";
+import { CancellationUpsell, useCancellationUpsell } from "@/components/conversion";
 
 interface AppointmentDetailsDialogProps {
   appointmentId: string | null;
@@ -25,6 +26,9 @@ export const AppointmentDetailsDialog = ({
   const [loading, setLoading] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  
+  // Hook para upsell de cancelamento
+  const { showUpsell, customerName, triggerUpsell, closeUpsell } = useCancellationUpsell();
 
   useEffect(() => {
     if (open && appointmentId) {
@@ -131,8 +135,12 @@ Te esperamos! 😊`;
   };
 
   const confirmCancel = async () => {
+    const customerNameToShow = appointment?.customer_name || appointment?.profile?.full_name;
     await updateStatus("cancelled");
     setShowCancelDialog(false);
+    
+    // Disparar upsell de cancelamento
+    triggerUpsell(customerNameToShow);
   };
 
   const getStatusColor = (status: string) => {
@@ -316,6 +324,13 @@ Te esperamos! 😊`;
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Upsell modal para cancelamentos */}
+      <CancellationUpsell
+        isOpen={showUpsell}
+        onClose={closeUpsell}
+        customerName={customerName}
+      />
     </>
   );
 };

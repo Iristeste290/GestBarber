@@ -10,6 +10,8 @@ import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { PWAUpdateBanner } from "@/components/pwa/PWAUpdateBanner";
 import { useUpcomingAppointmentsNotifier } from "@/hooks/useUpcomingAppointmentsNotifier";
 import { usePlanValidation } from "@/hooks/usePlanValidation";
+import { PlanBadge } from "@/components/conversion/PlanBadge";
+
 interface AppLayoutProps {
   children: ReactNode;
   title?: string;
@@ -20,11 +22,13 @@ interface AppLayoutProps {
 const AppHeader = memo(function AppHeader({ 
   title, 
   barbershopName,
-  userId
+  userId,
+  showPlanBadge
 }: { 
   title?: string; 
   barbershopName?: string;
   userId?: string;
+  showPlanBadge?: boolean;
 }) {
   return (
     <header className="sticky top-0 z-10 flex h-14 md:h-16 items-center gap-2 md:gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-3 md:px-4">
@@ -44,7 +48,10 @@ const AppHeader = memo(function AppHeader({
           </div>
         )}
       </div>
-      {userId && <NotificationBell userId={userId} />}
+      <div className="flex items-center gap-2 md:gap-3">
+        {showPlanBadge && <PlanBadge />}
+        {userId && <NotificationBell userId={userId} />}
+      </div>
     </header>
   );
 });
@@ -109,7 +116,12 @@ export const AppLayout = memo(function AppLayout({ children, title, description 
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col w-full min-w-0 contain-layout">
-          <AppHeader title={title} barbershopName={barbershopName} userId={user?.id} />
+          <AppHeader 
+            title={title} 
+            barbershopName={barbershopName} 
+            userId={user?.id}
+            showPlanBadge={!!user}
+          />
           <main className="flex-1 overflow-auto w-full">
             <div className="p-3 sm:p-4 md:p-6">
               {description && (

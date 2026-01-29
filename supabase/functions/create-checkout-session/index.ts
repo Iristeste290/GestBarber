@@ -1,10 +1,10 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.81.1";
-import Stripe from "https://esm.sh/stripe@14.21.0";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import Stripe from "https://esm.sh/stripe@18.5.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 serve(async (req) => {
@@ -35,7 +35,7 @@ serve(async (req) => {
     }
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-      apiVersion: '2023-10-16',
+      apiVersion: '2025-08-27.basil',
     });
 
     // Buscar ou criar customer no Stripe
@@ -57,10 +57,10 @@ serve(async (req) => {
       customerId = customer.id;
     }
 
-    // Price IDs do Stripe (hardcoded)
+    // Price IDs do Stripe (produção)
     const priceId = planType === 'mensal' 
-      ? 'price_1SopUFKtuTWnHVngHNaXabSC'  // Plano Growth Mensal R$ 59,90
-      : 'price_1SX074KtuTWnHVngd5iTQf1k';  // Plano Anual
+      ? 'price_1SuD6E35eITHBm6Zr9m88oFu'  // Plano Growth Mensal
+      : 'price_1SuD6E35eITHBm6Zr9m88oFu';  // Plano Anual (atualizar quando criar)
 
     // Criar sessão de checkout
     const session = await stripe.checkout.sessions.create({

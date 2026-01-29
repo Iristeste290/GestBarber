@@ -73,6 +73,28 @@ export default {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
         },
+        // P2 FIX: Semantic colors for conversion components
+        opportunity: {
+          DEFAULT: "hsl(var(--opportunity))",
+          foreground: "hsl(var(--opportunity-foreground))",
+          muted: "hsl(var(--opportunity-muted) / 0.2)",
+        },
+        loss: {
+          DEFAULT: "hsl(var(--loss))",
+          foreground: "hsl(var(--loss-foreground))",
+        },
+        "alert-weak": {
+          DEFAULT: "hsl(var(--alert-weak))",
+          foreground: "hsl(var(--alert-weak-foreground))",
+        },
+        "alert-inactive": {
+          DEFAULT: "hsl(var(--alert-inactive))",
+          foreground: "hsl(var(--alert-inactive-foreground))",
+        },
+        "alert-slots": {
+          DEFAULT: "hsl(var(--alert-slots))",
+          foreground: "hsl(var(--alert-slots-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

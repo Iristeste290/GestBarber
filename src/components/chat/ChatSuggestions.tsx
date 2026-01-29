@@ -15,14 +15,14 @@ interface ChatSuggestionsProps {
 export function ChatSuggestions({ isActivated, daysRemaining, onSuggestionClick }: ChatSuggestionsProps) {
   const categories: SuggestionCategory[] = [];
 
-  // Urgency category for freemium ending soon
+  // Urgency category for trial ending soon
   if (daysRemaining !== undefined && daysRemaining <= 5) {
     categories.push({
       icon: <Sparkles className="h-3.5 w-3.5 text-amber-500" />,
-      title: "Seu plano está acabando",
+      title: "Seu período de teste está acabando",
       suggestions: [
-        "Meu plano gratuito está acabando, o que fazer?",
-        "Quais são os planos disponíveis?"
+        "Meu teste grátis está acabando, o que fazer?",
+        "O que está incluso no plano Growth?"
       ]
     });
   }
@@ -66,7 +66,7 @@ export function ChatSuggestions({ isActivated, daysRemaining, onSuggestionClick 
     icon: <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />,
     title: "Dúvidas gerais",
     suggestions: [
-      "Como funciona o plano gratuito?",
+      "Qual a diferença entre Start e Growth?",
       "Como ver relatórios?"
     ]
   });

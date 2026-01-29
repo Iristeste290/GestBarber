@@ -1072,6 +1072,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "cash_transactions_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments_public_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "cash_transactions_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
@@ -1775,6 +1782,13 @@ export type Database = {
             referencedRelation: "appointments"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "loyalty_transactions_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments_public_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       manual_process_logs: {
@@ -2048,6 +2062,13 @@ export type Database = {
             columns: ["appointment_id"]
             isOneToOne: false
             referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_sales_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments_public_safe"
             referencedColumns: ["id"]
           },
           {
@@ -3111,6 +3132,13 @@ export type Database = {
             referencedRelation: "appointments"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "whatsapp_messages_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments_public_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       whatsapp_metrics: {
@@ -3232,6 +3260,78 @@ export type Database = {
       }
     }
     Views: {
+      appointments_public_safe: {
+        Row: {
+          appointment_date: string | null
+          appointment_time: string | null
+          barber_id: string | null
+          barber_name: string | null
+          duration_minutes: number | null
+          id: string | null
+          service_id: string | null
+          service_name: string | null
+          service_price: number | null
+          status: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barber_barbershop_public"
+            referencedColumns: ["barber_id"]
+          },
+          {
+            foreignKeyName: "appointments_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barber_services_public"
+            referencedColumns: ["barber_id"]
+          },
+          {
+            foreignKeyName: "appointments_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barber_site_barbers_public"
+            referencedColumns: ["barber_id"]
+          },
+          {
+            foreignKeyName: "appointments_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "barber_services_public"
+            referencedColumns: ["service_id"]
+          },
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "barber_site_services_public"
+            referencedColumns: ["service_id"]
+          },
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       barber_barbershop_public: {
         Row: {
           barber_id: string | null

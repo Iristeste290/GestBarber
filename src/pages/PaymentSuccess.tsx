@@ -203,7 +203,8 @@ const PaymentSuccess = () => {
     );
   }
 
-  const planName = subscriptionData?.plan === "anual" ? "Premium" : "Pro";
+  // Modelo atual: somente Start (grátis) e Growth (pago)
+  const planName = "Growth";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">

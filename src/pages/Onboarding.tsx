@@ -115,11 +115,11 @@ export default function Onboarding() {
       await completeActivation.mutateAsync("onboarding_complete");
 
       toast.success("Barbearia configurada!", {
-        description: "Vamos ver como crescer seu negócio.",
+        description: "Tudo pronto. Vamos começar!",
       });
 
-      // Redirect to Growth Engine instead of dashboard
-      navigate("/growth-engine");
+      // Redirect para o painel (evita levar usuário Start para área bloqueada)
+      navigate("/painel");
     } catch (error: any) {
       console.error("Error completing onboarding:", error);
       toast.error(error.message || "Erro ao salvar configurações");
@@ -351,7 +351,7 @@ export default function Onboarding() {
                     </>
                   ) : (
                     <>
-                      Ver meu Growth Engine
+                      Começar a usar
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </>
                   )}

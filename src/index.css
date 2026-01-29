@@ -104,6 +104,23 @@
     --warning: 48 89% 50%; /* #F1C40F */
     --warning-foreground: 0 0% 4%;
     
+    /* P2 FIX: Semantic tokens for conversion components */
+    --opportunity: 145 63% 49%; /* Emerald/Green for gains */
+    --opportunity-foreground: 0 0% 4%;
+    --opportunity-muted: 145 63% 49%;
+    
+    --loss: 6 78% 57%; /* Red for losses */
+    --loss-foreground: 0 0% 93%;
+    
+    --alert-weak: 25 95% 53%; /* Orange for weak week alerts */
+    --alert-weak-foreground: 0 0% 4%;
+    
+    --alert-inactive: 45 93% 47%; /* Amber for inactive clients */
+    --alert-inactive-foreground: 0 0% 4%;
+    
+    --alert-slots: 217 91% 60%; /* Blue for empty slots */
+    --alert-slots-foreground: 0 0% 100%;
+    
     --border: 0 0% 14%; /* Subtle border */
     --input: 0 0% 10%; /* #1A1A1A */
     --ring: 43 33% 63%; /* Gold ring */

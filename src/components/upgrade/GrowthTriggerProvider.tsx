@@ -1,7 +1,9 @@
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, ReactNode, useEffect } from "react";
 import { useGrowthTriggerEngine } from "@/hooks/useGrowthTriggerEngine";
+import { useConversionPushNotifications } from "@/hooks/useConversionPushNotifications";
 import { UpgradeModal } from "./UpgradeModal";
 import type { TriggerType, UpgradeTrigger, GrowthMetrics } from "@/hooks/useGrowthTriggerEngine";
+import { supabase } from "@/integrations/supabase/client";
 
 interface GrowthTriggerContextType {
   triggerFeatureBlock: (featureName: string) => void;
@@ -38,6 +40,20 @@ export const GrowthTriggerProvider = ({ children }: GrowthTriggerProviderProps) 
     metrics,
   } = useGrowthTriggerEngine();
 
+  // Melhoria estratégica: Integrar push notifications de conversão
+  const [userId, setUserId] = React.useState<string | undefined>();
+  
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        setUserId(data.user.id);
+      }
+    });
+  }, []);
+
+  // Hook de push notifications (auto-trigger baseado em métricas)
+  useConversionPushNotifications(userId);
+
   return (
     <GrowthTriggerContext.Provider
       value={{
@@ -58,3 +74,6 @@ export const GrowthTriggerProvider = ({ children }: GrowthTriggerProviderProps) 
     </GrowthTriggerContext.Provider>
   );
 };
+
+// Import React for useState
+import React from "react";

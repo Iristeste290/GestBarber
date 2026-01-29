@@ -7,8 +7,11 @@ import { ForecastCard } from "@/components/analytics/ForecastCard";
 import { ExportButtons } from "@/components/analytics/ExportButtons";
 import { CombinedMonthlyReport } from "@/components/analytics/CombinedMonthlyReport";
 import { CustomerMap } from "@/components/analytics/CustomerMap";
+import { GrowthFeatureGate } from "@/components/growth/GrowthFeatureGate";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportsPageSkeleton } from "@/components/skeletons/PageSkeletons";
+import { EducationalTips } from "@/components/conversion";
+import { BlurredPreview } from "@/components/conversion/BlurredPreview";
 
 const Relatorios = () => {
   const { loading: authLoading } = useRequireAuth();
@@ -33,6 +36,9 @@ const Relatorios = () => {
         <ReportsPageSkeleton />
       ) : (
         <div className="space-y-6">
+          {/* Dica educativa */}
+          <EducationalTips context="relatorios" />
+          
           <div className="flex justify-end">
             <ExportButtons 
               monthlyData={monthlyComparison}
@@ -76,16 +82,32 @@ const Relatorios = () => {
             </TabsContent>
 
             <TabsContent value="map" className="space-y-6">
-              <CustomerMap />
+              <BlurredPreview
+                featureName="Mapa de Clientes"
+                description="Descubra de onde vêm seus melhores clientes e onde estão suas maiores oportunidades de crescimento."
+                ctaText="Desbloquear"
+              >
+                <CustomerMap />
+              </BlurredPreview>
             </TabsContent>
           </Tabs>
 
           {peakHours && peakHours.length > 0 && (
-            <PeakHoursChart data={peakHours} />
+            <GrowthFeatureGate
+              featureName="Horários de Pico"
+              featureDescription="Descubra os horários mais lucrativos para otimizar sua agenda."
+            >
+              <PeakHoursChart data={peakHours} />
+            </GrowthFeatureGate>
           )}
 
           {historicalData && historicalData.length > 0 && (
-            <ForecastCard historicalData={historicalData} />
+            <GrowthFeatureGate
+              featureName="Previsão de Faturamento"
+              featureDescription="Veja projeções do seu faturamento baseadas em dados históricos."
+            >
+              <ForecastCard historicalData={historicalData} />
+            </GrowthFeatureGate>
           )}
         </div>
       )}

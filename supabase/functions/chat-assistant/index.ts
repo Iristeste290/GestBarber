@@ -212,7 +212,7 @@ O painel mostra resumo do dia:
 - Clientes atendidos
 - Comparativo com período anterior
 
-### Relatórios Avançados (Plano Pro/Growth)
+### Relatórios Avançados (Plano Growth)
 - Faturamento por período
 - Serviços mais vendidos
 - Ranking de barbeiros
@@ -498,9 +498,9 @@ serve(async (req) => {
       if (profile.trial_ends_at) {
         const daysRemaining = Math.ceil((new Date(profile.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
         if (daysRemaining <= 5 && daysRemaining > 0) {
-          contextInfo += `\n\nCONTEXTO: O plano gratuito deste usuário termina em ${daysRemaining} dias. Mencione os planos pagos se apropriado.`;
+          contextInfo += `\n\nCONTEXTO: O período de teste deste usuário termina em ${daysRemaining} dias. Ele está no plano Start e pode fazer upgrade para Growth.`;
         } else if (daysRemaining <= 0) {
-          contextInfo += "\n\nCONTEXTO: O plano gratuito deste usuário já expirou. Oriente sobre como fazer upgrade.";
+          contextInfo += "\n\nCONTEXTO: O período de teste expirou. Oriente sobre o plano Growth para desbloquear recursos avançados.";
         }
       }
       if (profile.barbershop_name) {

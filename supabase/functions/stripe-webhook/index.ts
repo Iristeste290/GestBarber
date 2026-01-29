@@ -106,7 +106,7 @@ serve(async (req) => {
         await supabase
           .from('subscriptions')
           .update({
-            plan_type: 'freemium',
+            plan_type: 'start',
             status: 'active',
             stripe_subscription_id: null,
             current_period_start: null,

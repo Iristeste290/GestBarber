@@ -161,11 +161,27 @@ const Planos = () => {
         {/* Header motivacional */}
         <div className="text-center max-w-2xl mx-auto space-y-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-            Você quer só trabalhar ou quer <span className="text-[#C9B27C]">crescer</span>?
+            Você quer só trabalhar ou quer <span className="text-[#C9B27C]">crescer de verdade</span>?
           </h2>
           <p className="text-muted-foreground">
-            O plano Start organiza sua barbearia. O plano Growth faz ela crescer.
+            O plano Start organiza sua barbearia. O plano Growth faz você <strong>ganhar mais dinheiro</strong>.
           </p>
+        </div>
+
+        {/* Proof points */}
+        <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-green-500" />
+            Recupere clientes que sumiram
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-green-500" />
+            Reduza faltas em até 60%
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-green-500" />
+            Preencha horários vazios
+          </span>
         </div>
 
         {/* Cards dos planos */}
@@ -236,11 +252,11 @@ const Planos = () => {
           </Card>
 
           {/* Growth Plan */}
-          <Card className={`relative border-[#C9B27C] shadow-lg shadow-[#C9B27C]/10 ${isGrowth ? 'ring-2 ring-[#C9B27C]/30' : ''}`}>
+          <Card className={`relative border-[#C9B27C] shadow-xl shadow-[#C9B27C]/20 ${isGrowth ? 'ring-2 ring-[#C9B27C]/30' : ''}`}>
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <Badge className="bg-gradient-to-r from-[#C9B27C] to-[#E8D9A8] text-black shadow-lg">
+              <Badge className="bg-gradient-to-r from-[#C9B27C] to-[#E8D9A8] text-black shadow-lg px-4">
                 <Crown className="w-3 h-3 mr-1" />
-                Recomendado
+                Mais escolhido
               </Badge>
             </div>
             {isGrowth && (
@@ -255,15 +271,18 @@ const Planos = () => {
                 <TrendingUp className="w-7 h-7 text-black" />
               </div>
               <CardTitle className="text-2xl">Growth</CardTitle>
+              <CardDescription className="text-sm">
+                O plano profissional para quem quer crescer
+              </CardDescription>
               <div className="mt-4">
                 <span className="text-4xl font-bold text-[#C9B27C]">
                   {mensalPrice ? formatPrice(mensalPrice.amount) : 'R$ 59,90'}
                 </span>
                 <span className="text-muted-foreground">/mês</span>
               </div>
-              <CardDescription className="mt-2">
-                Para crescer e ganhar mais dinheiro
-              </CardDescription>
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1 font-medium">
+                Se paga sozinho com o que você vai deixar de perder
+              </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <ul className="space-y-2">
@@ -328,10 +347,15 @@ const Planos = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center space-y-2 text-sm text-muted-foreground">
-          <p>Pagamento seguro via Stripe • Cancele quando quiser</p>
-          <p>
-            <span className="text-[#C9B27C] font-medium">Dúvida?</span>{' '}
+        <div className="text-center space-y-3 text-sm text-muted-foreground">
+          <p className="flex items-center justify-center gap-2">
+            ✓ Pagamento seguro via Stripe
+            <span className="mx-2">•</span>
+            ✓ Cancele quando quiser
+            <span className="mx-2">•</span>
+            ✓ Sem fidelidade
+          </p>
+          <p className="text-[#C9B27C] font-medium">
             O plano Growth se paga sozinho com o dinheiro que você vai deixar de perder.
           </p>
         </div>

@@ -18,6 +18,7 @@ import { AgendaSkeleton } from "@/components/skeletons/PageSkeletons";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useGrowthTriggers } from "@/components/upgrade/GrowthTriggerProvider";
+import { EducationalTips } from "@/components/conversion";
 
 // New components
 import { AgendaHeader } from "@/components/agenda/AgendaHeader";
@@ -311,6 +312,9 @@ const Agenda = () => {
               return null;
             })()
           )}
+
+          {/* Dica educativa */}
+          <EducationalTips context="agenda" />
 
           {/* Header with date and new appointment button */}
           <AgendaHeader

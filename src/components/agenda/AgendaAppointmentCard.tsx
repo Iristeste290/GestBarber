@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { openWhatsAppChat, formatReminderMessage } from "@/lib/whatsapp";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { AppointmentAttendanceActions } from "./AppointmentAttendanceActions";
 
 interface Appointment {
   id: string;
@@ -22,14 +23,18 @@ interface Appointment {
   customer_name: string | null;
   customer_phone: string | null;
   barber: { name: string };
-  service: { name: string; duration_minutes: number };
+  service: { name: string; duration_minutes: number; price?: number };
   profile: { full_name: string } | null;
+  checked_in_at?: string | null;
+  payment_status?: string | null;
+  payment_method?: string | null;
 }
 
 interface AgendaAppointmentCardProps {
   appointment: Appointment;
   onClick: () => void;
   onStatusChange?: (status: string) => void;
+  onRefresh?: () => void;
 }
 
 const statusConfig = {
@@ -81,6 +86,7 @@ export const AgendaAppointmentCard = ({
   appointment,
   onClick,
   onStatusChange,
+  onRefresh,
 }: AgendaAppointmentCardProps) => {
   const [reminderTemplate, setReminderTemplate] = useState<string | null>(null);
   const config = statusConfig[appointment.status as keyof typeof statusConfig] || statusConfig.pending;
@@ -241,6 +247,17 @@ export const AgendaAppointmentCard = ({
 
       {/* Mobile quick actions - always visible */}
       <div className="flex flex-wrap gap-2 mt-3 sm:hidden">
+        {/* Attendance actions for mobile */}
+        <AppointmentAttendanceActions
+          appointmentId={appointment.id}
+          status={appointment.status}
+          checkedInAt={appointment.checked_in_at || null}
+          paymentStatus={appointment.payment_status || null}
+          paymentMethod={appointment.payment_method || null}
+          servicePrice={appointment.service.price || 0}
+          onUpdate={onRefresh}
+        />
+        
         {/* WhatsApp reminder button - always visible for pending/confirmed */}
         {(appointment.status === "pending" || appointment.status === "confirmed") && (
           <Button
@@ -253,39 +270,6 @@ export const AgendaAppointmentCard = ({
             Lembrete
           </Button>
         )}
-        {appointment.status === "pending" && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 h-9 text-xs border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-950"
-            onClick={(e) => handleQuickAction(e, "confirmed")}
-          >
-            <Check className="h-3.5 w-3.5 mr-1.5" />
-            Confirmar
-          </Button>
-        )}
-        {appointment.status === "confirmed" && (
-          <>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 h-9 text-xs border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950"
-              onClick={(e) => handleQuickAction(e, "completed")}
-            >
-              <Check className="h-3.5 w-3.5 mr-1.5" />
-              Concluir
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 px-3 text-xs border-orange-200 text-orange-700 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-400 dark:hover:bg-orange-950"
-              onClick={(e) => handleQuickAction(e, "no_show")}
-            >
-              <UserX className="h-3.5 w-3.5 mr-1" />
-              No-show
-            </Button>
-          </>
-        )}
         {(appointment.status === "pending" || appointment.status === "confirmed") && (
           <Button
             variant="ghost"
@@ -297,6 +281,19 @@ export const AgendaAppointmentCard = ({
             Cancelar
           </Button>
         )}
+      </div>
+
+      {/* Attendance actions - Check-in and Payment */}
+      <div className="hidden sm:block">
+        <AppointmentAttendanceActions
+          appointmentId={appointment.id}
+          status={appointment.status}
+          checkedInAt={appointment.checked_in_at || null}
+          paymentStatus={appointment.payment_status || null}
+          paymentMethod={appointment.payment_method || null}
+          servicePrice={appointment.service.price || 0}
+          onUpdate={onRefresh}
+        />
       </div>
     </div>
   );

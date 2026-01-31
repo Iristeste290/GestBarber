@@ -1,13 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { ArrowLeft, Clock, CheckCircle2, Scissors, Store, Star, CalendarDays } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle2, Scissors, Star, CalendarDays, ChevronRight } from "lucide-react";
 import { format, addMinutes, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AppointmentBookingForm } from "@/components/agenda/AppointmentBookingForm";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { BookingStepper } from "@/components/booking/BookingStepper";
+import { ServicesSkeleton } from "@/components/booking/ServicesSkeleton";
+import { TimeSlotsSkeleton } from "@/components/booking/TimeSlotsSkeleton";
+import { CategorizedTimeSlots } from "@/components/booking/CategorizedTimeSlots";
+import { BookingSuccessScreen } from "@/components/booking/BookingSuccessScreen";
+import { useAvailableDates } from "@/hooks/useAvailableDates";
 
 interface Barber {
   id: string;
@@ -31,18 +38,36 @@ interface TimeSlot {
 const PublicBarberSchedule = () => {
   const { barberId } = useParams();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  
   const [barber, setBarber] = useState<Barber | null>(null);
   const [barbershopName, setBarbershopName] = useState<string>("");
   const [barbershopLogoUrl, setBarbershopLogoUrl] = useState<string | null>(null);
   const [services, setServices] = useState<Service[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingServices, setLoadingServices] = useState(true);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [noWorkHours, setNoWorkHours] = useState(false);
+  const [customerPhone, setCustomerPhone] = useState<string>("");
+
+  // Mobile stepper state
+  const [mobileStep, setMobileStep] = useState(1);
+
+  // Hook for checking unavailable dates
+  const { isDateUnavailable, loading: loadingDates } = useAvailableDates({ barberId });
+
+  // Stepper steps configuration
+  const stepperSteps = [
+    { label: "Serviço", icon: <Scissors className="w-4 h-4" /> },
+    { label: "Data", icon: <CalendarDays className="w-4 h-4" /> },
+    { label: "Horário", icon: <Clock className="w-4 h-4" /> },
+  ];
 
   useEffect(() => {
     if (barberId) {
@@ -59,8 +84,8 @@ const PublicBarberSchedule = () => {
   const loadBarberData = async () => {
     try {
       setLoading(true);
+      setLoadingServices(true);
       
-      // Use secure public view that excludes user_id
       const { data: barberData, error: barberError } = await supabase
         .from("barbers_public")
         .select("id, name, specialty, avatar_url")
@@ -70,7 +95,6 @@ const PublicBarberSchedule = () => {
       if (barberError) throw barberError;
       setBarber(barberData);
 
-      // Fetch barbershop info using the secure barber_barbershop_public view
       const { data: shopData } = await supabase
         .from("barber_barbershop_public")
         .select("barbershop_name, barbershop_logo_url")
@@ -84,7 +108,6 @@ const PublicBarberSchedule = () => {
         setBarbershopLogoUrl(shopData.barbershop_logo_url);
       }
 
-      // Fetch services using the secure barber_services_public view
       const { data: servicesData, error: servicesError } = await supabase
         .from("barber_services_public")
         .select("service_id, service_name, duration_minutes, price")
@@ -92,7 +115,6 @@ const PublicBarberSchedule = () => {
 
       if (servicesError) throw servicesError;
       
-      // Map to expected format
       const mappedServices = (servicesData || []).map(s => ({
         id: s.service_id,
         name: s.service_name,
@@ -104,6 +126,7 @@ const PublicBarberSchedule = () => {
       console.error("Erro ao carregar dados:", error);
     } finally {
       setLoading(false);
+      setLoadingServices(false);
     }
   };
 
@@ -210,6 +233,20 @@ const PublicBarberSchedule = () => {
     }
   };
 
+  const handleServiceSelect = (service: Service) => {
+    setSelectedService(service);
+    if (isMobile) {
+      setMobileStep(2);
+    }
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+    if (date && isMobile && selectedService) {
+      setMobileStep(3);
+    }
+  };
+
   const handleTimeSelect = (time: string) => {
     setSelectedTime(time);
     setShowBookingForm(true);
@@ -217,9 +254,28 @@ const PublicBarberSchedule = () => {
 
   const handleBookingSuccess = () => {
     setShowBookingForm(false);
+    setShowSuccess(true);
+  };
+
+  const handleNewBooking = () => {
+    setShowSuccess(false);
     setSelectedTime(null);
     setSelectedService(null);
-    loadAvailableSlots();
+    setSelectedDate(undefined);
+    setMobileStep(1);
+  };
+
+  const handleMobileBack = () => {
+    if (mobileStep > 1) {
+      setMobileStep(mobileStep - 1);
+    }
+  };
+
+  // Disable dates that are in the past or have no availability
+  const isDateDisabled = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date < today || isDateUnavailable(date);
   };
 
   if (loading) {
@@ -258,6 +314,21 @@ const PublicBarberSchedule = () => {
     );
   }
 
+  // Show success screen
+  if (showSuccess && selectedDate && selectedService && selectedTime) {
+    return (
+      <BookingSuccessScreen
+        barberName={barber.name}
+        service={selectedService}
+        date={selectedDate}
+        time={selectedTime}
+        customerPhone={customerPhone}
+        onNewBooking={handleNewBooking}
+      />
+    );
+  }
+
+  // Show booking form
   if (showBookingForm && selectedDate && selectedService && selectedTime) {
     return (
       <AppointmentBookingForm
@@ -274,100 +345,17 @@ const PublicBarberSchedule = () => {
 
   const availableCount = availableSlots.filter(s => s.available).length;
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      {/* Hero Header */}
-      <header className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        
-        <div className="relative container mx-auto px-4 py-8 md:py-12">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/agenda")}
-            className="mb-6 -ml-2"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar
-          </Button>
+  // Render mobile stepper flow
+  const renderMobileContent = () => {
+    return (
+      <div className="space-y-4">
+        {/* Stepper */}
+        <BookingStepper currentStep={mobileStep} steps={stepperSteps} />
 
-          {/* Barbershop Logo & Name */}
-          {(barbershopName || barbershopLogoUrl) && (
-            <div className="flex items-center justify-center gap-3 mb-8">
-              {barbershopLogoUrl && (
-                <img
-                  src={barbershopLogoUrl}
-                  alt={barbershopName || "Logo da barbearia"}
-                  className="w-12 h-12 md:w-14 md:h-14 rounded-xl object-cover border-2 border-primary/20 shadow-lg"
-                />
-              )}
-              {barbershopName && (
-                <div className="text-center md:text-left">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Barbearia</p>
-                  <h2 className="text-xl md:text-2xl font-bold text-foreground">{barbershopName}</h2>
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
-            {/* Avatar */}
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-primary/50 rounded-full blur opacity-30 group-hover:opacity-50 transition-opacity" />
-              {barber.avatar_url ? (
-                <img
-                  src={barber.avatar_url}
-                  alt={barber.name}
-                  className="relative w-28 h-28 md:w-36 md:h-36 rounded-full object-cover border-4 border-background shadow-2xl"
-                />
-              ) : (
-                <div className="relative w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center border-4 border-background shadow-2xl">
-                  <span className="text-4xl md:text-5xl font-bold text-primary-foreground">
-                    {barber.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
-              <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center border-4 border-background shadow-lg">
-                <CheckCircle2 className="w-5 h-5 text-white" />
-              </div>
-            </div>
-
-            {/* Info */}
-            <div className="text-center md:text-left space-y-3">
-              <div className="space-y-1">
-                <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">
-                  {barber.name}
-                </h1>
-                {barber.specialty && (
-                  <p className="text-lg text-primary font-medium flex items-center justify-center md:justify-start gap-2">
-                    <Scissors className="w-4 h-4" />
-                    {barber.specialty}
-                  </p>
-                )}
-              </div>
-              
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1.5 bg-muted/50 px-3 py-1.5 rounded-full">
-                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                  Profissional verificado
-                </span>
-                <span className="flex items-center gap-1.5 bg-muted/50 px-3 py-1.5 rounded-full">
-                  <CalendarDays className="w-4 h-4" />
-                  Agendamento online
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 md:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
-          
-          {/* Services Column */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center gap-3 mb-6">
+        {/* Step 1: Service Selection */}
+        {mobileStep === 1 && (
+          <div className="animate-fade-in space-y-4">
+            <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Scissors className="w-5 h-5 text-primary" />
               </div>
@@ -377,6 +365,188 @@ const PublicBarberSchedule = () => {
               </div>
             </div>
 
+            {loadingServices ? (
+              <ServicesSkeleton />
+            ) : (
+              <div className="space-y-3">
+                {services.map((service) => (
+                  <button
+                    key={service.id}
+                    onClick={() => handleServiceSelect(service)}
+                    className="w-full text-left p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md hover:border-primary/50 border-border bg-card hover:bg-muted/30"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-foreground truncate">{service.name}</h3>
+                        <div className="flex items-center gap-3 mt-1.5 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5" />
+                            {service.duration_minutes} min
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold text-foreground">R$ {service.price.toFixed(2)}</span>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Step 2: Date Selection */}
+        {mobileStep === 2 && (
+          <div className="animate-fade-in space-y-4">
+            <div className="flex items-center gap-3 mb-4">
+              <Button variant="ghost" size="icon" onClick={handleMobileBack}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <CalendarDays className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-foreground">Escolha a Data</h2>
+                <p className="text-sm text-muted-foreground">Dias em cinza estão indisponíveis</p>
+              </div>
+            </div>
+
+            {/* Selected service summary */}
+            {selectedService && (
+              <div className="bg-primary/5 rounded-xl p-3 border border-primary/20">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Serviço selecionado:</span>
+                  <span className="font-semibold text-foreground">{selectedService.name}</span>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-center bg-card rounded-2xl border p-4">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                disabled={isDateDisabled}
+                locale={ptBR}
+                className="rounded-xl border-0 p-0 pointer-events-auto"
+                classNames={{
+                  day_disabled: "text-muted-foreground/30 opacity-50 cursor-not-allowed",
+                  day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100 inline-flex items-center justify-center rounded-md text-sm transition-colors hover:bg-muted",
+                  day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                  day_today: "bg-accent text-accent-foreground font-semibold",
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Time Selection */}
+        {mobileStep === 3 && (
+          <div className="animate-fade-in space-y-4">
+            <div className="flex items-center gap-3 mb-4">
+              <Button variant="ghost" size="icon" onClick={handleMobileBack}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-foreground">Escolha o Horário</h2>
+                {selectedDate && (
+                  <p className="text-sm text-muted-foreground">
+                    {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Selected service & date summary */}
+            {selectedService && selectedDate && (
+              <div className="bg-primary/5 rounded-xl p-3 border border-primary/20 space-y-1">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Serviço:</span>
+                  <span className="font-semibold text-foreground">{selectedService.name}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Data:</span>
+                  <span className="font-semibold text-foreground">{format(selectedDate, "dd/MM/yyyy")}</span>
+                </div>
+              </div>
+            )}
+
+            <div className="bg-card rounded-2xl border p-4">
+              {loadingSlots ? (
+                <TimeSlotsSkeleton />
+              ) : noWorkHours ? (
+                <div className="text-center py-8 space-y-3">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+                    <CalendarDays className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Dia não disponível</p>
+                    <p className="text-sm text-muted-foreground">
+                      O profissional não trabalha neste dia.
+                    </p>
+                  </div>
+                  <Button variant="outline" onClick={handleMobileBack}>
+                    Escolher outra data
+                  </Button>
+                </div>
+              ) : availableSlots.length === 0 ? (
+                <div className="text-center py-8 space-y-3">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+                    <Clock className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Sem horários disponíveis</p>
+                    <p className="text-sm text-muted-foreground">
+                      Todos os horários estão ocupados.
+                    </p>
+                  </div>
+                  <Button variant="outline" onClick={handleMobileBack}>
+                    Escolher outra data
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  {availableCount > 0 && (
+                    <div className="flex justify-end mb-4">
+                      <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-full">
+                        {availableCount} {availableCount === 1 ? 'horário' : 'horários'} disponíveis
+                      </span>
+                    </div>
+                  )}
+                  <CategorizedTimeSlots slots={availableSlots} onSelect={handleTimeSelect} />
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Render desktop layout
+  const renderDesktopContent = () => {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
+        {/* Services Column */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Scissors className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-foreground">Escolha o Serviço</h2>
+              <p className="text-sm text-muted-foreground">Selecione o que deseja fazer</p>
+            </div>
+          </div>
+
+          {loadingServices ? (
+            <ServicesSkeleton />
+          ) : (
             <div className="space-y-3">
               {services.map((service) => {
                 const isSelected = selectedService?.id === service.id;
@@ -423,161 +593,218 @@ const PublicBarberSchedule = () => {
                 );
               })}
             </div>
-          </div>
+          )}
+        </div>
 
-          {/* Calendar Column */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Date Selection */}
-            <div className="bg-card rounded-2xl border shadow-sm p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <CalendarDays className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-foreground">Escolha a Data</h2>
-                  <p className="text-sm text-muted-foreground">Selecione o dia do agendamento</p>
-                </div>
+        {/* Calendar & Time Slots Column */}
+        <div className="lg:col-span-3 space-y-6">
+          {/* Date Selection */}
+          <div className="bg-card rounded-2xl border shadow-sm p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <CalendarDays className="w-5 h-5 text-primary" />
               </div>
-
-              <div className="flex justify-center">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  disabled={(date) => date < new Date()}
-                  locale={ptBR}
-                  className="rounded-xl border-0 p-0 pointer-events-auto"
-                  classNames={{
-                    months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                    month: "space-y-4",
-                    caption: "flex justify-center pt-1 relative items-center",
-                    caption_label: "text-sm font-medium",
-                    nav: "space-x-1 flex items-center",
-                    nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-muted",
-                    nav_button_previous: "absolute left-1",
-                    nav_button_next: "absolute right-1",
-                    table: "w-full border-collapse space-y-1",
-                    head_row: "flex",
-                    head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-                    row: "flex w-full mt-2",
-                    cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                    day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 inline-flex items-center justify-center rounded-md text-sm transition-colors hover:bg-muted",
-                    day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-                    day_today: "bg-accent text-accent-foreground",
-                    day_outside: "text-muted-foreground opacity-50",
-                    day_disabled: "text-muted-foreground opacity-50",
-                    day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
-                    day_hidden: "invisible",
-                  }}
-                />
+              <div>
+                <h2 className="text-xl font-bold text-foreground">Escolha a Data</h2>
+                <p className="text-sm text-muted-foreground">Dias em cinza estão indisponíveis</p>
               </div>
             </div>
 
-            {/* Time Slots */}
-            {selectedService && selectedDate && (
-              <div className="bg-card rounded-2xl border shadow-sm p-6 animate-fade-in">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <Clock className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-foreground">Horários Disponíveis</h2>
-                      <p className="text-sm text-muted-foreground">
-                        {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
-                      </p>
-                    </div>
-                  </div>
-                  {!loadingSlots && availableCount > 0 && (
-                    <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-full">
-                      {availableCount} {availableCount === 1 ? 'horário' : 'horários'}
-                    </span>
-                  )}
-                </div>
+            <div className="flex justify-center">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                disabled={isDateDisabled}
+                locale={ptBR}
+                className="rounded-xl border-0 p-0 pointer-events-auto"
+                classNames={{
+                  day_disabled: "text-muted-foreground/30 opacity-50 cursor-not-allowed",
+                  day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 inline-flex items-center justify-center rounded-md text-sm transition-colors hover:bg-muted",
+                  day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                  day_today: "bg-accent text-accent-foreground font-semibold",
+                }}
+              />
+            </div>
+          </div>
 
-                {loadingSlots ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="text-center space-y-3">
-                      <div className="w-10 h-10 rounded-full border-3 border-primary/20 border-t-primary animate-spin mx-auto" />
-                      <p className="text-sm text-muted-foreground">Buscando horários...</p>
-                    </div>
+          {/* Time Slots */}
+          {selectedService && selectedDate && (
+            <div className="bg-card rounded-2xl border shadow-sm p-6 animate-fade-in">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-primary" />
                   </div>
-                ) : noWorkHours ? (
-                  <div className="text-center py-12 space-y-3">
-                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
-                      <CalendarDays className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">Dia não disponível</p>
-                      <p className="text-sm text-muted-foreground">
-                        O profissional não trabalha neste dia. Selecione outra data.
-                      </p>
-                    </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-foreground">Horários Disponíveis</h2>
+                    <p className="text-sm text-muted-foreground">
+                      {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                    </p>
                   </div>
-                ) : availableSlots.length === 0 ? (
-                  <div className="text-center py-12 space-y-3">
-                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
-                      <Clock className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">Sem horários disponíveis</p>
-                      <p className="text-sm text-muted-foreground">
-                        Todos os horários estão ocupados. Tente outra data.
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                    {availableSlots.map((slot) => (
-                      <button
-                        key={slot.time}
-                        disabled={!slot.available}
-                        onClick={() => handleTimeSelect(slot.time)}
-                        className={cn(
-                          "py-3 px-2 rounded-xl text-sm font-medium transition-all duration-200",
-                          slot.available
-                            ? "bg-muted/50 hover:bg-primary hover:text-primary-foreground border border-transparent hover:border-primary hover:shadow-md active:scale-95"
-                            : "bg-muted/30 text-muted-foreground/50 cursor-not-allowed line-through"
-                        )}
-                      >
-                        {slot.time}
-                      </button>
-                    ))}
-                  </div>
+                </div>
+                {!loadingSlots && availableCount > 0 && (
+                  <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-full">
+                    {availableCount} {availableCount === 1 ? 'horário' : 'horários'}
+                  </span>
                 )}
               </div>
-            )}
 
-            {/* Selected Summary */}
-            {selectedService && (
-              <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-2xl border border-primary/20 p-6">
-                <h3 className="font-semibold text-foreground mb-3">Resumo do agendamento</h3>
-                <div className="flex flex-wrap gap-3 text-sm">
-                  <span className="bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border">
-                    <strong>Serviço:</strong> {selectedService.name}
-                  </span>
-                  <span className="bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border">
-                    <strong>Duração:</strong> {selectedService.duration_minutes} min
-                  </span>
-                  <span className="bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border">
-                    <strong>Valor:</strong> R$ {selectedService.price.toFixed(2)}
-                  </span>
-                  {selectedDate && (
-                    <span className="bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border">
-                      <strong>Data:</strong> {format(selectedDate, "dd/MM/yyyy")}
-                    </span>
-                  )}
+              {loadingSlots ? (
+                <TimeSlotsSkeleton />
+              ) : noWorkHours ? (
+                <div className="text-center py-12 space-y-3">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+                    <CalendarDays className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Dia não disponível</p>
+                    <p className="text-sm text-muted-foreground">
+                      O profissional não trabalha neste dia. Selecione outra data.
+                    </p>
+                  </div>
                 </div>
+              ) : availableSlots.length === 0 ? (
+                <div className="text-center py-12 space-y-3">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+                    <Clock className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Sem horários disponíveis</p>
+                    <p className="text-sm text-muted-foreground">
+                      Todos os horários estão ocupados. Tente outra data.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <CategorizedTimeSlots slots={availableSlots} onSelect={handleTimeSelect} />
+              )}
+            </div>
+          )}
+
+          {/* Selected Summary */}
+          {selectedService && (
+            <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-2xl border border-primary/20 p-6">
+              <h3 className="font-semibold text-foreground mb-3">Resumo do agendamento</h3>
+              <div className="flex flex-wrap gap-3 text-sm">
+                <span className="bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border">
+                  <strong>Serviço:</strong> {selectedService.name}
+                </span>
+                <span className="bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border">
+                  <strong>Duração:</strong> {selectedService.duration_minutes} min
+                </span>
+                <span className="bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border">
+                  <strong>Valor:</strong> R$ {selectedService.price.toFixed(2)}
+                </span>
+                {selectedDate && (
+                  <span className="bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border">
+                    <strong>Data:</strong> {format(selectedDate, "dd/MM/yyyy")}
+                  </span>
+                )}
               </div>
-            )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      {/* Hero Header */}
+      <header className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        
+        <div className="relative container mx-auto px-4 py-6 md:py-12">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/agenda")}
+            className="mb-4 -ml-2"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar
+          </Button>
+
+          {/* Barbershop Logo & Name */}
+          {(barbershopName || barbershopLogoUrl) && (
+            <div className="flex items-center justify-center gap-3 mb-6">
+              {barbershopLogoUrl && (
+                <img
+                  src={barbershopLogoUrl}
+                  alt={barbershopName || "Logo da barbearia"}
+                  className="w-10 h-10 md:w-14 md:h-14 rounded-xl object-cover border-2 border-primary/20 shadow-lg"
+                />
+              )}
+              {barbershopName && (
+                <div className="text-center md:text-left">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Barbearia</p>
+                  <h2 className="text-lg md:text-2xl font-bold text-foreground">{barbershopName}</h2>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+            {/* Avatar */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-primary/50 rounded-full blur opacity-30 group-hover:opacity-50 transition-opacity" />
+              {barber.avatar_url ? (
+                <img
+                  src={barber.avatar_url}
+                  alt={barber.name}
+                  className="relative w-20 h-20 md:w-36 md:h-36 rounded-full object-cover border-4 border-background shadow-2xl"
+                />
+              ) : (
+                <div className="relative w-20 h-20 md:w-36 md:h-36 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center border-4 border-background shadow-2xl">
+                  <span className="text-2xl md:text-5xl font-bold text-primary-foreground">
+                    {barber.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 md:-bottom-2 md:-right-2 w-7 h-7 md:w-10 md:h-10 bg-green-500 rounded-full flex items-center justify-center border-2 md:border-4 border-background shadow-lg">
+                <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
+              </div>
+            </div>
+
+            {/* Info */}
+            <div className="text-center md:text-left space-y-2">
+              <div className="space-y-1">
+                <h1 className="text-2xl md:text-4xl font-bold text-foreground tracking-tight">
+                  {barber.name}
+                </h1>
+                {barber.specialty && (
+                  <p className="text-base md:text-lg text-primary font-medium flex items-center justify-center md:justify-start gap-2">
+                    <Scissors className="w-4 h-4" />
+                    {barber.specialty}
+                  </p>
+                )}
+              </div>
+              
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 text-xs md:text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5 bg-muted/50 px-2 py-1 md:px-3 md:py-1.5 rounded-full">
+                  <Star className="w-3 h-3 md:w-4 md:h-4 text-amber-500 fill-amber-500" />
+                  Profissional verificado
+                </span>
+                <span className="flex items-center gap-1.5 bg-muted/50 px-2 py-1 md:px-3 md:py-1.5 rounded-full">
+                  <CalendarDays className="w-3 h-3 md:w-4 md:h-4" />
+                  Agendamento online
+                </span>
+              </div>
+            </div>
           </div>
         </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6 md:py-12">
+        {isMobile ? renderMobileContent() : renderDesktopContent()}
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-muted/30 mt-12">
-        <div className="container mx-auto px-4 py-6">
-          <p className="text-center text-sm text-muted-foreground">
+      <footer className="border-t bg-muted/30 mt-8 md:mt-12">
+        <div className="container mx-auto px-4 py-4 md:py-6">
+          <p className="text-center text-xs md:text-sm text-muted-foreground">
             Agendamento online • Powered by <span className="font-semibold text-primary">GestBarber</span>
           </p>
         </div>

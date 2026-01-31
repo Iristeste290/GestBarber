@@ -2,12 +2,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, User } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { AppointmentAttendanceActions } from "@/components/agenda/AppointmentAttendanceActions";
 
-interface BarberAppointmentsProps {
-  appointments: any[];
+interface Appointment {
+  id: string;
+  appointment_time: string;
+  status: string;
+  notes?: string;
+  profiles?: { full_name: string };
+  services?: { name: string; price?: number };
+  checked_in_at?: string | null;
+  payment_status?: string | null;
+  payment_method?: string | null;
 }
 
-export const BarberAppointments = ({ appointments }: BarberAppointmentsProps) => {
+interface BarberAppointmentsProps {
+  appointments: Appointment[];
+  onRefresh?: () => void;
+}
+
+export const BarberAppointments = ({ appointments, onRefresh }: BarberAppointmentsProps) => {
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       pending: "outline",
@@ -47,7 +61,7 @@ export const BarberAppointments = ({ appointments }: BarberAppointmentsProps) =>
         ) : (
           <ScrollArea className="h-[400px] pr-4">
             <div className="space-y-4">
-              {appointments.map((appointment: any) => (
+              {appointments.map((appointment) => (
                 <div
                   key={appointment.id}
                   className="flex flex-col gap-2 p-4 border rounded-lg hover:bg-accent/50 transition-colors"
@@ -72,7 +86,7 @@ export const BarberAppointments = ({ appointments }: BarberAppointmentsProps) =>
                       {appointment.appointment_time}
                     </div>
                     <div className="flex items-center gap-1">
-                      💰 R$ {appointment.services?.price?.toFixed(2)}
+                      💰 R$ {appointment.services?.price?.toFixed(2) || '0.00'}
                     </div>
                   </div>
                   {appointment.notes && (
@@ -80,6 +94,17 @@ export const BarberAppointments = ({ appointments }: BarberAppointmentsProps) =>
                       📝 {appointment.notes}
                     </p>
                   )}
+                  
+                  {/* Attendance actions */}
+                  <AppointmentAttendanceActions
+                    appointmentId={appointment.id}
+                    status={appointment.status}
+                    checkedInAt={appointment.checked_in_at || null}
+                    paymentStatus={appointment.payment_status || null}
+                    paymentMethod={appointment.payment_method || null}
+                    servicePrice={appointment.services?.price || 0}
+                    onUpdate={onRefresh}
+                  />
                 </div>
               ))}
             </div>

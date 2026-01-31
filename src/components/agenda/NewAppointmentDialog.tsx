@@ -9,11 +9,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon, Clock } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { usePlanValidation } from "@/hooks/usePlanValidation";
 import { useManualProcessTracker } from "@/hooks/useManualProcessTracker";
+import { 
+  sanitizeName, 
+  sanitizePhone, 
+  validateAppointmentCustomer,
+  containsDangerousContent 
+} from "@/lib/input-sanitizer";
 
 interface OccupiedSlot {
   time: string;
@@ -46,6 +52,8 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
   const [selectedTime, setSelectedTime] = useState("");
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [occupiedSlots, setOccupiedSlots] = useState<OccupiedSlot[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -223,14 +231,20 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
       return;
     }
 
-    // Validar telefone
-    const cleanPhone = clientPhone.replace(/\D/g, "");
-    if (cleanPhone.length < 10 || cleanPhone.length > 11) {
-      toast.error("Telefone deve ter 10 ou 11 dígitos");
+    // 🔒 Validação rigorosa com schema de sanitização
+    const customerValidation = validateAppointmentCustomer({
+      customerName: clientName,
+      customerPhone: clientPhone,
+    });
+
+    if (!customerValidation.success) {
+      toast.error((customerValidation as { success: false; error: string }).error);
       return;
     }
 
-    // Validate input
+    const { customerName: validatedName, customerPhone: validatedPhone } = customerValidation.data;
+
+    // Validate appointment fields
     const validationResult = appointmentSchema.safeParse({
       barberId: selectedBarber,
       serviceId: selectedService,
@@ -261,14 +275,14 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
         return;
       }
 
-      // Use the safe RPC function that checks for conflicts
+      // Use the safe RPC function with sanitized data
       const { data: appointmentId, error } = await supabase.rpc(
         "create_appointment_safe",
         {
           p_barber_id: selectedBarber,
           p_service_id: selectedService,
-          p_customer_name: clientName.trim(),
-          p_customer_phone: cleanPhone,
+          p_customer_name: validatedName,
+          p_customer_phone: validatedPhone,
           p_appointment_date: format(selectedDate, "yyyy-MM-dd"),
           p_appointment_time: selectedTime + ":00",
           p_duration_minutes: service.duration_minutes,
@@ -306,7 +320,32 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
     setSelectedTime("");
     setClientName("");
     setClientPhone("");
+    setNameError(null);
+    setPhoneError(null);
   };
+
+  // 🔒 Handler seguro para nome - sanitiza em tempo real
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    
+    // Verificar conteúdo perigoso
+    if (containsDangerousContent(rawValue)) {
+      setNameError("Caracteres não permitidos detectados");
+      return;
+    }
+    
+    // Sanitizar e aplicar
+    const sanitized = sanitizeName(rawValue);
+    setClientName(sanitized);
+    setNameError(null);
+  }, []);
+
+  // 🔒 Handler seguro para telefone - apenas números
+  const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitized = sanitizePhone(e.target.value);
+    setClientPhone(sanitized);
+    setPhoneError(null);
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -324,11 +363,20 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
             <input
               type="text"
               value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
+              onChange={handleNameChange}
               placeholder="Nome completo do cliente"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className={cn(
+                "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                nameError && "border-destructive"
+              )}
               maxLength={100}
             />
+            {nameError && (
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {nameError}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -336,14 +384,20 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
             <input
               type="tel"
               value={clientPhone}
-              onChange={(e) => {
-                const cleanPhone = e.target.value.replace(/\D/g, "");
-                setClientPhone(cleanPhone);
-              }}
+              onChange={handlePhoneChange}
               placeholder="11999999999"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className={cn(
+                "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                phoneError && "border-destructive"
+              )}
               maxLength={11}
             />
+            {phoneError && (
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {phoneError}
+              </p>
+            )}
             <p className="text-xs text-muted-foreground">
               Apenas números (DDD + número). Ex: 11999999999
             </p>

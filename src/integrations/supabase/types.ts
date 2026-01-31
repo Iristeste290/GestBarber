@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_logs: {
+        Row: {
+          completed_at: string | null
+          id: string
+          ip_address: string | null
+          requested_at: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          ip_address?: string | null
+          requested_at?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          ip_address?: string | null
+          requested_at?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_audit_logs: {
         Row: {
           action: string
@@ -114,6 +141,7 @@ export type Database = {
           appointment_date: string
           appointment_time: string
           barber_id: string
+          checked_in_at: string | null
           client_id: string
           created_at: string | null
           customer_name: string | null
@@ -122,6 +150,10 @@ export type Database = {
           id: string
           notes: string | null
           notification_sent: boolean | null
+          paid_at: string | null
+          payment_amount: number | null
+          payment_method: string | null
+          payment_status: string | null
           service_id: string
           status: string
           updated_at: string | null
@@ -130,6 +162,7 @@ export type Database = {
           appointment_date: string
           appointment_time: string
           barber_id: string
+          checked_in_at?: string | null
           client_id: string
           created_at?: string | null
           customer_name?: string | null
@@ -138,6 +171,10 @@ export type Database = {
           id?: string
           notes?: string | null
           notification_sent?: boolean | null
+          paid_at?: string | null
+          payment_amount?: number | null
+          payment_method?: string | null
+          payment_status?: string | null
           service_id: string
           status?: string
           updated_at?: string | null
@@ -146,6 +183,7 @@ export type Database = {
           appointment_date?: string
           appointment_time?: string
           barber_id?: string
+          checked_in_at?: string | null
           client_id?: string
           created_at?: string | null
           customer_name?: string | null
@@ -154,6 +192,10 @@ export type Database = {
           id?: string
           notes?: string | null
           notification_sent?: boolean | null
+          paid_at?: string | null
+          payment_amount?: number | null
+          payment_method?: string | null
+          payment_status?: string | null
           service_id?: string
           status?: string
           updated_at?: string | null
@@ -229,7 +271,56 @@ export type Database = {
             referencedRelation: "services"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services_public"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          new_data: Json | null
+          old_data: Json | null
+          record_id: string | null
+          table_name: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       automation_logs: {
         Row: {
@@ -3330,6 +3421,13 @@ export type Database = {
             referencedRelation: "services"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       barber_barbershop_public: {
@@ -3340,27 +3438,56 @@ export type Database = {
         }
         Relationships: []
       }
+      barber_breaks_public: {
+        Row: {
+          barber_id: string | null
+          end_time: string | null
+          start_time: string | null
+          weekday: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "barber_breaks_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barber_barbershop_public"
+            referencedColumns: ["barber_id"]
+          },
+          {
+            foreignKeyName: "barber_breaks_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barber_services_public"
+            referencedColumns: ["barber_id"]
+          },
+          {
+            foreignKeyName: "barber_breaks_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barber_site_barbers_public"
+            referencedColumns: ["barber_id"]
+          },
+          {
+            foreignKeyName: "barber_breaks_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barber_breaks_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       barber_exceptions_public: {
         Row: {
           barber_id: string | null
-          created_at: string | null
           date: string | null
-          id: string | null
           is_closed: boolean | null
-        }
-        Insert: {
-          barber_id?: string | null
-          created_at?: string | null
-          date?: string | null
-          id?: string | null
-          is_closed?: boolean | null
-        }
-        Update: {
-          barber_id?: string | null
-          created_at?: string | null
-          date?: string | null
-          id?: string | null
-          is_closed?: boolean | null
         }
         Relationships: [
           {
@@ -3493,6 +3620,51 @@ export type Database = {
         }
         Relationships: []
       }
+      barber_work_hours_public: {
+        Row: {
+          barber_id: string | null
+          end_time: string | null
+          start_time: string | null
+          weekday: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "barber_work_hours_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barber_barbershop_public"
+            referencedColumns: ["barber_id"]
+          },
+          {
+            foreignKeyName: "barber_work_hours_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barber_services_public"
+            referencedColumns: ["barber_id"]
+          },
+          {
+            foreignKeyName: "barber_work_hours_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barber_site_barbers_public"
+            referencedColumns: ["barber_id"]
+          },
+          {
+            foreignKeyName: "barber_work_hours_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barber_work_hours_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       barbers_public: {
         Row: {
           avatar_url: string | null
@@ -3571,8 +3743,44 @@ export type Database = {
         }
         Relationships: []
       }
+      services_public: {
+        Row: {
+          duration_minutes: number | null
+          id: string | null
+          name: string | null
+          price: number | null
+          user_id: string | null
+        }
+        Insert: {
+          duration_minutes?: number | null
+          id?: string | null
+          name?: string | null
+          price?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          duration_minutes?: number | null
+          id?: string | null
+          name?: string | null
+          price?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      appointment_check_in: {
+        Args: { p_appointment_id: string }
+        Returns: boolean
+      }
+      appointment_register_payment: {
+        Args: {
+          p_amount?: number
+          p_appointment_id: string
+          p_payment_method: string
+        }
+        Returns: boolean
+      }
       auto_complete_appointments: { Args: never; Returns: undefined }
       calculate_customer_score: {
         Args: {
@@ -3644,6 +3852,10 @@ export type Database = {
             Args: { full_name: string; papel: string; telefone: string }
             Returns: undefined
           }
+      delete_user_account_lgpd: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       generate_barber_slug: { Args: { barber_name: string }; Returns: string }
       generate_site_slug: { Args: { site_title: string }; Returns: string }
       get_customer_status: { Args: { p_score: number }; Returns: string }
@@ -3661,6 +3873,15 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      log_audit_event: {
+        Args: {
+          p_action: string
+          p_metadata?: Json
+          p_record_id?: string
+          p_table_name?: string
+        }
+        Returns: string
       }
       record_login_attempt: {
         Args: { p_email: string; p_ip_address?: string; p_success: boolean }

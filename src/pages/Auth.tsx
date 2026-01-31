@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import { z } from "zod";
 import { ForgotPasswordDialog } from "@/components/auth/ForgotPasswordDialog";
 import { PasswordStrengthIndicator, validatePasswordStrength } from "@/components/auth/PasswordStrengthIndicator";
 import { getDeviceId } from "@/lib/device-id";
+import { sanitizeName, sanitizePhone, sanitizeText, containsDangerousContent } from "@/lib/input-sanitizer";
 
 const authSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -533,9 +534,17 @@ const Auth = () => {
                           type="text"
                           placeholder="João Silva"
                           value={signupData.fullName}
-                          onChange={(e) => setSignupData({ ...signupData, fullName: e.target.value })}
+                          onChange={(e) => {
+                            const rawValue = e.target.value;
+                            if (containsDangerousContent(rawValue)) {
+                              toast.error("Caracteres não permitidos");
+                              return;
+                            }
+                            setSignupData({ ...signupData, fullName: sanitizeName(rawValue) });
+                          }}
                           required
                           disabled={isLoading}
+                          maxLength={100}
                           className="h-11 bg-[#1a1a1a] border-[#333]"
                         />
                       </div>
@@ -544,11 +553,12 @@ const Auth = () => {
                         <Input
                           id="signup-telefone"
                           type="tel"
-                          placeholder="(11) 98765-4321"
+                          placeholder="11987654321"
                           value={signupData.telefone}
-                          onChange={(e) => setSignupData({ ...signupData, telefone: e.target.value })}
+                          onChange={(e) => setSignupData({ ...signupData, telefone: sanitizePhone(e.target.value) })}
                           required
                           disabled={isLoading}
+                          maxLength={11}
                           className="h-11 bg-[#1a1a1a] border-[#333]"
                         />
                       </div>
@@ -561,9 +571,17 @@ const Auth = () => {
                         type="text"
                         placeholder="Barbearia do João"
                         value={signupData.barbershopName}
-                        onChange={(e) => setSignupData({ ...signupData, barbershopName: e.target.value })}
+                        onChange={(e) => {
+                          const rawValue = e.target.value;
+                          if (containsDangerousContent(rawValue)) {
+                            toast.error("Caracteres não permitidos");
+                            return;
+                          }
+                          setSignupData({ ...signupData, barbershopName: sanitizeText(rawValue) });
+                        }}
                         required
                         disabled={isLoading}
+                        maxLength={100}
                         className="h-11 bg-[#1a1a1a] border-[#333]"
                       />
                     </div>

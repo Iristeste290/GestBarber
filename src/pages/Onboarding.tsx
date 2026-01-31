@@ -94,8 +94,11 @@ export default function Onboarding() {
     setIsSubmitting(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
+      // Usa getSession() em vez de getUser() para evitar problemas de autenticação
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) throw new Error("Usuário não autenticado. Por favor, faça login novamente.");
+      
+      const user = session.user;
 
       // Save onboarding data to profile (using existing fields or creating new ones)
       // For now, we'll store it in a simple way

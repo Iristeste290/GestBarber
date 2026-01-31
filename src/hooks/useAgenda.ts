@@ -13,8 +13,11 @@ export interface Appointment {
   customer_name: string | null;
   customer_phone: string | null;
   barber: { name: string };
-  service: { name: string; duration_minutes: number };
+  service: { name: string; duration_minutes: number; price?: number };
   profile: { full_name: string } | null;
+  checked_in_at?: string | null;
+  payment_status?: string | null;
+  payment_method?: string | null;
 }
 
 type ViewMode = "day" | "tomorrow" | "week" | "month";
@@ -87,7 +90,7 @@ export const useAgenda = ({
         .select(`
           *,
           barber:barbers(name),
-          service:services(name, duration_minutes),
+          service:services(name, duration_minutes, price),
           profile:profiles(full_name)
         `)
         .in("barber_id", barberIds)

@@ -57,7 +57,8 @@ const Agenda = () => {
     groupedAppointments, 
     appointments,
     loading: appointmentsLoading, 
-    updateStatus 
+    updateStatus,
+    refresh: refreshAppointments,
   } = useAgenda({
     viewMode,
     selectedDate,
@@ -406,6 +407,7 @@ const Agenda = () => {
                         appointment={appointment}
                         onClick={() => setSelectedAppointmentId(appointment.id)}
                         onStatusChange={(status) => handleStatusChange(appointment.id, status)}
+                        onRefresh={refreshAppointments}
                       />
                     ))}
                   </div>

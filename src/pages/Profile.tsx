@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { User, Phone, Loader2, MessageSquare, RotateCcw, Bell, Volume2, VolumeX, Store } from "lucide-react";
+import { User, Phone, Loader2, MessageSquare, RotateCcw, Bell, Volume2, VolumeX, Store, Trash2 } from "lucide-react";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { z } from "zod";
 import { NotificationStatusCard } from "@/components/agenda/WhatsAppStatusCard";
@@ -18,6 +18,8 @@ import { PushNotificationSettings } from "@/components/notifications/PushNotific
 import { BarbershopLogoUpload } from "@/components/profile/BarbershopLogoUpload";
 import SiteGenerator from "@/components/profile/SiteGenerator";
 import { GoogleBusinessSetup } from "@/components/google-business/GoogleBusinessSetup";
+import { sanitizeName, sanitizePhone, sanitizeText, sanitizeGeneralText, containsDangerousContent } from "@/lib/input-sanitizer";
+import { DeleteAccountDialog } from "@/components/profile/DeleteAccountDialog";
 
 const profileSchema = z.object({
   full_name: z.string().trim().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
@@ -267,7 +269,14 @@ const Profile = () => {
               <Input
                 id="full_name"
                 value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                onChange={(e) => {
+                  const rawValue = e.target.value;
+                  if (containsDangerousContent(rawValue)) {
+                    toast.error("Caracteres não permitidos");
+                    return;
+                  }
+                  setFullName(sanitizeName(rawValue));
+                }}
                 placeholder="Digite seu nome completo"
                 maxLength={100}
               />
@@ -281,11 +290,7 @@ const Profile = () => {
               <Input
                 id="phone"
                 value={phone}
-                onChange={(e) => {
-                  // Remove caracteres não numéricos
-                  const cleanPhone = e.target.value.replace(/\D/g, "");
-                  setPhone(cleanPhone);
-                }}
+                onChange={(e) => setPhone(sanitizePhone(e.target.value))}
                 placeholder="11999999999"
                 maxLength={11}
               />
@@ -302,9 +307,17 @@ const Profile = () => {
               <Textarea
                 id="reminder_template"
                 value={reminderTemplate}
-                onChange={(e) => setReminderTemplate(e.target.value)}
+                onChange={(e) => {
+                  const rawValue = e.target.value;
+                  if (containsDangerousContent(rawValue)) {
+                    toast.error("Caracteres de script não são permitidos");
+                    return;
+                  }
+                  setReminderTemplate(sanitizeGeneralText(rawValue, 1000));
+                }}
                 placeholder="Digite o template da mensagem..."
                 rows={10}
+                maxLength={1000}
                 className="font-mono text-sm"
               />
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -341,6 +354,36 @@ const Profile = () => {
                 "Salvar Alterações"
               )}
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* LGPD - Delete Account */}
+        <Card className="border-destructive/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="h-5 w-5" />
+              Zona de Perigo
+            </CardTitle>
+            <CardDescription>
+              Ações irreversíveis relacionadas à sua conta
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-4">
+              <h4 className="font-medium text-destructive mb-2">
+                Excluir Conta (LGPD)
+              </h4>
+              <p className="text-sm text-muted-foreground mb-4">
+                Conforme a Lei Geral de Proteção de Dados, você pode solicitar a exclusão 
+                permanente dos seus dados pessoais. Esta ação é irreversível.
+              </p>
+              {user && (
+                <DeleteAccountDialog 
+                  userId={user.id} 
+                  userEmail={user.email} 
+                />
+              )}
+            </div>
           </CardContent>
         </Card>
 

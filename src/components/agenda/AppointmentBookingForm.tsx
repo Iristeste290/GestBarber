@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,9 +7,15 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ArrowLeft, Check, Clock, Calendar as CalendarIcon } from "lucide-react";
+import { ArrowLeft, Check, Clock, Calendar as CalendarIcon, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useBookingAttemptTracker } from "@/hooks/useBookingAttemptTracker";
+import { 
+  sanitizeName, 
+  sanitizePhone, 
+  validateAppointmentCustomer,
+  containsDangerousContent 
+} from "@/lib/input-sanitizer";
 
 interface Service {
   id: string;
@@ -42,6 +48,8 @@ export const AppointmentBookingForm = ({
   const [customerPhone, setCustomerPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   
   // 📊 Rastreamento de tentativas de agendamento
   const { 
@@ -73,33 +81,58 @@ export const AppointmentBookingForm = ({
     onCancel();
   };
 
+  // 🔒 Handler seguro para nome - sanitiza em tempo real
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    
+    // Verificar conteúdo perigoso
+    if (containsDangerousContent(rawValue)) {
+      setNameError("Caracteres não permitidos detectados");
+      return;
+    }
+    
+    // Sanitizar e aplicar
+    const sanitized = sanitizeName(rawValue);
+    setCustomerName(sanitized);
+    setNameError(null);
+  }, []);
+
+  // 🔒 Handler seguro para telefone - apenas números
+  const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitized = sanitizePhone(e.target.value);
+    setCustomerPhone(sanitized);
+    setPhoneError(null);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!customerName.trim()) {
-      toast.error("Por favor, informe seu nome");
+    // Validação rigorosa com schema
+    const validation = validateAppointmentCustomer({
+      customerName,
+      customerPhone,
+    });
+
+    if (!validation.success) {
+      toast.error((validation as { success: false; error: string }).error);
       return;
     }
 
-    const cleanPhone = customerPhone.replace(/\D/g, "");
-    if (cleanPhone.length < 10 || cleanPhone.length > 11) {
-      toast.error("Por favor, informe um telefone válido");
-      return;
-    }
+    const { customerName: validatedName, customerPhone: validatedPhone } = validation.data;
 
     setLoading(true);
 
     try {
       const dateStr = format(date, "yyyy-MM-dd");
       
-      // Criar agendamento usando a função RPC segura
+      // Criar agendamento usando a função RPC segura com dados sanitizados
       const { data: appointmentId, error: rpcError } = await supabase.rpc(
         "create_appointment_safe",
         {
           p_barber_id: barberId,
           p_service_id: service.id,
-          p_customer_name: customerName.trim(),
-          p_customer_phone: cleanPhone,
+          p_customer_name: validatedName,
+          p_customer_phone: validatedPhone,
           p_appointment_date: dateStr,
           p_appointment_time: time + ":00",
           p_duration_minutes: service.duration_minutes,
@@ -118,8 +151,8 @@ export const AppointmentBookingForm = ({
             body: {
               barberId: barberId,
               appointmentId: appointmentId,
-              phone: cleanPhone,
-              customerName: customerName.trim(),
+              phone: validatedPhone,
+              customerName: validatedName,
               barberName: barberName,
               serviceName: service.name,
               date: format(date, "dd/MM/yyyy", { locale: ptBR }),
@@ -254,10 +287,18 @@ export const AppointmentBookingForm = ({
                 <Input
                   id="name"
                   value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
+                  onChange={handleNameChange}
                   placeholder="Seu nome completo"
+                  maxLength={100}
                   required
+                  className={nameError ? "border-destructive" : ""}
                 />
+                {nameError && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {nameError}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -266,12 +307,20 @@ export const AppointmentBookingForm = ({
                   id="phone"
                   type="tel"
                   value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  placeholder="(11) 99999-9999"
+                  onChange={handlePhoneChange}
+                  placeholder="11999999999"
+                  maxLength={11}
                   required
+                  className={phoneError ? "border-destructive" : ""}
                 />
+                {phoneError && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {phoneError}
+                  </p>
+                )}
                 <p className="text-xs text-muted-foreground">
-                  Você pode receber a confirmação por WhatsApp se a barbearia tiver configurado
+                  Apenas números (DDD + número). Ex: 11999999999
                 </p>
               </div>
 

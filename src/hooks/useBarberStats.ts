@@ -45,7 +45,11 @@ export const useBarberStats = (barberId: string) => {
           id,
           appointment_time,
           status,
+          notes,
           customer_name,
+          checked_in_at,
+          payment_status,
+          payment_method,
           services(name, price),
           profiles(full_name)
         `)

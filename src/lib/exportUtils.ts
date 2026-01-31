@@ -1,5 +1,42 @@
-export const exportToCSV = (data: any[], filename: string) => {
+import { auditLog } from "./audit-logger";
+
+type ExportType = "clients" | "payments" | "appointments" | "financial" | "general";
+
+interface ExportOptions {
+  type?: ExportType;
+  dateRange?: { start: string; end: string };
+  filters?: Record<string, unknown>;
+}
+
+export const exportToCSV = async (
+  data: any[], 
+  filename: string,
+  options: ExportOptions = {}
+) => {
   if (!data || data.length === 0) return;
+
+  // Log the export for audit purposes
+  const { type = "general", dateRange, filters } = options;
+  
+  switch (type) {
+    case "clients":
+      await auditLog.exportClients(data.length, filters);
+      break;
+    case "payments":
+      await auditLog.exportPayments(data.length, dateRange);
+      break;
+    case "appointments":
+      await auditLog.exportAppointments(data.length, dateRange);
+      break;
+    case "financial":
+      await auditLog.exportFinancialReport({ 
+        recordCount: data.length, 
+        dateRange, 
+        filters,
+        exportFormat: "csv" 
+      });
+      break;
+  }
 
   const headers = Object.keys(data[0]);
   const csvContent = [

@@ -36,7 +36,7 @@ interface TimeSlot {
 }
 
 const PublicBarberSchedule = () => {
-  const { barberId } = useParams();
+  const { userId, barberId } = useParams();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
@@ -86,42 +86,29 @@ const PublicBarberSchedule = () => {
       setLoading(true);
       setLoadingServices(true);
       
-      const { data: barberData, error: barberError } = await supabase
-        .from("barbers_public")
-        .select("id, name, specialty, avatar_url")
-        .eq("id", barberId)
-        .single();
+      const { data: payload, error: invokeError } = await supabase.functions.invoke(
+        "public-barber",
+        { body: { barberId } },
+      );
 
-      if (barberError) throw barberError;
-      setBarber(barberData);
+      if (invokeError) throw invokeError;
 
-      const { data: shopData } = await supabase
-        .from("barber_barbershop_public")
-        .select("barbershop_name, barbershop_logo_url")
-        .eq("barber_id", barberId)
-        .maybeSingle();
-      
-      if (shopData?.barbershop_name) {
-        setBarbershopName(shopData.barbershop_name);
-      }
-      if (shopData?.barbershop_logo_url) {
-        setBarbershopLogoUrl(shopData.barbershop_logo_url);
+      const payloadBarber = (payload as any)?.barber as Barber | undefined;
+      const shop = (payload as any)?.barbershop as {
+        barbershop_name: string | null;
+        barbershop_logo_url: string | null;
+      } | undefined;
+      const payloadServices = (payload as any)?.services as Service[] | undefined;
+
+      if (!payloadBarber) {
+        setBarber(null);
+        return;
       }
 
-      const { data: servicesData, error: servicesError } = await supabase
-        .from("barber_services_public")
-        .select("service_id, service_name, duration_minutes, price")
-        .eq("barber_id", barberId);
-
-      if (servicesError) throw servicesError;
-      
-      const mappedServices = (servicesData || []).map(s => ({
-        id: s.service_id,
-        name: s.service_name,
-        duration_minutes: s.duration_minutes,
-        price: s.price
-      }));
-      setServices(mappedServices);
+      setBarber(payloadBarber);
+      setBarbershopName(shop?.barbershop_name ?? "");
+      setBarbershopLogoUrl(shop?.barbershop_logo_url ?? null);
+      setServices(payloadServices ?? []);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     } finally {
@@ -305,7 +292,7 @@ const PublicBarberSchedule = () => {
               O link que você acessou não está mais disponível ou o profissional não existe.
             </p>
           </div>
-          <Button onClick={() => navigate("/agenda")} size="lg" className="w-full">
+          <Button onClick={() => navigate(userId ? `/agenda-publica/${userId}` : "/")} size="lg" className="w-full">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar
           </Button>
@@ -719,7 +706,7 @@ const PublicBarberSchedule = () => {
         <div className="relative container mx-auto px-4 py-6 md:py-12">
           <Button
             variant="ghost"
-            onClick={() => navigate("/agenda")}
+            onClick={() => navigate(userId ? `/agenda-publica/${userId}` : "/")}
             className="mb-4 -ml-2"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />

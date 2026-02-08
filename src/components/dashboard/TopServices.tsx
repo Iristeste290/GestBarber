@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Scissors } from "lucide-react";
 import { format, startOfMonth } from "date-fns";
 import { useMemo } from "react";
@@ -11,6 +12,7 @@ interface ServiceStats {
   name: string;
   count: number;
   revenue: number;
+  image_url: string | null;
 }
 
 export const TopServices = () => {
@@ -35,7 +37,7 @@ export const TopServices = () => {
 
       const { data: appointments, error } = await supabase
         .from("appointments")
-        .select("service_id, services(id, name, price)")
+        .select("service_id, services(id, name, price, image_url)")
         .in("barber_id", barberIds)
         .eq("status", "completed")
         .gte("appointment_date", firstDayOfMonth);
@@ -52,6 +54,7 @@ export const TopServices = () => {
               name: apt.services.name,
               count: 0,
               revenue: 0,
+              image_url: apt.services.image_url || null,
             };
           }
           serviceStats[serviceId].count++;
@@ -80,9 +83,18 @@ export const TopServices = () => {
               className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg bg-muted/50"
             >
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex-shrink-0">
-                  <Scissors className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                </div>
+                <Avatar className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex-shrink-0">
+                  {service.image_url ? (
+                    <AvatarImage 
+                      src={service.image_url} 
+                      alt={service.name}
+                      className="object-cover"
+                    />
+                  ) : null}
+                  <AvatarFallback className="bg-primary/10">
+                    <Scissors className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                  </AvatarFallback>
+                </Avatar>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{service.name}</p>
                   <p className="text-xs sm:text-sm text-muted-foreground">

@@ -87,47 +87,29 @@ const PublicBarberScheduleBySlug = () => {
       setLoading(true);
       setLoadingServices(true);
       
-      const { data: barberData, error: barberError } = await supabase
-        .from("barbers_public")
-        .select("id, name, specialty, avatar_url, slug")
-        .eq("slug", slug)
-        .maybeSingle();
+      const { data: payload, error: invokeError } = await supabase.functions.invoke(
+        "public-barber",
+        { body: { slug } },
+      );
 
-      if (barberError) throw barberError;
-      if (!barberData) {
+      if (invokeError) throw invokeError;
+
+      const payloadBarber = (payload as any)?.barber as Barber | undefined;
+      const shop = (payload as any)?.barbershop as {
+        barbershop_name: string | null;
+        barbershop_logo_url: string | null;
+      } | undefined;
+      const payloadServices = (payload as any)?.services as Service[] | undefined;
+
+      if (!payloadBarber) {
         setLoading(false);
         return;
       }
-      
-      setBarber(barberData);
 
-      const { data: shopData } = await supabase
-        .from("barber_barbershop_public")
-        .select("barbershop_name, barbershop_logo_url")
-        .eq("barber_id", barberData.id)
-        .maybeSingle();
-      
-      if (shopData?.barbershop_name) {
-        setBarbershopName(shopData.barbershop_name);
-      }
-      if (shopData?.barbershop_logo_url) {
-        setBarbershopLogoUrl(shopData.barbershop_logo_url);
-      }
-
-      const { data: servicesData, error: servicesError } = await supabase
-        .from("barber_services_public")
-        .select("service_id, service_name, duration_minutes, price")
-        .eq("barber_id", barberData.id);
-
-      if (servicesError) throw servicesError;
-      
-      const mappedServices = (servicesData || []).map(s => ({
-        id: s.service_id,
-        name: s.service_name,
-        duration_minutes: s.duration_minutes,
-        price: s.price
-      }));
-      setServices(mappedServices);
+      setBarber(payloadBarber);
+      setBarbershopName(shop?.barbershop_name ?? "");
+      setBarbershopLogoUrl(shop?.barbershop_logo_url ?? null);
+      setServices(payloadServices ?? []);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     } finally {

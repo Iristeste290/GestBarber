@@ -233,6 +233,13 @@ export type Database = {
             foreignKeyName: "appointments_barber_id_fkey"
             columns: ["barber_id"]
             isOneToOne: false
+            referencedRelation: "barbers_by_owner_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
             referencedRelation: "barbers_public"
             referencedColumns: ["id"]
           },
@@ -455,6 +462,13 @@ export type Database = {
             foreignKeyName: "barber_breaks_barber_id_fkey"
             columns: ["barber_id"]
             isOneToOne: false
+            referencedRelation: "barbers_by_owner_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barber_breaks_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
             referencedRelation: "barbers_public"
             referencedColumns: ["id"]
           },
@@ -512,6 +526,13 @@ export type Database = {
             columns: ["barber_id"]
             isOneToOne: false
             referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barber_exceptions_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers_by_owner_public"
             referencedColumns: ["id"]
           },
           {
@@ -599,6 +620,13 @@ export type Database = {
             foreignKeyName: "barber_goals_barber_id_fkey"
             columns: ["barber_id"]
             isOneToOne: false
+            referencedRelation: "barbers_by_owner_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barber_goals_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
             referencedRelation: "barbers_public"
             referencedColumns: ["id"]
           },
@@ -674,6 +702,13 @@ export type Database = {
             columns: ["barber_id"]
             isOneToOne: true
             referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barber_score_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: true
+            referencedRelation: "barbers_by_owner_public"
             referencedColumns: ["id"]
           },
           {
@@ -788,6 +823,13 @@ export type Database = {
             columns: ["barber_id"]
             isOneToOne: false
             referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barber_work_hours_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers_by_owner_public"
             referencedColumns: ["id"]
           },
           {
@@ -1347,6 +1389,13 @@ export type Database = {
             foreignKeyName: "empty_slots_barber_id_fkey"
             columns: ["barber_id"]
             isOneToOne: false
+            referencedRelation: "barbers_by_owner_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "empty_slots_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
             referencedRelation: "barbers_public"
             referencedColumns: ["id"]
           },
@@ -1772,6 +1821,13 @@ export type Database = {
             foreignKeyName: "lost_revenue_barber_id_fkey"
             columns: ["barber_id"]
             isOneToOne: false
+            referencedRelation: "barbers_by_owner_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lost_revenue_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
             referencedRelation: "barbers_public"
             referencedColumns: ["id"]
           },
@@ -2188,6 +2244,13 @@ export type Database = {
             columns: ["barber_id"]
             isOneToOne: false
             referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_sales_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers_by_owner_public"
             referencedColumns: ["id"]
           },
           {
@@ -3397,6 +3460,13 @@ export type Database = {
             foreignKeyName: "appointments_barber_id_fkey"
             columns: ["barber_id"]
             isOneToOne: false
+            referencedRelation: "barbers_by_owner_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
             referencedRelation: "barbers_public"
             referencedColumns: ["id"]
           },
@@ -3478,6 +3548,13 @@ export type Database = {
             foreignKeyName: "barber_breaks_barber_id_fkey"
             columns: ["barber_id"]
             isOneToOne: false
+            referencedRelation: "barbers_by_owner_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barber_breaks_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
             referencedRelation: "barbers_public"
             referencedColumns: ["id"]
           },
@@ -3516,6 +3593,13 @@ export type Database = {
             columns: ["barber_id"]
             isOneToOne: false
             referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barber_exceptions_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers_by_owner_public"
             referencedColumns: ["id"]
           },
           {
@@ -3660,10 +3744,30 @@ export type Database = {
             foreignKeyName: "barber_work_hours_barber_id_fkey"
             columns: ["barber_id"]
             isOneToOne: false
+            referencedRelation: "barbers_by_owner_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barber_work_hours_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
             referencedRelation: "barbers_public"
             referencedColumns: ["id"]
           },
         ]
+      }
+      barbers_by_owner_public: {
+        Row: {
+          avatar_url: string | null
+          barbershop_logo_url: string | null
+          barbershop_name: string | null
+          id: string | null
+          name: string | null
+          slug: string | null
+          specialty: string | null
+          user_id: string | null
+        }
+        Relationships: []
       }
       barbers_public: {
         Row: {
@@ -3874,6 +3978,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_barber_active: { Args: { p_barber_id: string }; Returns: boolean }
       log_audit_event: {
         Args: {
           p_action: string

@@ -91,8 +91,8 @@ const App = () => {
                   <Route path="/auth" element={<Pages.Auth />} />
                   <Route path="/onboarding" element={<Pages.Onboarding />} />
                   <Route path="/google-callback" element={<GoogleCallback />} />
-                  <Route path="/agenda-publica" element={<PublicAgenda />} />
-                  <Route path="/agenda-publica/:barberId" element={<PublicBarberSchedule />} />
+                  <Route path="/agenda-publica/:userId" element={<PublicAgenda />} />
+                  <Route path="/agenda-publica/:userId/:barberId" element={<PublicBarberSchedule />} />
                   <Route path="/agenda/:slug" element={<PublicBarberScheduleBySlug />} />
                   <Route path="/b/:slug" element={<BarberSitePage />} />
                   <Route path="/b/:slug/:service" element={<BarberSitePage />} />

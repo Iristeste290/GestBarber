@@ -59,3 +59,9 @@ verify_jwt = false
 
 [functions.google-business-metrics]
 verify_jwt = false
+
+[functions.public-agenda]
+verify_jwt = false
+
+[functions.public-barber]
+verify_jwt = false

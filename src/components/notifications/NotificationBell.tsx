@@ -1,4 +1,4 @@
-import { Bell, Sparkles } from "lucide-react";
+import { Bell, Sparkles, Check, Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -13,6 +13,7 @@ import { useAppUpdates } from "@/hooks/useAppUpdates";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface NotificationBellProps {
   userId: string;
@@ -48,34 +49,44 @@ export const NotificationBell = ({ userId }: NotificationBellProps) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative hover:bg-accent/50 transition-colors"
+        >
           <Bell className="h-5 w-5" />
           {totalUnread > 0 && (
-            <Badge 
-              variant="destructive" 
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-            >
+            <span className="absolute -top-0.5 -right-0.5 h-4 w-4 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-medium animate-in zoom-in-50">
               {totalUnread > 9 ? '9+' : totalUnread}
-            </Badge>
+            </span>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
+      <PopoverContent className="w-[360px] p-0 shadow-xl border-border/50" align="end">
         <Tabs defaultValue="notifications" className="w-full">
-          <div className="border-b px-2 pt-2">
-            <TabsList className="w-full grid grid-cols-2">
-              <TabsTrigger value="notifications" className="relative text-xs">
-                Notificações
+          {/* Header com tabs */}
+          <div className="bg-gradient-to-b from-card to-card/95 border-b border-border/50">
+            <TabsList className="w-full h-12 bg-transparent p-1 gap-1">
+              <TabsTrigger 
+                value="notifications" 
+                className="flex-1 h-10 data-[state=active]:bg-accent data-[state=active]:shadow-sm rounded-lg transition-all gap-2"
+              >
+                <Bell className="h-4 w-4" />
+                <span className="text-sm font-medium">Notificações</span>
                 {notificationUnread > 0 && (
-                  <span className="ml-1 bg-destructive text-destructive-foreground rounded-full px-1.5 text-[10px]">
+                  <span className="h-5 min-w-5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-semibold px-1.5">
                     {notificationUnread}
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="updates" className="relative text-xs">
-                Novidades
+              <TabsTrigger 
+                value="updates" 
+                className="flex-1 h-10 data-[state=active]:bg-accent data-[state=active]:shadow-sm rounded-lg transition-all gap-2"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span className="text-sm font-medium">Novidades</span>
                 {updatesUnread > 0 && (
-                  <span className="ml-1 bg-primary text-primary-foreground rounded-full px-1.5 text-[10px]">
+                  <span className="h-5 min-w-5 flex items-center justify-center rounded-full bg-gold text-gold-foreground text-[10px] font-semibold px-1.5">
                     {updatesUnread}
                   </span>
                 )}
@@ -84,51 +95,64 @@ export const NotificationBell = ({ userId }: NotificationBellProps) => {
           </div>
 
           <TabsContent value="notifications" className="m-0">
+            {/* Action bar */}
             {notificationUnread > 0 && (
-              <div className="flex justify-end p-2 border-b">
+              <div className="flex justify-end px-3 py-2 bg-muted/30 border-b border-border/30">
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={() => markAllAsRead()}
-                  className="text-xs h-7"
+                  className="text-xs h-7 text-muted-foreground hover:text-foreground gap-1.5"
                 >
+                  <Check className="h-3 w-3" />
                   Marcar todas como lidas
                 </Button>
               </div>
             )}
-            <ScrollArea className="h-[350px]">
+            <ScrollArea className="h-[320px]">
               {notifications.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">
-                  <Bell className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                  <p>Nenhuma notificação</p>
+                <div className="flex flex-col items-center justify-center py-12 px-4">
+                  <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                    <Inbox className="h-8 w-8 text-muted-foreground/50" />
+                  </div>
+                  <p className="text-sm font-medium text-muted-foreground">Tudo limpo!</p>
+                  <p className="text-xs text-muted-foreground/70 mt-1">Nenhuma notificação pendente</p>
                 </div>
               ) : (
-                <div className="divide-y">
+                <div className="p-2 space-y-1">
                   {notifications.map((notification) => (
                     <button
                       key={notification.id}
                       onClick={() => handleNotificationClick(notification)}
-                      className={`w-full p-4 text-left hover:bg-accent transition-colors ${
-                        !notification.is_read ? 'bg-accent/50' : ''
-                      }`}
+                      className={cn(
+                        "w-full p-3 text-left rounded-lg transition-all",
+                        "hover:bg-accent/70 active:scale-[0.99]",
+                        !notification.is_read 
+                          ? "bg-accent/50 border border-primary/10" 
+                          : "border border-transparent hover:border-border/30"
+                      )}
                     >
                       <div className="flex gap-3">
-                        <span className="text-2xl">{getNotificationIcon(notification.type)}</span>
+                        <div className="h-10 w-10 rounded-full bg-muted/70 flex items-center justify-center flex-shrink-0">
+                          <span className="text-lg">{getNotificationIcon(notification.type)}</span>
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm">{notification.title}</p>
-                          <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="font-medium text-sm leading-tight">{notification.title}</p>
+                            {!notification.is_read && (
+                              <span className="h-2 w-2 rounded-full bg-primary flex-shrink-0 mt-1.5" />
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
                             {notification.message}
                           </p>
-                          <p className="text-xs text-muted-foreground mt-2">
+                          <p className="text-[10px] text-muted-foreground/60 mt-2 font-medium uppercase tracking-wide">
                             {formatDistanceToNow(new Date(notification.created_at), {
                               addSuffix: true,
                               locale: ptBR,
                             })}
                           </p>
                         </div>
-                        {!notification.is_read && (
-                          <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0 mt-1" />
-                        )}
                       </div>
                     </button>
                   ))}
@@ -138,49 +162,60 @@ export const NotificationBell = ({ userId }: NotificationBellProps) => {
           </TabsContent>
 
           <TabsContent value="updates" className="m-0">
+            {/* Action bar */}
             {updatesUnread > 0 && (
-              <div className="flex justify-end p-2 border-b">
+              <div className="flex justify-end px-3 py-2 bg-muted/30 border-b border-border/30">
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={() => markAllUpdatesAsRead()}
-                  className="text-xs h-7"
+                  className="text-xs h-7 text-muted-foreground hover:text-foreground gap-1.5"
                 >
+                  <Check className="h-3 w-3" />
                   Marcar todas como lidas
                 </Button>
               </div>
             )}
-            <ScrollArea className="h-[350px]">
+            <ScrollArea className="h-[320px]">
               {updates.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">
-                  <Sparkles className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                  <p>Nenhuma novidade ainda</p>
+                <div className="flex flex-col items-center justify-center py-12 px-4">
+                  <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                    <Sparkles className="h-8 w-8 text-muted-foreground/50" />
+                  </div>
+                  <p className="text-sm font-medium text-muted-foreground">Nenhuma novidade</p>
+                  <p className="text-xs text-muted-foreground/70 mt-1">Em breve teremos novidades!</p>
                 </div>
               ) : (
-                <div className="divide-y">
+                <div className="p-2 space-y-1">
                   {updates.map((update) => (
                     <button
                       key={update.id}
                       onClick={() => handleUpdateClick(update.id)}
-                      className={`w-full p-4 text-left hover:bg-accent transition-colors ${
-                        !update.is_read ? 'bg-accent/50' : ''
-                      }`}
+                      className={cn(
+                        "w-full p-3 text-left rounded-lg transition-all",
+                        "hover:bg-accent/70 active:scale-[0.99]",
+                        !update.is_read 
+                          ? "bg-gradient-to-r from-gold/10 to-transparent border border-gold/20" 
+                          : "border border-transparent hover:border-border/30"
+                      )}
                     >
                       <div className="flex gap-3">
-                        <span className="text-2xl">{update.emoji || '✨'}</span>
+                        <div className="h-10 w-10 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0">
+                          <span className="text-lg">{update.emoji || '✨'}</span>
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-sm">{update.title}</p>
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="font-medium text-sm leading-tight">{update.title}</p>
                             {!update.is_read && (
-                              <Badge variant="default" className="text-[10px] px-1.5 py-0 h-4">
+                              <Badge className="bg-gold hover:bg-gold text-xs px-1.5 h-5 font-semibold shrink-0">
                                 Nova
                               </Badge>
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                          <p className="text-xs text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
                             {update.description}
                           </p>
-                          <p className="text-xs text-muted-foreground mt-2">
+                          <p className="text-[10px] text-muted-foreground/60 mt-2 font-medium uppercase tracking-wide">
                             {formatDistanceToNow(new Date(update.created_at), {
                               addSuffix: true,
                               locale: ptBR,

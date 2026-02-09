@@ -16,12 +16,14 @@ import { NoShowPredictionCard } from "@/components/growth/NoShowPredictionCard";
 import { DynamicPricingCard } from "@/components/growth/DynamicPricingCard";
 import { GrowthEngineSkeleton } from "@/components/skeletons/PageSkeletons";
 import { GrowthFeatureGate } from "@/components/growth/GrowthFeatureGate";
+import { useIsDemo } from "@/hooks/useIsDemo";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const GrowthEngine = () => {
   const { loading } = useRequireAuth();
   const [activeTab, setActiveTab] = useState("empty-slots");
+  const isDemo = useIsDemo();
   const { 
     emptySlots, 
     problematicClients, 
@@ -118,14 +120,16 @@ const GrowthEngine = () => {
         featureDescription="O Growth Engine analisa sua barbearia em tempo real e mostra exatamente o que fazer para ganhar mais dinheiro hoje."
       >
         <div className="space-y-6">
-          {/* Action Banner */}
-          <ActionBanner
-            emptySlotsCount={emptySlots.data?.length || 0}
-            reactivationCount={reactivationQueue.data?.length || 0}
-            blockedCount={blockedClientsCount}
-            pendingRemindersCount={pendingRemindersCount}
-            onNavigate={setActiveTab}
-          />
+          {/* Action Banner - hidden for demo */}
+          {!isDemo && (
+            <ActionBanner
+              emptySlotsCount={emptySlots.data?.length || 0}
+              reactivationCount={reactivationQueue.data?.length || 0}
+              blockedCount={blockedClientsCount}
+              pendingRemindersCount={pendingRemindersCount}
+              onNavigate={setActiveTab}
+            />
+          )}
 
           {/* Header with Sync Button */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

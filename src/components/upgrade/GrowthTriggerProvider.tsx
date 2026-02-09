@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode, useEffect } from "react";
+import React, { createContext, useContext, ReactNode, useEffect, useState } from "react";
 import { useGrowthTriggerEngine } from "@/hooks/useGrowthTriggerEngine";
 import { useConversionPushNotifications } from "@/hooks/useConversionPushNotifications";
 import { UpgradeModal } from "./UpgradeModal";
@@ -40,13 +40,14 @@ export const GrowthTriggerProvider = ({ children }: GrowthTriggerProviderProps) 
     metrics,
   } = useGrowthTriggerEngine();
 
-  // Melhoria estratégica: Integrar push notifications de conversão
-  const [userId, setUserId] = React.useState<string | undefined>();
+  const [userId, setUserId] = useState<string | undefined>();
+  const [isDemo, setIsDemo] = useState(false);
   
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
         setUserId(data.user.id);
+        setIsDemo(data.user.email === "demo@gestbarber.com");
       }
     });
   }, []);
@@ -65,15 +66,14 @@ export const GrowthTriggerProvider = ({ children }: GrowthTriggerProviderProps) 
       }}
     >
       {children}
-      <UpgradeModal
-        trigger={activeTrigger}
-        isOpen={isModalOpen}
-        onClose={dismissTrigger}
-        eventId={activeEventId || undefined}
-      />
+      {!isDemo && (
+        <UpgradeModal
+          trigger={activeTrigger}
+          isOpen={isModalOpen}
+          onClose={dismissTrigger}
+          eventId={activeEventId || undefined}
+        />
+      )}
     </GrowthTriggerContext.Provider>
   );
 };
-
-// Import React for useState
-import React from "react";

@@ -15,6 +15,7 @@ import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { DashboardSkeleton } from "@/components/skeletons/PageSkeletons";
 import { PremiumFeatureAnnouncements } from "@/components/notifications/PremiumFeatureAnnouncements";
 import { useGrowthTriggers } from "@/components/upgrade/GrowthTriggerProvider";
+import { useIsDemo } from "@/hooks/useIsDemo";
 import { 
   InactiveClientsAlert, 
   EmptySlotsAlert, 
@@ -31,6 +32,7 @@ const Dashboard = () => {
   const { user, loading } = useRequireAuth();
   const { profile, loading: profileLoading } = useUserProfile(user);
   const { checkTriggers, isStart } = useGrowthTriggers();
+  const isDemo = useIsDemo();
 
   // Check triggers on dashboard load for Start plan users
   useEffect(() => {
@@ -45,10 +47,10 @@ const Dashboard = () => {
 
   return (
     <AppLayout title="Painel" description="Visão geral da barbearia">
-      <PremiumFeatureAnnouncements />
+      {!isDemo && <PremiumFeatureAnnouncements />}
       
       {/* Milestone celebration for Start users */}
-      <MilestoneUpsell />
+      {!isDemo && <MilestoneUpsell />}
       
       {loading || profileLoading ? (
         <DashboardSkeleton />
@@ -66,26 +68,26 @@ const Dashboard = () => {
           )}
           
           {/* Tracker de perdas diárias (Start only) */}
-          <DailyLossTracker />
+          {!isDemo && <DailyLossTracker />}
           
           {/* Card principal de oportunidade (apenas Start) */}
-          <MonthlyOpportunityCard />
+          {!isDemo && <MonthlyOpportunityCard />}
           
           {/* Alerta de semana fraca (Start only) */}
-          <WeakWeekAlert />
+          {!isDemo && <WeakWeekAlert />}
           
           {/* Alerta de Dinheiro Perdido - para todos, com CTA diferente */}
-          <LostRevenueAlert />
+          {!isDemo && <LostRevenueAlert />}
           
           {/* Alertas de conversão para usuários Start */}
-          <InactiveClientsAlert />
-          <EmptySlotsAlert />
+          {!isDemo && <InactiveClientsAlert />}
+          {!isDemo && <EmptySlotsAlert />}
           
           {/* Stats de engajamento (Growth only) */}
-          <EngagementStatsCard />
+          {!isDemo && <EngagementStatsCard />}
           
           {/* Dica educativa */}
-          <EducationalTips context="dashboard" />
+          {!isDemo && <EducationalTips context="dashboard" />}
           
           {/* Google Business Cards - Visibilidade Local */}
           <GoogleBusinessCards />

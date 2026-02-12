@@ -20,7 +20,11 @@ const StatsCardSkeleton = () => (
   </Card>
 );
 
-export const StatsCards = memo(() => {
+interface StatsCardsProps {
+  isDemo?: boolean;
+}
+
+export const StatsCards = memo(({ isDemo = false }: StatsCardsProps) => {
   const queryClient = useQueryClient();
   const today = format(new Date(), "yyyy-MM-dd");
   const yesterday = format(subDays(new Date(), 1), "yyyy-MM-dd");
@@ -131,7 +135,19 @@ export const StatsCards = memo(() => {
     refetchInterval: 60000, // Atualiza a cada 1 minuto
   });
 
-  if (isLoading) {
+  // Dados fictícios para conta demo
+  const demoStats = {
+    todayRevenue: 1250.00,
+    todayAppointments: 14,
+    averageTicket: 89.29,
+    revenueTrend: 12.5,
+    appointmentsTrend: 8.3,
+    avgTicketTrend: 3.7,
+  };
+
+  const displayStats = isDemo ? demoStats : stats;
+
+  if (isLoading && !isDemo) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
         <StatsCardSkeleton />
@@ -153,14 +169,14 @@ export const StatsCards = memo(() => {
         </CardHeader>
         <CardContent className="p-4 md:p-6 pt-0">
           <div className="text-xl md:text-2xl font-bold text-primary">
-            R$ {stats?.todayRevenue.toFixed(2) || "0.00"}
+            R$ {displayStats?.todayRevenue.toFixed(2) || "0.00"}
           </div>
           <div className="flex items-center justify-between mt-1">
             <p className="text-xs text-muted-foreground">
               Serviços concluídos
             </p>
-            {stats?.revenueTrend !== undefined && (
-              <TrendIndicator value={stats.revenueTrend} />
+            {displayStats?.revenueTrend !== undefined && (
+              <TrendIndicator value={displayStats.revenueTrend} />
             )}
           </div>
         </CardContent>
@@ -175,14 +191,14 @@ export const StatsCards = memo(() => {
         </CardHeader>
         <CardContent className="p-4 md:p-6 pt-0">
           <div className="text-xl md:text-2xl font-bold text-foreground">
-            {stats?.todayAppointments || 0}
+            {displayStats?.todayAppointments || 0}
           </div>
           <div className="flex items-center justify-between mt-1">
             <p className="text-xs text-muted-foreground">
               Concluídos
             </p>
-            {stats?.appointmentsTrend !== undefined && (
-              <TrendIndicator value={stats.appointmentsTrend} />
+            {displayStats?.appointmentsTrend !== undefined && (
+              <TrendIndicator value={displayStats.appointmentsTrend} />
             )}
           </div>
         </CardContent>
@@ -197,14 +213,14 @@ export const StatsCards = memo(() => {
         </CardHeader>
         <CardContent className="p-4 md:p-6 pt-0">
           <div className="text-xl md:text-2xl font-bold text-foreground">
-            R$ {stats?.averageTicket.toFixed(2) || "0.00"}
+            R$ {displayStats?.averageTicket.toFixed(2) || "0.00"}
           </div>
           <div className="flex items-center justify-between mt-1">
             <p className="text-xs text-muted-foreground">
               Por agendamento
             </p>
-            {stats?.avgTicketTrend !== undefined && (
-              <TrendIndicator value={stats.avgTicketTrend} />
+            {displayStats?.avgTicketTrend !== undefined && (
+              <TrendIndicator value={displayStats.avgTicketTrend} />
             )}
           </div>
         </CardContent>

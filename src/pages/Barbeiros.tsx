@@ -175,7 +175,7 @@ const Barbeiros = () => {
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {isAtLimit 
-                        ? "Limite atingido no plano Freemium" 
+                        ? "Limite atingido no plano Start" 
                         : `Você pode adicionar mais ${maxBarbers - currentBarbers} barbeiro(s)`
                       }
                     </p>

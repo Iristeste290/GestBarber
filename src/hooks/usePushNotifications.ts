@@ -3,6 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Json } from "@/integrations/supabase/types";
 
+interface PushServiceWorkerRegistration extends ServiceWorkerRegistration {
+  pushManager: PushManager;
+}
+
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
@@ -64,7 +68,7 @@ export function usePushNotifications(userId?: string) {
       if (!isSupported || !userId) return;
 
       try {
-        const registration = await navigator.serviceWorker.ready;
+        const registration = await navigator.serviceWorker.ready as unknown as PushServiceWorkerRegistration;
         const subscription = await registration.pushManager.getSubscription();
         setIsSubscribed(!!subscription);
       } catch (error) {
@@ -100,7 +104,7 @@ export function usePushNotifications(userId?: string) {
       }
 
       // Get service worker registration
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await navigator.serviceWorker.ready as unknown as PushServiceWorkerRegistration;
 
       // Check for existing subscription
       let subscription = await registration.pushManager.getSubscription();
@@ -154,7 +158,7 @@ export function usePushNotifications(userId?: string) {
     try {
       setIsLoading(true);
 
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await navigator.serviceWorker.ready as unknown as PushServiceWorkerRegistration;
       const subscription = await registration.pushManager.getSubscription();
 
       if (subscription) {

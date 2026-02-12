@@ -14,7 +14,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, X } from "lucide-react";
 import { BarberAvatar } from "./BarberAvatar";
-import { usePlanValidation } from "@/hooks/usePlanValidation";
+import { useUsageLimits } from "@/hooks/useUsageLimits";
+import { UsageLimitModal } from "@/components/upgrade/UsageLimitModal";
 import { useNavigate } from "react-router-dom";
 
 interface NewBarberDialogProps {
@@ -33,7 +34,9 @@ export function NewBarberDialog({ open, onOpenChange, onAddBarber }: NewBarberDi
     specialty: "",
     avatar_url: "",
   });
-  const { checkLimit, userPlan } = usePlanValidation();
+  const { checkCanAdd, refetch: refetchLimits } = useUsageLimits();
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [limitInfo, setLimitInfo] = useState({ current: 0, max: 0 });
   const navigate = useNavigate();
 
   const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
@@ -110,18 +113,10 @@ export function NewBarberDialog({ open, onOpenChange, onAddBarber }: NewBarberDi
     }
 
     // Verificar limite de barbeiros
-    const limitCheck = await checkLimit("barbers");
-    if (!limitCheck.allowed) {
-      toast.error(
-        `Limite de barbeiros atingido! Seu plano permite até ${limitCheck.max} barbeiros.`,
-        {
-          description: "Faça upgrade para adicionar mais barbeiros",
-          action: {
-            label: "Ver Planos",
-            onClick: () => navigate("/planos"),
-          },
-        }
-      );
+    const check = checkCanAdd("barbers");
+    if (!check.allowed) {
+      setLimitInfo({ current: check.current, max: check.max });
+      setShowLimitModal(true);
       return;
     }
 
@@ -154,6 +149,7 @@ export function NewBarberDialog({ open, onOpenChange, onAddBarber }: NewBarberDi
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
@@ -250,5 +246,15 @@ export function NewBarberDialog({ open, onOpenChange, onAddBarber }: NewBarberDi
         </form>
       </DialogContent>
     </Dialog>
+
+      <UsageLimitModal
+        isOpen={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+        resource="barbers"
+        current={limitInfo.current}
+        max={limitInfo.max}
+      />
+    </>
   );
 }
+

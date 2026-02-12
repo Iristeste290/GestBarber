@@ -24,12 +24,12 @@ const plans = [
     iconBg: "bg-[#1a1a1a]",
     iconColor: "text-[#EDEDED]/60",
     features: [
-      { text: "Agenda completa", included: true },
-      { text: "Gestão de clientes", included: true },
-      { text: "Controle de caixa", included: true },
-      { text: "Barbeiros ilimitados", included: true },
+      { text: "Agenda (até 100 agendamentos)", included: true },
+      { text: "Até 100 clientes", included: true },
+      { text: "Até 3 barbeiros", included: true },
       { text: "Serviços ilimitados", included: true },
-      { text: "Controle financeiro", included: true },
+      { text: "Controle de caixa e custos", included: true },
+      { text: "Relatórios básicos", included: true },
       { text: "Growth Engine", included: false },
       { text: "Mapa de Clientes", included: false },
       { text: "IA do Site", included: false },
@@ -47,13 +47,12 @@ const plans = [
     iconBg: "bg-gradient-to-br from-primary to-primary/70",
     iconColor: "text-black",
     features: [
-      { text: "Tudo do Start", included: true, highlight: true },
+      { text: "Tudo do Start sem limites", included: true, highlight: true },
+      { text: "Clientes, barbeiros e agendamentos ilimitados", included: true },
       { text: "Growth Engine (IA)", included: true },
-      { text: "Mapa de clientes", included: true },
-      { text: "Insights de faturamento", included: true },
-      { text: "Previsões e alertas", included: true },
-      { text: "SEO local automático", included: true },
-      { text: "IA que cria site", included: true },
+      { text: "Mapa de clientes + Ranking", included: true },
+      { text: "Previsões e alertas inteligentes", included: true },
+      { text: "SEO local + IA que cria site", included: true },
       { text: "Suporte humano prioritário", included: true },
     ],
     cta: "Quero crescer",
@@ -101,7 +100,7 @@ export const PlansSection = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <Card
-                    className={`relative overflow-visible bg-gradient-to-b from-[#151515] to-[#111111] border-[#222222] h-full ${
+                    className={`relative bg-gradient-to-b from-[#151515] to-[#111111] border-[#222222] h-full ${
                       isGrowth
                         ? "border-primary/50 shadow-xl shadow-primary/10 lg:scale-105"
                         : "hover:border-primary/20"
@@ -111,10 +110,10 @@ export const PlansSection = () => {
                     {isGrowth && (
                       <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl blur opacity-50" />
                     )}
-                    
+
                     {plan.badge && (
-                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                        <Badge className="bg-gradient-to-r from-primary to-primary/80 text-black shadow-gold font-bold py-1.5 px-4">
+                      <div className="relative flex justify-center pt-4 -mb-2 z-10">
+                        <Badge className="bg-gradient-to-r from-primary to-primary/80 text-black shadow-gold font-bold py-1.5 px-5 whitespace-nowrap">
                           <Crown className="w-3.5 h-3.5 mr-1.5" />
                           {plan.badge}
                         </Badge>
@@ -122,7 +121,7 @@ export const PlansSection = () => {
                     )}
 
                     <div className="relative">
-                      <CardHeader className={`text-center ${isGrowth ? 'pt-12' : 'pt-10'} pb-6`}>
+                      <CardHeader className={`text-center ${isGrowth ? 'pt-6' : 'pt-10'} pb-6`}>
                         <div className={`mx-auto mb-4 w-16 h-16 rounded-2xl ${plan.iconBg} flex items-center justify-center shadow-lg ${isGrowth ? 'shadow-primary/20' : ''}`}>
                           <Icon className={`w-8 h-8 ${plan.iconColor}`} />
                         </div>

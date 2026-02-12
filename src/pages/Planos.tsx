@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Check, X, TrendingUp, Briefcase, Sparkles, Crown, Clock } from "lucide-react";
 import { usePlanValidation } from "@/hooks/usePlanValidation";
+import { useUsageLimits } from "@/hooks/useUsageLimits";
+import { Progress } from "@/components/ui/progress";
 import { FullPageLoader } from "@/components/ui/full-page-loader";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +26,7 @@ interface StripePriceData {
 const Planos = () => {
   const { userPlan, loading, isGrowth, isStart } = usePlanValidation();
   const [searchParams] = useSearchParams();
+  const { counts, limits, getUsagePercentage } = useUsageLimits();
   const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
   const [stripePrices, setStripePrices] = useState<StripePriceData[]>([]);
   const [loadingPrices, setLoadingPrices] = useState(true);
@@ -108,9 +111,9 @@ const Planos = () => {
   };
 
   const startFeatures = [
-    { text: 'Agenda completa', included: true },
-    { text: 'Gestão de clientes', included: true },
-    { text: 'Barbeiros ilimitados', included: true },
+    { text: 'Agenda (até 100 agendamentos)', included: true },
+    { text: 'Até 100 clientes', included: true },
+    { text: 'Até 3 barbeiros', included: true },
     { text: 'Serviços ilimitados', included: true },
     { text: 'Controle de caixa', included: true },
     { text: 'Controle de custos', included: true },
@@ -131,15 +134,14 @@ const Planos = () => {
   ];
 
   const growthFeatures = [
-    { text: 'Tudo do Start', included: true, highlight: true },
+    { text: 'Tudo do Start sem limites', included: true, highlight: true },
+    { text: 'Clientes ilimitados', included: true },
+    { text: 'Barbeiros ilimitados', included: true },
+    { text: 'Agendamentos ilimitados', included: true },
     { text: 'Growth Engine completo', included: true },
-    { text: 'Horários Vazios', included: true },
-    { text: 'Clientes Sumidos', included: true },
-    { text: 'Clientes Problemáticos', included: true },
-    { text: 'Ranking Invisível', included: true },
-    { text: 'Mapa de Clientes', included: true },
-    { text: 'IA do Site', included: true },
-    { text: 'SEO Local (Google Maps)', included: true },
+    { text: 'Horários Vazios + Clientes Sumidos', included: true },
+    { text: 'Ranking + Mapa de Clientes', included: true },
+    { text: 'IA do Site + SEO Local', included: true },
     { text: 'Alertas de dinheiro perdido', included: true },
     { text: 'Suporte humano prioritário', included: true },
   ];
@@ -185,17 +187,17 @@ const Planos = () => {
         </div>
 
         {/* Cards dos planos */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto pt-2">
           {/* Start Plan */}
           <Card className={`relative ${isStart ? 'border-primary ring-2 ring-primary/20' : 'border-border'}`}>
             {isStart && (
-              <div className="absolute -top-3 right-4">
-                <Badge variant="secondary" className="shadow-lg">
+              <div className="flex justify-center -mb-2 pt-3">
+                <Badge variant="secondary" className="shadow-lg whitespace-nowrap px-4 py-1">
                   Plano Atual
                 </Badge>
               </div>
             )}
-            <CardHeader className="text-center pb-4">
+            <CardHeader className={`text-center pb-4 ${isStart ? 'pt-8' : ''}`}>
               <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-muted flex items-center justify-center">
                 <Briefcase className="w-7 h-7 text-muted-foreground" />
               </div>
@@ -223,6 +225,28 @@ const Planos = () => {
                   </li>
                 ))}
               </ul>
+
+              {/* Usage bars (só mostra se for Start) */}
+              {isStart && (
+                <div className="pt-3 border-t border-border space-y-2.5">
+                  <p className="text-xs font-medium text-muted-foreground">Seu uso atual</p>
+                  {[
+                    { label: "Clientes", current: counts.clients, max: limits.maxClients, key: "clients" as const },
+                    { label: "Barbeiros", current: counts.barbers, max: limits.maxBarbers, key: "barbers" as const },
+                    { label: "Agendamentos", current: counts.appointments, max: limits.maxAppointments, key: "appointments" as const },
+                  ].map((item) => (
+                    <div key={item.key} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">{item.label}</span>
+                        <span className={`font-medium ${getUsagePercentage(item.key) >= 80 ? 'text-amber-600 dark:text-amber-400' : 'text-foreground'}`}>
+                          {item.current}/{item.max}
+                        </span>
+                      </div>
+                      <Progress value={getUsagePercentage(item.key)} className="h-1.5" />
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* Em breve section */}
               <div className="pt-3 border-t border-border">
@@ -253,20 +277,13 @@ const Planos = () => {
 
           {/* Growth Plan */}
           <Card className={`relative border-[#C9B27C] shadow-xl shadow-[#C9B27C]/20 ${isGrowth ? 'ring-2 ring-[#C9B27C]/30' : ''}`}>
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <Badge className="bg-gradient-to-r from-[#C9B27C] to-[#E8D9A8] text-black shadow-lg px-4">
+            <div className="flex justify-center pt-3 -mb-2">
+              <Badge className="bg-gradient-to-r from-[#C9B27C] to-[#E8D9A8] text-black shadow-lg whitespace-nowrap px-4 py-1">
                 <Crown className="w-3 h-3 mr-1" />
-                Mais escolhido
+                {isGrowth ? 'Plano Atual' : 'Mais escolhido'}
               </Badge>
             </div>
-            {isGrowth && (
-              <div className="absolute -top-3 right-4">
-                <Badge variant="secondary" className="shadow-lg bg-[#C9B27C] text-black">
-                  Plano Atual
-                </Badge>
-              </div>
-            )}
-            <CardHeader className="text-center pb-4 pt-8">
+            <CardHeader className="text-center pb-4">
               <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-gradient-to-br from-[#C9B27C] to-[#E8D9A8] flex items-center justify-center">
                 <TrendingUp className="w-7 h-7 text-black" />
               </div>

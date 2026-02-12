@@ -42,9 +42,9 @@ export interface UserPlan {
 // Configuração dos planos
 const PLAN_CONFIGS: Record<PlanType, PlanLimits> = {
   start: {
-    // Start: Recursos básicos gratuitos para sempre
-    maxBarbers: Infinity,
-    maxAppointmentsPerMonth: Infinity,
+    // Start: Recursos básicos com limites
+    maxBarbers: 3,
+    maxAppointmentsPerMonth: 100, // lifetime, não por mês
     maxServices: Infinity,
     maxProducts: Infinity,
     hasBasicReports: true,
@@ -224,11 +224,22 @@ export const usePlanValidation = () => {
       return { allowed: false, current: 0, max: 0 };
     }
 
-    // No modelo, Start tem recursos básicos ilimitados
+    // Growth tem tudo ilimitado
+    if (userPlan.plan === "growth") {
+      return { allowed: true, current: 0, max: Infinity };
+    }
+
+    const limitMap: Record<string, number> = {
+      barbers: userPlan.limits.maxBarbers,
+      services: userPlan.limits.maxServices,
+      products: userPlan.limits.maxProducts,
+      appointments: userPlan.limits.maxAppointmentsPerMonth,
+    };
+
     return {
-      allowed: true,
+      allowed: true, // Verificação real é feita pelo useUsageLimits
       current: 0,
-      max: Infinity,
+      max: limitMap[resource] ?? Infinity,
     };
   };
 

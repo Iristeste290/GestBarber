@@ -1,9 +1,11 @@
-import React, { createContext, useContext, ReactNode, useEffect, useState } from "react";
+import React from "react";
+import { createContext, useContext, ReactNode, useEffect } from "react";
 import { useGrowthTriggerEngine } from "@/hooks/useGrowthTriggerEngine";
 import { useConversionPushNotifications } from "@/hooks/useConversionPushNotifications";
 import { UpgradeModal } from "./UpgradeModal";
 import type { TriggerType, UpgradeTrigger, GrowthMetrics } from "@/hooks/useGrowthTriggerEngine";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsDemo } from "@/hooks/useIsDemo";
 
 interface GrowthTriggerContextType {
   triggerFeatureBlock: (featureName: string) => void;
@@ -28,6 +30,7 @@ interface GrowthTriggerProviderProps {
 }
 
 export const GrowthTriggerProvider = ({ children }: GrowthTriggerProviderProps) => {
+  const isDemo = useIsDemo();
   const {
     activeTrigger,
     activeEventId,
@@ -40,20 +43,20 @@ export const GrowthTriggerProvider = ({ children }: GrowthTriggerProviderProps) 
     metrics,
   } = useGrowthTriggerEngine();
 
-  const [userId, setUserId] = useState<string | undefined>();
-  const [isDemo, setIsDemo] = useState(false);
+  // Melhoria estratégica: Integrar push notifications de conversão
+  const [userId, setUserId] = React.useState<string | undefined>();
   
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
         setUserId(data.user.id);
-        setIsDemo(data.user.email === "demo@gestbarber.com");
       }
     });
   }, []);
 
   // Hook de push notifications (auto-trigger baseado em métricas)
-  useConversionPushNotifications(userId);
+  // Passa undefined para demo para desativar sem quebrar regras de hooks
+  useConversionPushNotifications(isDemo ? undefined : userId);
 
   return (
     <GrowthTriggerContext.Provider
@@ -77,3 +80,4 @@ export const GrowthTriggerProvider = ({ children }: GrowthTriggerProviderProps) 
     </GrowthTriggerContext.Provider>
   );
 };
+

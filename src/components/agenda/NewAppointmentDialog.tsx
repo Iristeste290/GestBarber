@@ -12,7 +12,8 @@ import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon, Clock, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
-import { usePlanValidation } from "@/hooks/usePlanValidation";
+import { useUsageLimits } from "@/hooks/useUsageLimits";
+import { UsageLimitModal } from "@/components/upgrade/UsageLimitModal";
 import { useManualProcessTracker } from "@/hooks/useManualProcessTracker";
 import { 
   sanitizeName, 
@@ -57,7 +58,9 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
   const [isLoading, setIsLoading] = useState(false);
   const [occupiedSlots, setOccupiedSlots] = useState<OccupiedSlot[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
-  const { checkLimit } = usePlanValidation();
+  const { checkCanAdd } = useUsageLimits();
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [limitInfo, setLimitInfo] = useState({ current: 0, max: 0 });
   
   // 📊 Rastreamento de tempo manual
   const { startManualProcess, endManualProcess, cancelManualProcess } = useManualProcessTracker();
@@ -260,9 +263,10 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
     setIsLoading(true);
 
     try {
-      const limitCheck = await checkLimit("appointments");
-      if (!limitCheck.allowed) {
-        toast.error(`Limite de agendamentos mensais atingido! Você tem ${limitCheck.current}/${limitCheck.max} agendamentos este mês. Faça upgrade para criar mais.`);
+      const check = checkCanAdd("appointments");
+      if (!check.allowed) {
+        setLimitInfo({ current: check.current, max: check.max });
+        setShowLimitModal(true);
         setIsLoading(false);
         return;
       }
@@ -348,6 +352,7 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
   }, []);
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
@@ -530,5 +535,14 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
         </div>
       </DialogContent>
     </Dialog>
+
+      <UsageLimitModal
+        isOpen={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+        resource="appointments"
+        current={limitInfo.current}
+        max={limitInfo.max}
+      />
+    </>
   );
 };

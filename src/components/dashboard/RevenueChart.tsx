@@ -6,7 +6,11 @@ import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { format, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-export const RevenueChart = () => {
+interface RevenueChartProps {
+  isDemo?: boolean;
+}
+
+export const RevenueChart = ({ isDemo = false }: RevenueChartProps) => {
   const endDate = new Date();
   const startDate = subDays(endDate, 29);
 
@@ -52,8 +56,31 @@ export const RevenueChart = () => {
       }
       return data;
     },
-    staleTime: 300000, // 5 minutos
+    staleTime: 300000,
+    enabled: !isDemo,
   });
+
+  // Dados fictícios para conta demo - consistentes com R$ 1.250 hoje
+  const demoChartData = (() => {
+    if (!isDemo) return chartData;
+    const data = [];
+    const dailyValues = [
+      980, 1120, 850, 1350, 1200, 760, 0,
+      1050, 1180, 920, 1400, 1100, 880, 0,
+      1150, 1300, 950, 1280, 1050, 810, 0,
+      1100, 1250, 900, 1380, 1150, 870, 0,
+      1200, 1250,
+    ];
+    for (let i = 29; i >= 0; i--) {
+      data.push({
+        date: format(subDays(endDate, i), "dd/MM", { locale: ptBR }),
+        revenue: dailyValues[29 - i],
+      });
+    }
+    return data;
+  })();
+
+  const displayData = isDemo ? demoChartData : chartData;
 
   const chartConfig = {
     revenue: {
@@ -62,8 +89,8 @@ export const RevenueChart = () => {
     },
   };
 
-  const totalRevenue = chartData.reduce((sum, item) => sum + item.revenue, 0);
-  const averageRevenue = chartData.length > 0 ? totalRevenue / chartData.length : 0;
+  const totalRevenue = displayData.reduce((sum, item) => sum + item.revenue, 0);
+  const averageRevenue = displayData.length > 0 ? totalRevenue / displayData.length : 0;
 
   return (
     <Card className="overflow-hidden contain-content">
@@ -98,7 +125,7 @@ export const RevenueChart = () => {
       <CardContent className="px-2 sm:px-6 pb-6">
         <ChartContainer config={chartConfig} className="h-[280px] sm:h-[320px] w-full">
           <AreaChart 
-            data={chartData}
+            data={displayData}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
           >
             <defs>

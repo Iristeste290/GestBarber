@@ -123,6 +123,46 @@ export const AppointmentBookingForm = ({
     setLoading(true);
 
     try {
+      // Check owner's appointment limit before creating
+      const { data: barberData } = await supabase
+        .from("barbers")
+        .select("user_id")
+        .eq("id", barberId)
+        .single();
+
+      if (barberData?.user_id) {
+        const { data: ownerProfile } = await supabase
+          .from("profiles")
+          .select("plan")
+          .eq("id", barberData.user_id)
+          .single();
+
+        const isStartPlan = !ownerProfile?.plan || ownerProfile.plan === "start" || ownerProfile.plan === "freemium";
+        
+        if (isStartPlan) {
+          // Count existing appointments for this owner's barbers
+          const { data: ownerBarbers } = await supabase
+            .from("barbers")
+            .select("id")
+            .eq("user_id", barberData.user_id);
+
+          const barberIds = ownerBarbers?.map(b => b.id) || [];
+          
+          if (barberIds.length > 0) {
+            const { count } = await supabase
+              .from("appointments")
+              .select("id", { count: "exact", head: true })
+              .in("barber_id", barberIds);
+
+            if ((count || 0) >= 100) {
+              toast.error("Esta barbearia atingiu o limite de agendamentos. Entre em contato diretamente.");
+              setLoading(false);
+              return;
+            }
+          }
+        }
+      }
+
       const dateStr = format(date, "yyyy-MM-dd");
       
       // Criar agendamento usando a função RPC segura com dados sanitizados

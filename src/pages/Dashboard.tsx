@@ -94,12 +94,12 @@ const Dashboard = () => {
           
           <PublicAgendaCard />
           
-          <StatsCards />
+          <StatsCards isDemo={isDemo} />
           
           <RevenueForecast />
           
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
-            <RevenueChart />
+            <RevenueChart isDemo={isDemo} />
             <TopServices />
           </div>
 

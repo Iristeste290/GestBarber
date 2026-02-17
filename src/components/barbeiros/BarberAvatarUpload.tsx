@@ -77,15 +77,18 @@ export function BarberAvatarUpload({
     try {
       // Deletar avatar antigo se existir
       if (currentAvatarUrl) {
-        const oldPath = currentAvatarUrl.split("/barber-avatars/")[1];
+        const oldPath = decodeURIComponent(currentAvatarUrl.split("/barber-avatars/")[1] || "");
         if (oldPath) {
           await supabase.storage.from("barber-avatars").remove([oldPath]);
         }
       }
 
-      // Upload nova foto
+      // Upload nova foto - use user-scoped path for RLS
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+      
       const fileExt = selectedFile.name.split(".").pop()?.toLowerCase();
-      const fileName = `${barberId}-${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/${barberId}-${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("barber-avatars")

@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { encryptToken, decryptToken } from '../_shared/token-encryption.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -30,11 +31,8 @@ serve(async (req) => {
     console.log('Google Business Auth action:', action);
 
     if (action === 'get-auth-url') {
-      // Generate OAuth URL
       const scope = encodeURIComponent('https://www.googleapis.com/auth/business.manage');
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
-
-      console.log('Generated auth URL');
 
       return new Response(JSON.stringify({ authUrl }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -42,7 +40,6 @@ serve(async (req) => {
     }
 
     if (action === 'exchange-code') {
-      // Exchange authorization code for tokens
       console.log('Exchanging code for tokens');
 
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
@@ -66,7 +63,6 @@ serve(async (req) => {
 
       console.log('Tokens received, fetching accounts');
 
-      // Fetch Google Business accounts
       const accountsResponse = await fetch(
         'https://mybusinessaccountmanagement.googleapis.com/v1/accounts',
         {
@@ -77,7 +73,6 @@ serve(async (req) => {
       const accountsData = await accountsResponse.json();
       console.log('Accounts data:', JSON.stringify(accountsData));
 
-      // Check if there's an API error (quota exceeded, etc.)
       if (accountsData.error) {
         console.error('Google Business API error:', accountsData.error);
         return new Response(JSON.stringify({
@@ -92,8 +87,6 @@ serve(async (req) => {
       }
 
       const accounts = accountsData.accounts || [];
-
-      // Calculate token expiry
       const tokenExpiresAt = new Date(Date.now() + tokens.expires_in * 1000).toISOString();
 
       return new Response(JSON.stringify({
@@ -133,7 +126,10 @@ serve(async (req) => {
 
       console.log('Saving connection for user:', userId);
 
-      // Encrypt tokens before storing (in production, use proper encryption)
+      // Encrypt tokens before storing
+      const encryptedAccessToken = await encryptToken(accessToken);
+      const encryptedRefreshToken = refreshToken ? await encryptToken(refreshToken) : null;
+
       const { error } = await supabase
         .from('google_business_connection')
         .upsert({
@@ -141,8 +137,8 @@ serve(async (req) => {
           business_id: locationId,
           account_name: accountName,
           location_name: locationName,
-          access_token: accessToken,
-          refresh_token: refreshToken,
+          access_token: encryptedAccessToken,
+          refresh_token: encryptedRefreshToken,
           token_expires_at: tokenExpiresAt,
           is_connected: true,
           last_sync_at: new Date().toISOString(),

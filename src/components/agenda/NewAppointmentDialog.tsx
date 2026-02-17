@@ -9,12 +9,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon, Clock, AlertCircle } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, AlertCircle, ChevronRight, ChevronLeft, User, Phone, Scissors, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { useUsageLimits } from "@/hooks/useUsageLimits";
 import { UsageLimitModal } from "@/components/upgrade/UsageLimitModal";
 import { useManualProcessTracker } from "@/hooks/useManualProcessTracker";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   sanitizeName, 
   sanitizePhone, 
@@ -44,7 +45,13 @@ interface NewAppointmentDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const TOTAL_STEPS = 6;
+const stepLabels = ["Nome", "Telefone", "Serviço", "Barbeiro", "Data", "Horário"];
+const stepIcons = [User, Phone, Scissors, UserCheck, CalendarIcon, Clock];
+
 export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialogProps) => {
+  const isMobile = useIsMobile();
+  const [step, setStep] = useState(1);
   const [barbers, setBarbers] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
   const [selectedService, setSelectedService] = useState("");
@@ -62,19 +69,17 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [limitInfo, setLimitInfo] = useState({ current: 0, max: 0 });
   
-  // 📊 Rastreamento de tempo manual
   const { startManualProcess, endManualProcess, cancelManualProcess } = useManualProcessTracker();
 
-  // Iniciar rastreamento quando dialog abre
   useEffect(() => {
     if (open) {
       startManualProcess("manual_appointment");
+      setStep(1);
     } else {
       cancelManualProcess();
     }
   }, [open, startManualProcess, cancelManualProcess]);
 
-  // Fetch barber's appointments for selected date
   useEffect(() => {
     if (selectedBarber && selectedDate) {
       loadOccupiedSlots();
@@ -97,7 +102,7 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
         `)
         .eq("barber_id", selectedBarber)
         .eq("appointment_date", format(selectedDate, "yyyy-MM-dd"))
-        .in("status", ["pending", "confirmed"]); // Only block pending/confirmed, not completed/cancelled/no_show
+        .in("status", ["pending", "confirmed"]);
       
       if (error) throw error;
 
@@ -107,7 +112,6 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
         serviceName: apt.services?.name || "Serviço",
       }));
 
-      console.log("Occupied slots for", selectedBarber, format(selectedDate, "yyyy-MM-dd"), ":", slots);
       setOccupiedSlots(slots);
     } catch (error) {
       console.error("Error loading occupied slots:", error);
@@ -164,30 +168,6 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
     return slots;
   };
 
-  // Check if a time slot is occupied considering service duration
-  const getSlotStatus = (slotTime: string): { isOccupied: boolean; reason?: string } => {
-    const selectedService = services.find(s => s.id === selectedService);
-    const newServiceDuration = selectedService?.duration_minutes || 30;
-    
-    const slotMinutes = timeToMinutes(slotTime);
-    const newServiceEnd = slotMinutes + newServiceDuration;
-
-    for (const occupied of occupiedSlots) {
-      const occupiedStart = timeToMinutes(occupied.time);
-      const occupiedEnd = occupiedStart + occupied.duration;
-
-      // Check if new appointment would overlap with existing
-      if (slotMinutes < occupiedEnd && newServiceEnd > occupiedStart) {
-        return {
-          isOccupied: true,
-          reason: `${occupied.serviceName} (${occupied.time} - ${minutesToTime(occupiedEnd)})`,
-        };
-      }
-    }
-
-    return { isOccupied: false };
-  };
-
   const timeToMinutes = (time: string): number => {
     const [hours, minutes] = time.split(":").map(Number);
     return hours * 60 + minutes;
@@ -199,7 +179,6 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
     return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
   };
 
-  // Memoized time slots with occupation status
   const timeSlotsWithStatus = useMemo(() => {
     const slots = generateTimeSlots();
     const currentService = services.find(s => s.id === selectedService);
@@ -216,7 +195,6 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
         const occupiedStart = timeToMinutes(occupied.time);
         const occupiedEnd = occupiedStart + occupied.duration;
 
-        // Check overlap
         if (slotMinutes < occupiedEnd && serviceEnd > occupiedStart) {
           isOccupied = true;
           reason = `${occupied.serviceName} (${occupied.time} - ${minutesToTime(occupiedEnd)})`;
@@ -234,7 +212,6 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
       return;
     }
 
-    // 🔒 Validação rigorosa com schema de sanitização
     const customerValidation = validateAppointmentCustomer({
       customerName: clientName,
       customerPhone: clientPhone,
@@ -247,7 +224,6 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
 
     const { customerName: validatedName, customerPhone: validatedPhone } = customerValidation.data;
 
-    // Validate appointment fields
     const validationResult = appointmentSchema.safeParse({
       barberId: selectedBarber,
       serviceId: selectedService,
@@ -271,7 +247,6 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
         return;
       }
 
-      // Get service duration for conflict checking
       const service = services.find(s => s.id === selectedService);
       if (!service) {
         toast.error("Serviço não encontrado");
@@ -279,7 +254,6 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
         return;
       }
 
-      // Use the safe RPC function with sanitized data
       const { data: appointmentId, error } = await supabase.rpc(
         "create_appointment_safe",
         {
@@ -303,10 +277,7 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
       }
 
       toast.success("Agendamento criado com sucesso!");
-      
-      // ✅ Finalizar rastreamento de tempo manual (agendamento concluído)
       await endManualProcess();
-      
       onOpenChange(false);
       resetForm();
     } catch (error: any) {
@@ -326,215 +297,481 @@ export const NewAppointmentDialog = ({ open, onOpenChange }: NewAppointmentDialo
     setClientPhone("");
     setNameError(null);
     setPhoneError(null);
+    setStep(1);
   };
 
-  // 🔒 Handler seguro para nome - sanitiza em tempo real
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
-    
-    // Verificar conteúdo perigoso
     if (containsDangerousContent(rawValue)) {
       setNameError("Caracteres não permitidos detectados");
       return;
     }
-    
-    // Sanitizar e aplicar
     const sanitized = sanitizeName(rawValue);
     setClientName(sanitized);
     setNameError(null);
   }, []);
 
-  // 🔒 Handler seguro para telefone - apenas números
   const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const sanitized = sanitizePhone(e.target.value);
     setClientPhone(sanitized);
     setPhoneError(null);
   }, []);
 
+  const canGoNext = () => {
+    switch (step) {
+      case 1: return clientName.trim().length >= 2;
+      case 2: return clientPhone.trim().length >= 10;
+      case 3: return selectedService !== "";
+      case 4: return selectedBarber !== "";
+      case 5: return !!selectedDate;
+      case 6: return selectedTime !== "";
+      default: return false;
+    }
+  };
+
+  // --- STEP RENDERERS ---
+
+  const renderStepName = () => (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-primary">
+        <User className="h-5 w-5" />
+        <span className="font-semibold text-sm">Qual o nome do cliente?</span>
+      </div>
+      <input
+        type="text"
+        value={clientName}
+        onChange={handleNameChange}
+        placeholder="Nome completo do cliente"
+        autoFocus
+        className={cn(
+          "flex h-12 w-full rounded-lg border border-input bg-background px-4 py-3 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          nameError && "border-destructive"
+        )}
+        maxLength={100}
+      />
+      {nameError && (
+        <p className="text-xs text-destructive flex items-center gap-1">
+          <AlertCircle className="h-3 w-3" />
+          {nameError}
+        </p>
+      )}
+    </div>
+  );
+
+  const renderStepPhone = () => (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-primary">
+        <Phone className="h-5 w-5" />
+        <span className="font-semibold text-sm">Telefone (WhatsApp)</span>
+      </div>
+      <input
+        type="tel"
+        value={clientPhone}
+        onChange={handlePhoneChange}
+        placeholder="11999999999"
+        autoFocus
+        className={cn(
+          "flex h-12 w-full rounded-lg border border-input bg-background px-4 py-3 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          phoneError && "border-destructive"
+        )}
+        maxLength={11}
+      />
+      {phoneError && (
+        <p className="text-xs text-destructive flex items-center gap-1">
+          <AlertCircle className="h-3 w-3" />
+          {phoneError}
+        </p>
+      )}
+      <p className="text-xs text-muted-foreground">
+        Apenas números (DDD + número). Ex: 11999999999
+      </p>
+    </div>
+  );
+
+  const renderStepService = () => (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-primary">
+        <Scissors className="h-5 w-5" />
+        <span className="font-semibold text-sm">Selecione o serviço</span>
+      </div>
+      <Select value={selectedService} onValueChange={setSelectedService}>
+        <SelectTrigger className="h-12 text-base">
+          <SelectValue placeholder={
+            services.length === 0 
+              ? "Nenhum serviço cadastrado" 
+              : "Selecione o serviço"
+          } />
+        </SelectTrigger>
+        <SelectContent className="max-h-[300px]">
+          {services.map((service) => (
+            <SelectItem key={service.id} value={service.id}>
+              <div className="flex flex-col gap-1 py-1">
+                <span className="font-medium">{service.name}</span>
+                <span className="text-xs opacity-70">
+                  R$ {service.price.toFixed(2)} • {service.duration_minutes} min
+                </span>
+              </div>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {services.length === 0 && (
+        <p className="text-xs text-muted-foreground">
+          Cadastre serviços na tela /servicos primeiro
+        </p>
+      )}
+    </div>
+  );
+
+  const renderStepBarber = () => (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-primary">
+        <UserCheck className="h-5 w-5" />
+        <span className="font-semibold text-sm">Selecione o barbeiro</span>
+      </div>
+      <Select value={selectedBarber} onValueChange={setSelectedBarber}>
+        <SelectTrigger className="h-12 text-base">
+          <SelectValue placeholder="Selecione o barbeiro" />
+        </SelectTrigger>
+        <SelectContent>
+          {barbers.map((barber) => (
+            <SelectItem key={barber.id} value={barber.id}>
+              {barber.name} {barber.specialty && `- ${barber.specialty}`}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
+  const renderStepDate = () => (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-primary">
+        <CalendarIcon className="h-5 w-5" />
+        <span className="font-semibold text-sm">Escolha a data</span>
+      </div>
+      <div className="flex justify-center">
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={setSelectedDate}
+          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+          initialFocus
+          className="pointer-events-auto rounded-lg border border-border"
+        />
+      </div>
+    </div>
+  );
+
+  const renderStepTime = () => (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-primary">
+        <Clock className="h-5 w-5" />
+        <span className="font-semibold text-sm">Escolha o horário</span>
+      </div>
+      {loadingSlots ? (
+        <p className="text-sm text-muted-foreground py-4 text-center">Carregando horários...</p>
+      ) : (
+        <div className="grid grid-cols-4 gap-2 max-h-[240px] overflow-y-auto p-1">
+          {timeSlotsWithStatus.map(({ time, isOccupied, reason }) => (
+            <Button
+              key={time}
+              type="button"
+              variant={selectedTime === time ? "default" : isOccupied ? "outline" : "secondary"}
+              size="sm"
+              disabled={isOccupied}
+              onClick={() => setSelectedTime(time)}
+              className={cn(
+                "text-xs font-medium transition-all",
+                isOccupied && "opacity-50 line-through bg-destructive/10 border-destructive/30 text-muted-foreground cursor-not-allowed",
+                selectedTime === time && "ring-2 ring-primary ring-offset-2"
+              )}
+              title={isOccupied ? `Ocupado: ${reason}` : `Disponível às ${time}`}
+            >
+              <Clock className={cn("h-3 w-3 mr-1", isOccupied && "text-destructive")} />
+              {time}
+            </Button>
+          ))}
+        </div>
+      )}
+      {occupiedSlots.length > 0 && (
+        <p className="text-xs text-muted-foreground flex items-center gap-1">
+          <span className="inline-block w-3 h-3 bg-destructive/10 border border-destructive/30 rounded" />
+          Horários riscados estão ocupados
+        </p>
+      )}
+    </div>
+  );
+
+  const renderCurrentStep = () => {
+    switch (step) {
+      case 1: return renderStepName();
+      case 2: return renderStepPhone();
+      case 3: return renderStepService();
+      case 4: return renderStepBarber();
+      case 5: return renderStepDate();
+      case 6: return renderStepTime();
+      default: return null;
+    }
+  };
+
+  // --- MOBILE: 6-STEP STEPPER ---
+  if (isMobile) {
+    return (
+      <>
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="max-w-[95vw] p-4">
+            <DialogHeader className="pb-1">
+              <DialogTitle className="text-base">Novo Agendamento</DialogTitle>
+              <DialogDescription className="text-xs">
+                Passo {step} de {TOTAL_STEPS} — {stepLabels[step - 1]}
+              </DialogDescription>
+            </DialogHeader>
+
+            {/* Progress bar */}
+            <div className="flex gap-1 mb-3">
+              {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "h-1 flex-1 rounded-full transition-all duration-300",
+                    i < step ? "bg-primary" : "bg-muted"
+                  )}
+                />
+              ))}
+            </div>
+
+            <div className="min-h-[180px]">
+              {renderCurrentStep()}
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              {step > 1 ? (
+                <Button variant="outline" onClick={() => setStep(step - 1)} className="flex-1" size="lg">
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Voltar
+                </Button>
+              ) : (
+                <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1" size="lg">
+                  Cancelar
+                </Button>
+              )}
+              {step < TOTAL_STEPS ? (
+                <Button onClick={() => setStep(step + 1)} disabled={!canGoNext()} className="flex-1" size="lg">
+                  Continuar
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button onClick={handleSubmit} disabled={isLoading || !selectedTime} className="flex-1" size="lg">
+                  {isLoading ? "Criando..." : "Confirmar"}
+                </Button>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <UsageLimitModal
+          isOpen={showLimitModal}
+          onClose={() => setShowLimitModal(false)}
+          resource="appointments"
+          current={limitInfo.current}
+          max={limitInfo.max}
+        />
+      </>
+    );
+  }
+
+  // --- DESKTOP: ALL FIELDS IN ONE VIEW ---
   return (
     <>
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Novo Agendamento</DialogTitle>
-          <DialogDescription>
-            Preencha os dados para criar um novo agendamento
-          </DialogDescription>
-        </DialogHeader>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Novo Agendamento</DialogTitle>
+            <DialogDescription>
+              Preencha os dados para criar um novo agendamento
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Nome do Cliente</Label>
-            <input
-              type="text"
-              value={clientName}
-              onChange={handleNameChange}
-              placeholder="Nome completo do cliente"
-              className={cn(
-                "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                nameError && "border-destructive"
+          <div className="space-y-4">
+            {/* Name */}
+            <div className="space-y-2">
+              <Label>Nome do Cliente</Label>
+              <input
+                type="text"
+                value={clientName}
+                onChange={handleNameChange}
+                placeholder="Nome completo do cliente"
+                className={cn(
+                  "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  nameError && "border-destructive"
+                )}
+                maxLength={100}
+              />
+              {nameError && (
+                <p className="text-xs text-destructive flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {nameError}
+                </p>
               )}
-              maxLength={100}
-            />
-            {nameError && (
-              <p className="text-xs text-destructive flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {nameError}
-              </p>
-            )}
-          </div>
+            </div>
 
-          <div className="space-y-2">
-            <Label>Telefone do Cliente (WhatsApp)</Label>
-            <input
-              type="tel"
-              value={clientPhone}
-              onChange={handlePhoneChange}
-              placeholder="11999999999"
-              className={cn(
-                "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                phoneError && "border-destructive"
+            {/* Phone */}
+            <div className="space-y-2">
+              <Label>Telefone do Cliente (WhatsApp)</Label>
+              <input
+                type="tel"
+                value={clientPhone}
+                onChange={handlePhoneChange}
+                placeholder="11999999999"
+                className={cn(
+                  "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  phoneError && "border-destructive"
+                )}
+                maxLength={11}
+              />
+              {phoneError && (
+                <p className="text-xs text-destructive flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {phoneError}
+                </p>
               )}
-              maxLength={11}
-            />
-            {phoneError && (
-              <p className="text-xs text-destructive flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {phoneError}
-              </p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Apenas números (DDD + número). Ex: 11999999999
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Serviço</Label>
-            <Select value={selectedService} onValueChange={setSelectedService}>
-              <SelectTrigger>
-                <SelectValue placeholder={
-                  services.length === 0 
-                    ? "Nenhum serviço cadastrado" 
-                    : "Selecione o serviço"
-                } />
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
-                {services.map((service) => (
-                  <SelectItem key={service.id} value={service.id}>
-                    <div className="flex flex-col gap-1 py-1">
-                      <span className="font-medium">{service.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        R$ {service.price.toFixed(2)} • {service.duration_minutes} min
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {services.length === 0 && (
               <p className="text-xs text-muted-foreground">
-                Cadastre serviços na tela /servicos primeiro
+                Apenas números (DDD + número). Ex: 11999999999
               </p>
-            )}
-          </div>
+            </div>
 
-          <div className="space-y-2">
-            <Label>Barbeiro</Label>
-            <Select value={selectedBarber} onValueChange={setSelectedBarber}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o barbeiro" />
-              </SelectTrigger>
-              <SelectContent>
-                {barbers.map((barber) => (
-                  <SelectItem key={barber.id} value={barber.id}>
-                    {barber.name} {barber.specialty && `- ${barber.specialty}`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Data</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !selectedDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {selectedDate ? format(selectedDate, "PPP", { locale: ptBR }) : "Selecione a data"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                  initialFocus
-                  className="pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              Horário
-              {loadingSlots && (
-                <span className="text-xs text-muted-foreground">(carregando...)</span>
+            {/* Service */}
+            <div className="space-y-2">
+              <Label>Serviço</Label>
+              <Select value={selectedService} onValueChange={setSelectedService}>
+                <SelectTrigger>
+                  <SelectValue placeholder={
+                    services.length === 0 
+                      ? "Nenhum serviço cadastrado" 
+                      : "Selecione o serviço"
+                  } />
+                </SelectTrigger>
+                <SelectContent className="max-h-[300px]">
+                  {services.map((service) => (
+                    <SelectItem key={service.id} value={service.id}>
+                      <div className="flex flex-col gap-1 py-1">
+                        <span className="font-medium">{service.name}</span>
+                        <span className="text-xs opacity-70">
+                          R$ {service.price.toFixed(2)} • {service.duration_minutes} min
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {services.length === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Cadastre serviços na tela /servicos primeiro
+                </p>
               )}
-            </Label>
-            {!selectedBarber || !selectedDate ? (
-              <p className="text-sm text-muted-foreground py-2">
-                Selecione o barbeiro e a data para ver os horários disponíveis
-              </p>
-            ) : (
-              <div className="grid grid-cols-4 gap-2 max-h-[200px] overflow-y-auto p-1">
-                {timeSlotsWithStatus.map(({ time, isOccupied, reason }) => (
-                  <Button
-                    key={time}
-                    type="button"
-                    variant={selectedTime === time ? "default" : isOccupied ? "outline" : "secondary"}
-                    size="sm"
-                    disabled={isOccupied}
-                    onClick={() => setSelectedTime(time)}
-                    className={cn(
-                      "text-xs font-medium transition-all",
-                      isOccupied && "opacity-50 line-through bg-destructive/10 border-destructive/30 text-muted-foreground cursor-not-allowed",
-                      selectedTime === time && "ring-2 ring-primary ring-offset-2"
-                    )}
-                    title={isOccupied ? `Ocupado: ${reason}` : `Disponível às ${time}`}
-                  >
-                    <Clock className={cn("h-3 w-3 mr-1", isOccupied && "text-destructive")} />
-                    {time}
-                  </Button>
-                ))}
-              </div>
-            )}
-            {occupiedSlots.length > 0 && selectedBarber && selectedDate && (
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <span className="inline-block w-3 h-3 bg-destructive/10 border border-destructive/30 rounded" />
-                Horários riscados estão ocupados
-              </p>
-            )}
-          </div>
+            </div>
 
-          <div className="flex gap-2 pt-4">
-            <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
-              Cancelar
-            </Button>
-            <Button onClick={handleSubmit} disabled={isLoading} className="flex-1">
-              {isLoading ? "Criando..." : "Confirmar"}
-            </Button>
+            {/* Barber */}
+            <div className="space-y-2">
+              <Label>Barbeiro</Label>
+              <Select value={selectedBarber} onValueChange={setSelectedBarber}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o barbeiro" />
+                </SelectTrigger>
+                <SelectContent>
+                  {barbers.map((barber) => (
+                    <SelectItem key={barber.id} value={barber.id}>
+                      {barber.name} {barber.specialty && `- ${barber.specialty}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Date */}
+            <div className="space-y-2">
+              <Label>Data</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !selectedDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? format(selectedDate, "PPP", { locale: ptBR }) : "Selecione a data"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Time */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                Horário
+                {loadingSlots && (
+                  <span className="text-xs text-muted-foreground">(carregando...)</span>
+                )}
+              </Label>
+              {!selectedBarber || !selectedDate ? (
+                <p className="text-sm text-muted-foreground py-2">
+                  Selecione o barbeiro e a data para ver os horários disponíveis
+                </p>
+              ) : (
+                <div className="grid grid-cols-4 gap-2 max-h-[200px] overflow-y-auto p-1">
+                  {timeSlotsWithStatus.map(({ time, isOccupied, reason }) => (
+                    <Button
+                      key={time}
+                      type="button"
+                      variant={selectedTime === time ? "default" : isOccupied ? "outline" : "secondary"}
+                      size="sm"
+                      disabled={isOccupied}
+                      onClick={() => setSelectedTime(time)}
+                      className={cn(
+                        "text-xs font-medium transition-all",
+                        isOccupied && "opacity-50 line-through bg-destructive/10 border-destructive/30 text-muted-foreground cursor-not-allowed",
+                        selectedTime === time && "ring-2 ring-primary ring-offset-2"
+                      )}
+                      title={isOccupied ? `Ocupado: ${reason}` : `Disponível às ${time}`}
+                    >
+                      <Clock className={cn("h-3 w-3 mr-1", isOccupied && "text-destructive")} />
+                      {time}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              {occupiedSlots.length > 0 && selectedBarber && selectedDate && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <span className="inline-block w-3 h-3 bg-destructive/10 border border-destructive/30 rounded" />
+                  Horários riscados estão ocupados
+                </p>
+              )}
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+                Cancelar
+              </Button>
+              <Button onClick={handleSubmit} disabled={isLoading} className="flex-1">
+                {isLoading ? "Criando..." : "Confirmar"}
+              </Button>
+            </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
 
       <UsageLimitModal
         isOpen={showLimitModal}

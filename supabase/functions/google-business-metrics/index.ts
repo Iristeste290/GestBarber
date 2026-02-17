@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { decryptToken, encryptToken } from '../_shared/token-encryption.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,13 +12,23 @@ const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
+async function getDecryptedToken(encryptedToken: string): Promise<string> {
+  try {
+    return await decryptToken(encryptedToken);
+  } catch {
+    // Fallback: token might be stored in plaintext (pre-encryption migration)
+    return encryptedToken;
+  }
+}
+
 async function refreshTokenIfNeeded(supabase: any, connection: any): Promise<string | null> {
   const tokenExpiresAt = new Date(connection.token_expires_at);
   const now = new Date();
 
-  // If token expires in less than 5 minutes, refresh it
   if (tokenExpiresAt.getTime() - now.getTime() < 5 * 60 * 1000) {
     console.log('Token expired or expiring soon, refreshing...');
+
+    const refreshToken = await getDecryptedToken(connection.refresh_token);
 
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -25,7 +36,7 @@ async function refreshTokenIfNeeded(supabase: any, connection: any): Promise<str
       body: new URLSearchParams({
         client_id: GOOGLE_CLIENT_ID!,
         client_secret: GOOGLE_CLIENT_SECRET!,
-        refresh_token: connection.refresh_token,
+        refresh_token: refreshToken,
         grant_type: 'refresh_token',
       }),
     });
@@ -39,11 +50,13 @@ async function refreshTokenIfNeeded(supabase: any, connection: any): Promise<str
 
     const newTokenExpiresAt = new Date(Date.now() + tokens.expires_in * 1000).toISOString();
 
-    // Update the token in database
+    // Encrypt the new access token before storing
+    const encryptedAccessToken = await encryptToken(tokens.access_token);
+
     await supabase
       .from('google_business_connection')
       .update({
-        access_token: tokens.access_token,
+        access_token: encryptedAccessToken,
         token_expires_at: newTokenExpiresAt,
       })
       .eq('id', connection.id);
@@ -52,7 +65,7 @@ async function refreshTokenIfNeeded(supabase: any, connection: any): Promise<str
     return tokens.access_token;
   }
 
-  return connection.access_token;
+  return await getDecryptedToken(connection.access_token);
 }
 
 serve(async (req) => {
@@ -67,7 +80,6 @@ serve(async (req) => {
     console.log('Google Business Metrics action:', action);
 
     if (action === 'sync-metrics') {
-      // Get the user's connection
       const { data: connection, error: connError } = await supabase
         .from('google_business_connection')
         .select('*')
@@ -83,7 +95,6 @@ serve(async (req) => {
         });
       }
 
-      // Refresh token if needed
       const accessToken = await refreshTokenIfNeeded(supabase, connection);
       if (!accessToken) {
         return new Response(JSON.stringify({ error: 'Failed to refresh token' }), {
@@ -95,7 +106,6 @@ serve(async (req) => {
       const locationId = connection.business_id;
       console.log('Fetching metrics for location:', locationId);
 
-      // Get date range for last 7 days
       const endDate = new Date();
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 7);
@@ -113,8 +123,6 @@ serve(async (req) => {
         },
       };
 
-      // Fetch insights from Google Business Profile API
-      // Note: The actual API endpoint may vary based on your Google API setup
       const insightsUrl = `https://businessprofileperformance.googleapis.com/v1/${locationId}:getDailyMetricsTimeSeries`;
       
       const metricsResponse = await fetch(insightsUrl, {
@@ -140,7 +148,6 @@ serve(async (req) => {
       const metricsData = await metricsResponse.json();
       console.log('Metrics response:', JSON.stringify(metricsData));
 
-      // Parse and aggregate metrics
       let totalViews = 0;
       let totalCalls = 0;
       let totalWebsiteClicks = 0;
@@ -165,7 +172,6 @@ serve(async (req) => {
         }
       }
 
-      // Save metrics to database
       const today = new Date().toISOString().split('T')[0];
 
       const { error: upsertError } = await supabase
@@ -177,7 +183,7 @@ serve(async (req) => {
           phone_calls: totalCalls,
           website_clicks: totalWebsiteClicks,
           direction_requests: totalDirections,
-          searches_count: Math.floor(totalViews * 0.6), // Approximate
+          searches_count: Math.floor(totalViews * 0.6),
         }, {
           onConflict: 'user_id,metric_date',
         });
@@ -186,7 +192,6 @@ serve(async (req) => {
         console.error('Error saving metrics:', upsertError);
       }
 
-      // Update last sync time
       await supabase
         .from('google_business_connection')
         .update({ last_sync_at: new Date().toISOString() })
@@ -208,7 +213,6 @@ serve(async (req) => {
     }
 
     if (action === 'sync-all') {
-      // Sync metrics for all connected accounts (for cron job)
       console.log('Syncing all connected accounts');
 
       const { data: connections, error } = await supabase
@@ -228,9 +232,6 @@ serve(async (req) => {
             failed++;
             continue;
           }
-
-          // Similar metrics fetching logic as above
-          // (simplified for brevity)
           synced++;
         } catch (e) {
           console.error('Error syncing connection:', connection.id, e);

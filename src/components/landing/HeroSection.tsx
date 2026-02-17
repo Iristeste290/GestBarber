@@ -1,8 +1,37 @@
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 import { AuthLinkButton } from "@/components/landing/AuthLinkButton";
 import { ArrowRight, TrendingUp, DollarSign, Shield, Play } from "lucide-react";
 
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'wistia-player': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        'media-id'?: string;
+        aspect?: string;
+        'controls-visible-on-load'?: string;
+      }, HTMLElement>;
+    }
+  }
+}
+
 export const HeroSection = () => {
+  useEffect(() => {
+    // Load Wistia scripts
+    if (!document.querySelector('script[src*="fast.wistia.com/player.js"]')) {
+      const playerScript = document.createElement('script');
+      playerScript.src = 'https://fast.wistia.com/player.js';
+      playerScript.async = true;
+      document.head.appendChild(playerScript);
+    }
+    if (!document.querySelector('script[src*="ykc48s8kp3"]')) {
+      const embedScript = document.createElement('script');
+      embedScript.src = 'https://fast.wistia.com/embed/ykc48s8kp3.js';
+      embedScript.async = true;
+      embedScript.type = 'module';
+      document.head.appendChild(embedScript);
+    }
+  }, []);
   return (
     <section
       id="inicio"
@@ -131,99 +160,29 @@ export const HeroSection = () => {
             transition={{ duration: 1, delay: 0.4 }}
             className="relative hidden lg:block"
           >
-            {/* Main dashboard mockup */}
             <div className="relative">
               {/* Glow effect behind */}
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5 rounded-3xl blur-3xl scale-105" />
               
-              {/* Dashboard frame */}
-              <div className="relative rounded-3xl bg-[#111111] border border-primary/20 overflow-hidden shadow-2xl shadow-primary/10">
-                {/* Browser chrome */}
-                <div className="flex items-center gap-2 px-4 py-3 bg-[#0A0A0A] border-b border-primary/10">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-destructive/60" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
-                    <div className="w-3 h-3 rounded-full bg-green-500/60" />
+              {/* Wistia Video */}
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-primary/10 border border-primary/20">
+                <div className="relative w-full">
+                  {/* Overlay text */}
+                  <div className="absolute inset-0 z-10 flex items-center justify-center px-6 text-center pointer-events-none opacity-0 hover:opacity-100 transition-opacity">
+                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-primary drop-shadow-lg">
+                      Veja como os barbeiros estão aumentando o faturamento
+                    </h2>
                   </div>
-                  <div className="flex-1 h-7 rounded-lg bg-[#1A1A1A] flex items-center px-3">
-                    <span className="text-xs text-muted-foreground">app.gestbarber.com</span>
-                  </div>
-                </div>
-                
-                {/* Dashboard content */}
-                <div className="p-6 space-y-4">
-                  {/* Header */}
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="h-4 w-32 bg-primary/20 rounded" />
-                      <div className="h-3 w-48 bg-[#1A1A1A] rounded mt-2" />
-                    </div>
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <div className="w-5 h-5 rounded-full bg-primary" />
-                    </div>
-                  </div>
-                  
-                  {/* Stats cards */}
-                  <div className="grid grid-cols-3 gap-3">
-                    {[
-                      { value: "R$ 4.850", label: "Faturamento", color: "from-primary/20 to-primary/10" },
-                      { value: "+23%", label: "Crescimento", color: "from-green-500/20 to-green-500/10" },
-                      { value: "89%", label: "Ocupação", color: "from-blue-500/20 to-blue-500/10" },
-                    ].map((stat, i) => (
-                      <div key={i} className={`p-4 rounded-xl bg-gradient-to-br ${stat.color} border border-white/5`}>
-                        <p className="text-lg font-bold text-[#EDEDED]">{stat.value}</p>
-                        <p className="text-xs text-muted-foreground">{stat.label}</p>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Chart placeholder */}
-                  <div className="h-32 rounded-xl bg-[#0A0A0A] border border-primary/10 p-4">
-                    <div className="flex items-end justify-between h-full gap-2">
-                      {[40, 65, 45, 80, 55, 90, 70].map((h, i) => (
-                        <motion.div
-                          key={i}
-                          initial={{ height: 0 }}
-                          animate={{ height: `${h}%` }}
-                          transition={{ duration: 0.8, delay: 0.8 + i * 0.1 }}
-                          className="flex-1 bg-gradient-to-t from-primary to-primary/50 rounded-t"
-                        />
-                      ))}
-                    </div>
-                  </div>
+
+                  {/* Wistia Player */}
+                  <wistia-player
+                    media-id="ykc48s8kp3"
+                    aspect="1.7777777777777777"
+                    controls-visible-on-load="false"
+                    style={{ width: '100%', display: 'block' }}
+                  />
                 </div>
               </div>
-              
-              {/* Floating notification card */}
-              <motion.div
-                initial={{ opacity: 0, x: 20, y: 20 }}
-                animate={{ opacity: 1, x: 0, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.2 }}
-                className="absolute -right-4 -bottom-4 p-4 rounded-2xl bg-[#111111] border border-primary/30 shadow-gold backdrop-blur-sm"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-green-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-[#EDEDED]">+R$ 1.200</p>
-                    <p className="text-xs text-muted-foreground">esta semana</p>
-                  </div>
-                </div>
-              </motion.div>
-              
-              {/* Floating alert card */}
-              <motion.div
-                initial={{ opacity: 0, x: -20, y: -20 }}
-                animate={{ opacity: 1, x: 0, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.4 }}
-                className="absolute -left-8 top-1/3 p-3 rounded-xl bg-[#111111] border border-primary/20 shadow-lg backdrop-blur-sm"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                  <span className="text-xs text-primary font-medium">3 horários vazios hoje</span>
-                </div>
-              </motion.div>
             </div>
           </motion.div>
         </div>

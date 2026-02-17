@@ -73,7 +73,7 @@ export const ProblemsSection = () => {
 
         {/* The Turn */}
         <ScrollAnimation animation="scale">
-          <div className="max-w-4xl mx-auto text-center p-10 md:p-16 rounded-[2rem] bg-gradient-to-br from-[#151515] via-[#111111] to-[#0D0D0D] border border-primary/20 relative overflow-hidden">
+          <div className="max-w-4xl mx-auto text-center p-6 sm:p-10 md:p-16 rounded-2xl sm:rounded-[2rem] bg-gradient-to-br from-[#151515] via-[#111111] to-[#0D0D0D] border border-primary/20 relative overflow-hidden">
             {/* Glow effects */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-primary/10 blur-3xl" />
             <div className="absolute bottom-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-2xl" />

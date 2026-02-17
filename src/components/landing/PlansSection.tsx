@@ -137,7 +137,7 @@ export const PlansSection = () => {
                         </div>
                       </CardHeader>
 
-                      <CardContent className="space-y-6 px-8 pb-8">
+                      <CardContent className="space-y-6 px-4 sm:px-8 pb-6 sm:pb-8">
                         <ul className="space-y-4">
                           {plan.features.map((feature, idx) => (
                             <li key={idx} className="flex items-center gap-3">

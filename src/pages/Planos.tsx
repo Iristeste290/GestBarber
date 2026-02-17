@@ -365,13 +365,13 @@ const Planos = () => {
 
         {/* Footer */}
         <div className="text-center space-y-3 text-sm text-muted-foreground">
-          <p className="flex items-center justify-center gap-2">
-            ✓ Pagamento seguro via Stripe
-            <span className="mx-2">•</span>
-            ✓ Cancele quando quiser
-            <span className="mx-2">•</span>
-            ✓ Sem fidelidade
-          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-0">
+            <span className="flex items-center gap-1">✓ Pagamento seguro via Stripe</span>
+            <span className="hidden sm:inline mx-2">•</span>
+            <span className="flex items-center gap-1">✓ Cancele quando quiser</span>
+            <span className="hidden sm:inline mx-2">•</span>
+            <span className="flex items-center gap-1">✓ Sem fidelidade</span>
+          </div>
           <p className="text-[#C9B27C] font-medium">
             O plano Growth se paga sozinho com o dinheiro que você vai deixar de perder.
           </p>

@@ -88,7 +88,7 @@ export const LandingNavbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="lg:hidden p-2 text-white hover:text-primary transition-colors"
+            className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-white hover:text-primary transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
           >

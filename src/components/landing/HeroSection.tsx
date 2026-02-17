@@ -158,7 +158,7 @@ export const HeroSection = () => {
             initial={{ opacity: 0, x: 50, rotateY: -10 }}
             animate={{ opacity: 1, x: 0, rotateY: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
-            className="relative hidden lg:block"
+            className="relative"
           >
             <div className="relative">
               {/* Glow effect behind */}

@@ -33,7 +33,7 @@ export const CTASection = () => {
       <div className="container mx-auto px-4 relative">
         <div className="max-w-5xl mx-auto">
           <ScrollAnimation animation="scale">
-            <div className="text-center p-12 md:p-20 rounded-[3rem] bg-gradient-to-b from-[#151515]/80 to-[#111111]/80 border border-primary/20 backdrop-blur-sm shadow-2xl shadow-primary/5">
+            <div className="text-center p-6 sm:p-10 md:p-20 rounded-2xl sm:rounded-[3rem] bg-gradient-to-b from-[#151515]/80 to-[#111111]/80 border border-primary/20 backdrop-blur-sm shadow-2xl shadow-primary/5">
               {/* Logo */}
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -90,11 +90,11 @@ export const CTASection = () => {
                 <AuthLinkButton 
                   variant="premium" 
                   size="lg" 
-                  className="text-xl px-14 py-8 shadow-gold hover:shadow-gold-lg transition-all duration-300 hover:-translate-y-1"
+                  className="text-base sm:text-xl px-6 sm:px-14 py-6 sm:py-8 shadow-gold hover:shadow-gold-lg transition-all duration-300 hover:-translate-y-1 w-full sm:w-auto"
                 >
-                  <Sparkles className="w-6 h-6 mr-3" />
-                  Criar minha conta no GestBarber
-                  <ArrowRight className="ml-3 w-6 h-6" />
+                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 flex-shrink-0" />
+                  <span className="truncate">Criar minha conta</span>
+                  <ArrowRight className="ml-2 sm:ml-3 w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                 </AuthLinkButton>
               </motion.div>
               

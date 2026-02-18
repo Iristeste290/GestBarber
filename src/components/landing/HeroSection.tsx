@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { AuthLinkButton } from "@/components/landing/AuthLinkButton";
-import { ArrowRight, TrendingUp, DollarSign, Shield, Play } from "lucide-react";
+import { ArrowRight, TrendingUp, DollarSign, Shield } from "lucide-react";
 
 declare global {
   namespace JSX {
@@ -60,16 +60,16 @@ export const HeroSection = () => {
       {/* Grid pattern overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(201,178,124,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(201,178,124,0.02)_1px,transparent_1px)] bg-[size:80px_80px]" />
 
-      <div className="container relative mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div className="container relative mx-auto px-6 lg:px-12 xl:px-16 py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 xl:gap-24 items-center">
           {/* Left Content */}
-          <div className="text-center lg:text-left">
+          <div className="text-center lg:text-left space-y-8">
             {/* Badge */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#111111]/80 border border-primary/20 mb-8 backdrop-blur-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#111111]/80 border border-primary/20 backdrop-blur-sm"
             >
               <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
               <span className="text-sm text-primary font-medium">Sistema de crescimento para barbearias</span>
@@ -80,7 +80,7 @@ export const HeroSection = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-[1.1] text-[#EDEDED]"
+              className="text-4xl md:text-5xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-bold leading-[1.1] text-[#EDEDED]"
             >
               Pare de gerenciar.{" "}
               <span className="text-primary relative">
@@ -99,7 +99,7 @@ export const HeroSection = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed"
+              className="text-lg md:text-xl text-muted-foreground max-w-lg mx-auto lg:mx-0 leading-relaxed"
             >
               O único sistema para barbearias que mostra onde você está{" "}
               <span className="text-destructive font-medium">perdendo dinheiro</span>{" "}
@@ -107,12 +107,12 @@ export const HeroSection = () => {
               <span className="text-primary font-medium">ganhar mais</span>.
             </motion.p>
 
-            {/* CTA Buttons */}
+            {/* CTA Button */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-12"
+              className="flex items-center justify-center lg:justify-start"
             >
               <AuthLinkButton 
                 variant="premium" 
@@ -122,12 +122,6 @@ export const HeroSection = () => {
                 Quero meu GestBarber
                 <ArrowRight className="ml-2 w-5 h-5" />
               </AuthLinkButton>
-              <button className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group">
-                <span className="w-12 h-12 rounded-full border border-primary/30 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                  <Play className="w-4 h-4 text-primary ml-0.5" />
-                </span>
-                <span className="font-medium">Ver como funciona</span>
-              </button>
             </motion.div>
 
             {/* Trust indicators */}
@@ -135,7 +129,7 @@ export const HeroSection = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.7, delay: 0.5 }}
-              className="flex flex-wrap items-center justify-center lg:justify-start gap-4"
+              className="flex flex-wrap items-center justify-center lg:justify-start gap-3"
             >
               {[
                 { icon: DollarSign, text: "Plano Start grátis" },
@@ -144,16 +138,16 @@ export const HeroSection = () => {
               ].map((item, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#111111]/60 border border-primary/10 backdrop-blur-sm"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#111111]/60 border border-primary/10 backdrop-blur-sm"
                 >
-                  <item.icon className="w-4 h-4 text-primary" />
+                  <item.icon className="w-4 h-4 text-primary flex-shrink-0" />
                   <span className="text-sm text-muted-foreground">{item.text}</span>
                 </div>
               ))}
             </motion.div>
           </div>
 
-          {/* Right - App Mockup */}
+          {/* Right - Video */}
           <motion.div
             initial={{ opacity: 0, x: 50, rotateY: -10 }}
             animate={{ opacity: 1, x: 0, rotateY: 0 }}
@@ -167,13 +161,6 @@ export const HeroSection = () => {
               {/* Wistia Video */}
               <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-primary/10 border border-primary/20">
                 <div className="relative w-full">
-                  {/* Overlay text */}
-                  <div className="absolute inset-0 z-10 flex items-center justify-center px-6 text-center pointer-events-none opacity-0 hover:opacity-100 transition-opacity">
-                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-primary drop-shadow-lg">
-                      Veja como os barbeiros estão aumentando o faturamento
-                    </h2>
-                  </div>
-
                   {/* Wistia Player */}
                   <wistia-player
                     media-id="ykc48s8kp3"

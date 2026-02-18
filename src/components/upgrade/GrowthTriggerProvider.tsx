@@ -1,9 +1,10 @@
 import React from "react";
-import { createContext, useContext, ReactNode, useEffect } from "react";
+import { createContext, useContext, ReactNode, useEffect, useState, useCallback } from "react";
 import { useGrowthTriggerEngine } from "@/hooks/useGrowthTriggerEngine";
 import { useConversionPushNotifications } from "@/hooks/useConversionPushNotifications";
-import { UpgradeModal } from "./UpgradeModal";
-import type { TriggerType, UpgradeTrigger, GrowthMetrics } from "@/hooks/useGrowthTriggerEngine";
+import { UpgradeToast, canShowUpgradeToast, recordUpgradeToastShown } from "./UpgradeToast";
+import { UpgradeFullScreenModal } from "./UpgradeFullScreenModal";
+import type { GrowthMetrics } from "@/hooks/useGrowthTriggerEngine";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsDemo } from "@/hooks/useIsDemo";
 
@@ -36,27 +37,65 @@ export const GrowthTriggerProvider = ({ children }: GrowthTriggerProviderProps) 
     activeEventId,
     isModalOpen,
     dismissTrigger,
-    triggerFeatureBlock,
+    triggerFeatureBlock: engineTriggerFeatureBlock,
     checkTriggers,
     isStart,
     isGrowth,
     metrics,
   } = useGrowthTriggerEngine();
 
-  // Melhoria estratégica: Integrar push notifications de conversão
+  // Estado do sistema em 2 etapas
+  const [toastOpen, setToastOpen] = useState(false);
+  const [fullModalOpen, setFullModalOpen] = useState(false);
+  const [currentFeatureName, setCurrentFeatureName] = useState<string | undefined>();
+
+  // Push notifications user id
   const [userId, setUserId] = React.useState<string | undefined>();
-  
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setUserId(data.user.id);
-      }
+      if (data.user) setUserId(data.user.id);
     });
   }, []);
 
-  // Hook de push notifications (auto-trigger baseado em métricas)
-  // Passa undefined para demo para desativar sem quebrar regras de hooks
   useConversionPushNotifications(isDemo ? undefined : userId);
+
+  // Quando o engine dispara um trigger automático → mostrar toast
+  useEffect(() => {
+    if (!isDemo && isModalOpen && activeTrigger && !fullModalOpen) {
+      if (canShowUpgradeToast()) {
+        setToastOpen(true);
+        recordUpgradeToastShown();
+      }
+    }
+  }, [isModalOpen, activeTrigger, isDemo, fullModalOpen]);
+
+  // Feature block → toast imediato
+  const triggerFeatureBlock = useCallback((featureName: string) => {
+    engineTriggerFeatureBlock(featureName);
+    setCurrentFeatureName(featureName);
+    if (canShowUpgradeToast()) {
+      setToastOpen(true);
+      recordUpgradeToastShown();
+    } else {
+      // Se cooldown ativo, abrir direto no full modal
+      setFullModalOpen(true);
+    }
+  }, [engineTriggerFeatureBlock]);
+
+  const handleToastExpand = () => {
+    setToastOpen(false);
+    setFullModalOpen(true);
+  };
+
+  const handleToastDismiss = () => {
+    setToastOpen(false);
+    dismissTrigger();
+  };
+
+  const handleFullModalClose = () => {
+    setFullModalOpen(false);
+    dismissTrigger();
+  };
 
   return (
     <GrowthTriggerContext.Provider
@@ -69,15 +108,28 @@ export const GrowthTriggerProvider = ({ children }: GrowthTriggerProviderProps) 
       }}
     >
       {children}
+
+      {/* Etapa 1: Toast compacto */}
       {!isDemo && (
-        <UpgradeModal
-          trigger={activeTrigger}
-          isOpen={isModalOpen}
-          onClose={dismissTrigger}
+        <UpgradeToast
+          isOpen={toastOpen}
+          featureName={currentFeatureName}
+          onDismiss={handleToastDismiss}
+          onExpand={handleToastExpand}
+        />
+      )}
+
+      {/* Etapa 2: Modal full screen */}
+      {!isDemo && (
+        <UpgradeFullScreenModal
+          isOpen={fullModalOpen}
+          onClose={handleFullModalClose}
+          featureName={currentFeatureName}
+          triggerMessage={activeTrigger?.message}
+          lostMoney={activeTrigger?.lostMoney}
           eventId={activeEventId || undefined}
         />
       )}
     </GrowthTriggerContext.Provider>
   );
 };
-

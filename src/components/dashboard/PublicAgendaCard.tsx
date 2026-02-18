@@ -61,7 +61,7 @@ export const PublicAgendaCard = () => {
         <div className="flex flex-col sm:flex-row gap-2">
           <Button
             onClick={handleOpenAgenda}
-            className="flex-1"
+            className="flex-1 h-12 text-base"
             size="lg"
           >
             <Users className="mr-2 h-4 w-4" />

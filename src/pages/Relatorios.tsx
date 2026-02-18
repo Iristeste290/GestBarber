@@ -48,11 +48,11 @@ const Relatorios = () => {
           </div>
 
           <Tabs defaultValue="combined" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="combined">Relatório Mensal</TabsTrigger>
-              <TabsTrigger value="monthly">Comparação Mensal</TabsTrigger>
-              <TabsTrigger value="weekly">Comparação Semanal</TabsTrigger>
-              <TabsTrigger value="map">Mapa de Clientes</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 h-auto p-1">
+              <TabsTrigger value="combined" className="text-xs py-2 px-1 leading-tight whitespace-normal h-auto">Relatório Mensal</TabsTrigger>
+              <TabsTrigger value="monthly" className="text-xs py-2 px-1 leading-tight whitespace-normal h-auto">Comparação Mensal</TabsTrigger>
+              <TabsTrigger value="weekly" className="text-xs py-2 px-1 leading-tight whitespace-normal h-auto">Comparação Semanal</TabsTrigger>
+              <TabsTrigger value="map" className="text-xs py-2 px-1 leading-tight whitespace-normal h-auto">Mapa de Clientes</TabsTrigger>
             </TabsList>
 
             <TabsContent value="combined" className="space-y-6">

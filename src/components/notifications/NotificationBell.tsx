@@ -62,7 +62,7 @@ export const NotificationBell = ({ userId }: NotificationBellProps) => {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[360px] p-0 shadow-xl border-border/50" align="end">
+      <PopoverContent className="w-[calc(100vw-24px)] sm:w-[360px] max-w-[360px] p-0 shadow-xl border-border/50" align="end" sideOffset={8}>
         <Tabs defaultValue="notifications" className="w-full">
           {/* Header com tabs */}
           <div className="bg-gradient-to-b from-card to-card/95 border-b border-border/50">

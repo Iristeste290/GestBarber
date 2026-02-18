@@ -2,14 +2,21 @@
   "name": "GestBarber - Sistema de Gestão para Barbearias",
   "short_name": "GestBarber",
   "description": "GestBarber é um sistema completo de gestão para barbearias com agendamentos, analytics, posts automáticos e muito mais",
-  "start_url": "/auth",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#1a1a1a",
   "theme_color": "#C9B887",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/favicon.png?v=12",
+      "src": "/icon-192.png?v=12",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png?v=12",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
@@ -18,13 +25,13 @@
       "src": "/icon-192.png?v=12",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     },
     {
       "src": "/icon-512.png?v=12",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     },
     {
       "src": "/apple-touch-icon.png?v=12",
@@ -33,13 +40,5 @@
       "purpose": "any"
     }
   ],
-  "categories": ["business", "productivity"],
-  "screenshots": [
-    {
-      "src": "/screenshot-1.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    }
-  ]
+  "categories": ["business", "productivity"]
 }
